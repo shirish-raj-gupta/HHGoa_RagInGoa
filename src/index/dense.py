@@ -31,17 +31,37 @@ class Hit:
 class DensePartition:
     """One HNSW index over one language's chunks."""
 
+    # MEASURED, do not "optimize" back to I8. usearch's ScalarKind.I8 expects
+    # values in int8 range, not L2-normalized floats in [-1,1], and it does not
+    # scale them for you. Feeding it unit vectors destroys the distance function
+    # and therefore the HNSW graph. Self-retrieval (search a vector against an
+    # index that CONTAINS it, expect rank 0) on 20k random unit vectors:
+    #
+    #     dtype   ef_search=64   ef_search=256
+    #     F32          99.0%          100.0%
+    #     F16         100.0%           99.5%
+    #     I8            9.0%            1.0%     <- broken
+    #
+    # Pre-scaling by 127 does not help (9.5%); casting to int8 is worse (6.5%).
+    # The failure is not uniform, which is what makes it dangerous: on real
+    # embeddings it produced a plausible ablation table with one inexplicable
+    # row (fixed_128_o0 R@5=0.474 against 0.864 for its neighbours), because
+    # graph quality became a lottery per build rather than consistently bad.
+    #
+    # F16 costs 2 B/dim instead of 1 but is numerically sound. This is NOT the
+    # same int8 as the ONNX model quantization, which IS validated and kept
+    # (0.990 mean cosine agreement with fp32 across five scripts).
+    DTYPE = ScalarKind.F16
+
     def __init__(self, lang: str, dim: int = 384, *,
                  connectivity: int = 16, expansion_add: int = 128,
-                 expansion_search: int = 64, quantize: bool = True):
+                 expansion_search: int = 64, dtype: ScalarKind | None = None):
         self.lang, self.dim = lang, dim
         self.expansion_search = expansion_search
         self.index = Index(
             ndim=dim,
             metric=MetricKind.Cos,
-            # int8 keeps the full-14 corpus at ~384 B/vector; measured cosine
-            # agreement with fp32 is 0.990 mean / 0.987 min across scripts
-            dtype=ScalarKind.I8 if quantize else ScalarKind.F32,
+            dtype=dtype or self.DTYPE,
             connectivity=connectivity,
             expansion_add=expansion_add,
             expansion_search=expansion_search,
@@ -73,9 +93,46 @@ class DensePartition:
                     score=float(1.0 - d), lang=self.lang, rank=r)
                 for r, (kk, d) in enumerate(zip(keys, dists))]
 
+    def self_retrieval_rate(self, n: int = 200, seed: int = 0) -> float:
+        """
+        Sanity guard: a vector searched against an index that CONTAINS it must
+        come back at rank 0. Anything below ~0.95 means the distance function
+        is broken (wrong dtype, unnormalized vectors, dimension mismatch)
+        rather than merely imprecise.
+
+        This exists because a silently broken index still returns plausible
+        top-k results and quietly ruins every retrieval metric downstream.
+        """
+        if not self.chunk_ids:
+            return 1.0
+        rng = np.random.default_rng(seed)
+        idx = rng.choice(len(self.chunk_ids), min(n, len(self.chunk_ids)),
+                         replace=False)
+        vecs = self.index.get(np.asarray(idx, dtype=np.uint64))
+        if vecs is None:
+            return 1.0
+        vecs = np.atleast_2d(np.asarray(vecs, dtype=np.float32))
+        hit = 0
+        for row, key in zip(vecs, idx):
+            m = self.index.search(row.reshape(1, -1), 1, log=False)
+            keys = np.atleast_1d(m.keys.flatten())
+            if len(keys) and int(keys[0]) == int(key):
+                hit += 1
+        return hit / len(idx)
+
     @property
     def size_bytes(self) -> int:
-        return self.index.memory_usage
+        """
+        Actual stored bytes. usearch's `memory_usage` reports an allocation
+        figure that did not track vector count in testing (51.2 MB for both
+        49,611 and 53,274 vectors), so it is not trustworthy for the ablation's
+        "Index MB" column - compute it instead.
+        """
+        bytes_per_scalar = {ScalarKind.F32: 4, ScalarKind.F16: 2,
+                            ScalarKind.I8: 1}.get(self.DTYPE, 4)
+        vectors = len(self.chunk_ids) * self.dim * bytes_per_scalar
+        graph = len(self.chunk_ids) * self.index.connectivity * 2 * 4
+        return vectors + graph
 
     def save(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)

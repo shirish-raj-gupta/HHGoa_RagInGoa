@@ -66,7 +66,7 @@ def dedupe_by_passage(hits) -> list[str]:
 
 # ------------------------------------------------------------------ one arm
 def run_arm(name, chunker, corpus_df, queries_df, embed, lang,
-            k=10, latency_sample=200, seed=0) -> dict:
+            k=10, latency_sample=200, seed=0, vec_cache: dict | None = None) -> dict:
     t0 = time.perf_counter_ns()
     passages = [Passage(r.passage_id, r.doc_id, r.text, r.lang, r.script)
                 for r in corpus_df.itertuples()]
@@ -76,9 +76,28 @@ def run_arm(name, chunker, corpus_df, queries_df, embed, lang,
     n_degen = sum(c.degenerate for c in chunks)
     is_late = any(c.extra.get("late_chunk") for c in chunks)
 
+    # Fingerprint the emitted chunk text. Arms that produce byte-identical
+    # chunks are the SAME retrieval system and must score identically - so we
+    # reuse the vectors and record which arm this one collapsed onto. This
+    # turns "fixed_512 is a no-op on this corpus" from a claim into a proof,
+    # and it is why the table shows exact ties rather than near-ties.
+    fp = None
+    if not is_late:
+        import hashlib
+        h = hashlib.blake2b(digest_size=16)
+        for c in chunks:
+            h.update(c.text.encode("utf-8"))
+            h.update(b"\x00")
+        fp = h.hexdigest()
+
+    identical_to = None
+    cached = vec_cache.get(fp) if (vec_cache is not None and fp) else None
+
     # ---- embed the chunks
     t0 = time.perf_counter_ns()
-    if is_late:
+    if cached is not None:
+        V, identical_to = cached["V"], cached["arm"]
+    elif is_late:
         # late chunking: one full-passage forward pass, then mean-pool spans
         by_pid: dict[str, list] = {}
         for c in chunks:
@@ -92,14 +111,21 @@ def run_arm(name, chunker, corpus_df, queries_df, embed, lang,
         V = np.vstack(vecs)
         chunks = order
     else:
-        V = embed.encode_passages([c.text for c in chunks], batch=128)
+        V = embed.encode_passages([c.text for c in chunks], batch=64)
     t_embed_corpus = (time.perf_counter_ns() - t0) / 1e6
+    if vec_cache is not None and fp and cached is None:
+        vec_cache[fp] = {"V": V, "arm": name}
 
     # ---- index
     part = DensePartition(lang, dim=V.shape[1])
     t0 = time.perf_counter_ns()
     part.add(V, [c.chunk_id for c in chunks], [c.passage_id for c in chunks])
     t_index = (time.perf_counter_ns() - t0) / 1e6
+
+    # Guard: a vector must retrieve itself at rank 0. Below 0.95 the distance
+    # function is broken, not merely imprecise - this is what caught usearch's
+    # ScalarKind.I8 silently ruining one arm's numbers (see src/index/dense.py).
+    self_retr = part.self_retrieval_rate(200)
 
     # ---- retrieve
     qs = queries_df[queries_df.answerable].reset_index(drop=True)
@@ -130,10 +156,14 @@ def run_arm(name, chunker, corpus_df, queries_df, embed, lang,
     return {
         "strategy": name, "lang": lang,
         "chunks": len(chunks), "passages": len(passages),
+        "chunk_fingerprint": fp,
+        "identical_to": identical_to,
         "chunks_per_passage": round(len(chunks) / max(1, len(passages)), 3),
         "degenerate_chunks": n_degen,
         "degenerate_pct": round(100 * n_degen / max(1, len(chunks)), 2),
         "index_mb": round(part.size_bytes / 1e6, 1),
+        "self_retrieval": round(self_retr, 4),
+        "index_ok": bool(self_retr >= 0.95),
         "recall_at_5": round(float(np.mean(agg["recall_at_5"])), 4),
         "mrr_at_10": round(float(np.mean(agg["mrr_at_10"])), 4),
         "ndcg_at_10": round(float(np.mean(agg["ndcg_at_10"])), 4),
@@ -170,11 +200,13 @@ def main() -> int:
     names = [n.strip() for n in a.arms.split(",") if n.strip()] or list(registry)
 
     results, existing = [], []
+    vec_cache: dict = {}
     if a.out.exists():
         existing = json.loads(a.out.read_text(encoding="utf-8")).get("results", [])
 
     for lang in a.langs.split(","):
         d = a.slice / lang
+        vec_cache.clear()   # vectors are per-language
         corpus = pd.read_parquet(d / "corpus.parquet")
         queries = pd.read_parquet(d / "queries.parquet")
         if a.max_queries:
@@ -185,13 +217,16 @@ def main() -> int:
             if n not in registry:
                 print(f"  !! unknown arm {n}"); continue
             t0 = time.time()
-            r = run_arm(n, registry[n], corpus, queries, embed, lang)
+            r = run_arm(n, registry[n], corpus, queries, embed, lang,
+                        vec_cache=vec_cache)
             results.append(r)
             print(f"  {n:22s} chunks={r['chunks']:>7,} "
                   f"R@5={r['recall_at_5']:.4f} MRR@10={r['mrr_at_10']:.4f} "
                   f"nDCG@10={r['ndcg_at_10']:.4f} "
                   f"idx={r['index_mb']:>5.1f}MB emb_p50={r['embed_p50_ms']:.2f} "
                   f"ret_p50={r['retrieve_p50_ms']:.3f} degen={r['degenerate_pct']:.0f}% "
+                  f"{'==' + r['identical_to'] if r['identical_to'] else ''} "
+                  f"{'' if r['index_ok'] else '!!INDEX_BROKEN sr=%.2f!!' % r['self_retrieval']} "
                   f"[{time.time()-t0:.0f}s]", flush=True)
             a.out.parent.mkdir(parents=True, exist_ok=True)
             a.out.write_text(json.dumps({

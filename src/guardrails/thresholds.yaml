@@ -1,0 +1,69 @@
+# Guardrail thresholds.
+#
+# tau_relevance is the only one that MUST be calibrated rather than chosen.
+# It is fitted on the natural unanswerable set - 43,991 real queries whose real
+# candidate passages genuinely do not contain the answer (docs/discovery/report.md
+# section 4) - and the ROC is published in docs/guardrails-eval.md.
+# A hardcoded 0.5 here would be a guess; this number has a curve behind it.
+
+relevance:
+  # top-1 fused score below this => "not covered by this corpus"
+  tau: null            # SET BY bench/calibrate_tau.py - null means uncalibrated
+  tau_source: uncalibrated
+  # margin below tau where we ask for clarification instead of refusing outright
+  ambiguous_band: 0.04
+
+transcript:
+  # Sarvam language_probability below this => confirm the transcript first
+  min_confidence: 0.55
+  min_duration_ms: 300          # shorter than this is a mis-tap, not speech
+  min_chars: 2
+  max_chars: 512
+
+audio:
+  # RMS below this over the whole utterance => silence, ask to repeat
+  min_rms: 0.005
+  max_duration_ms: 30000
+
+language:
+  # the 14 in the corpus, plus English. Anything else is refused explicitly
+  # rather than silently retrieved against the wrong partition.
+  supported:
+    - eng_Latn
+    - asm_Beng
+    - ben_Beng
+    - guj_Gujr
+    - hin_Deva
+    - kan_Knda
+    - mal_Mlym
+    - mar_Deva
+    - npi_Deva
+    - ory_Orya
+    - pan_Guru
+    - san_Deva
+    - tam_Taml
+    - tel_Telu
+    - urd_Arab
+  fallback: eng_Latn
+
+grounding:
+  # fraction of answer sentences that must be entailed by a cited chunk
+  min_entailed_ratio: 0.75
+  # below this per-sentence score the sentence is stripped from the answer
+  sentence_entailment_floor: 0.45
+  # if more than this fraction gets stripped, refuse the whole answer
+  max_stripped_ratio: 0.5
+
+output:
+  max_answer_chars: 1200
+  max_citations: 8
+  require_citation: true
+  # the answer must be in the language that was asked
+  enforce_language_match: true
+
+injection:
+  # screened on the TRANSCRIPT - someone will say this out loud
+  min_hits_to_block: 1
+
+pii:
+  redact_before_logging: true

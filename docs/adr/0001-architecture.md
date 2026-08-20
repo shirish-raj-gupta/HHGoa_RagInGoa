@@ -35,11 +35,22 @@ Metadata-aware chunking (strategy #7) already required this routing layer, so it
 machinery. Partitions are memory-mapped (`usearch.view()`), so resident RAM tracks the hot set
 rather than the full 7.3 GB.
 
-**Accepted costs, stated plainly.** 7.3 GB of index must be built (hours, GPU-accelerated
-locally) and then *shipped* — a Space is stateless, so it pulls from a HF dataset repo at boot
-and needs `startup_duration_timeout` raised. On a 2 vCPU / 16 GB `cpu-basic` Space this is
-tight, and cold-boot will be minutes. This was chosen with the tradeoff visible; the mitigation
-is partitioning plus mmap, and Gate C will report whether it holds.
+**Accepted costs, stated plainly — and they grew after measurement.**
+
+| | at Gate A sign-off | measured 2026-08-20 |
+|---|---:|---:|
+| Vector dtype | int8, 384 B | **F16, 768 B** (§4 — int8 is broken) |
+| Full-14 index | ~7.3 GB | **~12.8 GB** |
+| Embed throughput | ~786 psg/s (short strings) | **156 psg/s** (real passages, 16 threads, length-bucketed) |
+| Full-14 build time | ~5 h | **~25 h CPU** |
+
+The index must be built once and then *shipped* — a Space is stateless, so it pulls from a HF
+dataset repo at boot and needs `startup_duration_timeout` raised. **12.8 GB does not fit in a
+`cpu-basic` Space's 16 GB RAM alongside the runtime**, so memory-mapping (`usearch.view()`) is
+now load-bearing rather than an optimization, and cold-boot is minutes.
+
+Both numbers moved the wrong way after real measurement. They are recorded here rather than
+quietly absorbed, and §12 carries the consequences for the deployment decision.
 
 **Rejected.**
 - *Sampled subset (20k queries, 4 languages)* — ~400 MB and comfortable, and it was my
@@ -90,10 +101,40 @@ a non-issue — measured, not assumed.
 
 ## 4. Index
 
-**Decision.** **`usearch`** HNSW in-process, int8, cosine. Tune `M` ∈ {16, 32} and
+**Decision.** **`usearch`** HNSW in-process, **F16**, cosine. Tune `M` ∈ {16, 32} and
 `ef_search`; publish the recall-vs-latency curve and mark the chosen operating point.
 Sparse: **`bm25s`** with per-script tokenization. Dense and sparse run **concurrently**,
 fused with **RRF**, then MMR (λ ≈ 0.7).
+
+**Amended 2026-08-20 — int8 vector storage is unusable, and this was measured, not assumed.**
+The original decision said int8 (384 B/vector). It is wrong. `usearch`'s `ScalarKind.I8`
+expects values in int8 range and does **not** rescale L2-normalized unit vectors, so the
+distance function — and with it the HNSW graph — is destroyed. Self-retrieval (search a
+vector against an index that contains it; correct answer is rank 0) on 20k random unit
+vectors:
+
+| dtype | ef_search=64 | ef_search=256 | bytes/vector |
+|---|---:|---:|---:|
+| F32 | 99.0% | 100.0% | 1536 |
+| **F16 (chosen)** | **100.0%** | **99.5%** | **768** |
+| I8 | 9.0% | 1.0% | 384 |
+
+Pre-scaling by 127 does not fix it (9.5%); casting to `int8` is worse (6.5%). The failure is
+**not uniform**, which is what made it dangerous: on real embeddings it produced a
+plausible-looking ablation table with a single inexplicable row (`fixed_128_o0` at
+R@5 **0.474** where its neighbours scored **0.864**), because graph quality became a lottery
+per build instead of consistently bad. A uniformly bad index would have been caught
+immediately; this one nearly shipped.
+
+`DensePartition.self_retrieval_rate()` now guards against the whole class of bug, and the
+ablation records it per arm so a broken index shows up in the table instead of hiding in it.
+
+**This is a different int8 from the ONNX model quantization**, which is validated and kept
+(0.990 mean / 0.987 min cosine agreement with fp32 across five scripts, §3).
+
+**Cost of the fix:** vectors double from 384 to 768 B. Full-14 index goes from ~7.3 GB to
+**~12.8 GB** (10.98 GB vectors + 1.83 GB graph at `M=16`). See §12 — this makes the Space
+sizing materially tighter and is called out there rather than buried here.
 
 **Why.** In-process, no network hop. At ~778k vectors an HNSW query is single-digit ms, which
 is what leaves room in the budget for guardrails. Indic morphology hurts pure lexical
