@@ -1,6 +1,6 @@
 # ADR 0001 — Architecture
 
-- **Status:** proposed (awaiting Gate A sign-off)
+- **Status:** **accepted** at Gate A sign-off, 2026-08-20 (see §11 for what was decided)
 - **Date:** 2026-08-20
 - **Context:** HH Goa 2026 Task #2 — voice-to-grounded-answer RAG over `ai4bharat/MSMARCO-XI`
 - **Evidence:** [`docs/discovery/report.md`](../discovery/report.md), reproduced by
@@ -13,30 +13,41 @@ the brief measures worse than a simpler option, that is called out rather than h
 
 ## 1. Corpus construction
 
-**Decision.** Build the corpus from the **`validation` split only**, sampled by `query_id`,
-keeping every candidate passage for each sampled query, in **English + Hindi + Tamil +
-Bengali**. Deduplicate English **once, globally**. Target ~20k queries → **~778k passages,
-~400 MB index**.
+**Decision (Gate A sign-off).** Build the **full `validation` split, all 14 languages** —
+~14.3M passages, ~7.3 GB index. Deduplicate English **once, globally**. **Partition the index
+by language** rather than building one flat 14.3M-vector index.
 
-**Why.**
+**Why full validation.**
 - `validation` is 14 languages including **Telugu; `train` has only 13** (report §3). Using
   validation costs nothing and avoids a silent language hole.
-- Passages are attached to queries. Sampling by `query_id` keeps every query's full
-  candidate set intact — which is what makes `is_selected` usable as a retrieval label. Any
-  other sampling unit corrupts the metric.
+- Passages are attached to queries, so the ingest unit is the query with its full candidate
+  set intact — that is what makes `is_selected` usable as a retrieval label.
 - The 14 shards are **row-aligned** (verified element-wise, report §3), so the same query and
-  the same gold labels exist in every language. Language becomes a clean ablation axis with
-  zero confound.
-- Language choice spans four scripts (Latin, Devanagari, Tamil, Bengali) and the widest
-  measured token-inflation spread — Tamil is the **3.20×** byte outlier, so if script-aware
-  handling is going to break anywhere, it breaks there.
+  the same gold labels exist in every language. Language is a clean ablation axis with zero
+  confound, and at full scale it covers all 14 rather than a chosen 4.
+
+**Why language partitioning is what makes this viable.** A flat 14.3M-vector index would put
+the 200 ms claim out of reach. But the corpus is parallel: a Hindi query only needs the Hindi
+partition plus English for cross-lingual fallback. That is **~1.9M vectors searched per query,
+not 14.3M** — per-query latency stays near single-partition scale while coverage is complete.
+The cost moves from query time to **storage and build time**, which is the right place for it.
+Metadata-aware chunking (strategy #7) already required this routing layer, so it is not extra
+machinery. Partitions are memory-mapped (`usearch.view()`), so resident RAM tracks the hot set
+rather than the full 7.3 GB.
+
+**Accepted costs, stated plainly.** 7.3 GB of index must be built (hours, GPU-accelerated
+locally) and then *shipped* — a Space is stateless, so it pulls from a HF dataset repo at boot
+and needs `startup_duration_timeout` raised. On a 2 vCPU / 16 GB `cpu-basic` Space this is
+tight, and cold-boot will be minutes. This was chosen with the tradeoff visible; the mitigation
+is partitioning plus mmap, and Gate C will report whether it holds.
 
 **Rejected.**
-- *Full validation, all 14 languages* — 14.3M passages, **7.3 GB** index (report §9). Cannot
-  boot on a Space inside a 200 ms budget.
-- *`train` split* — 49 GB, no Telugu, and no upside; the labels are the same kind.
-- *English only* — 950k passages / 487 MB and much simpler, but this is an **Indic** voice
-  task. Rejected on relevance, not on cost.
+- *Sampled subset (20k queries, 4 languages)* — ~400 MB and comfortable, and it was my
+  recommendation. Overruled at Gate A in favour of full coverage.
+- *`train` split* — 49 GB, no Telugu, no upside; same kind of labels.
+- *English only* — simpler, but this is an **Indic** voice task. Rejected on relevance.
+- *Flat single index over all 14 languages* — the version of "full validation" that genuinely
+  cannot meet the budget. Partitioning is the difference.
 - *Naive ingest of all shards* — would index the identical English corpus **14 times**
   (13.7M rows → 950k unique, **93.1% waste**, report §7).
 
@@ -164,11 +175,8 @@ short retrieved passages with citations, in-language. That is not a task that ne
 reasoning. Prompt caching matters more than model choice for TTFT, since the system prompt and
 tool schema are byte-stable across every request.
 
-**Flagged for your decision.** House default is `claude-opus-5` and cost is normally not my
-call to trade away. I am proposing Haiku 4.5 on a **latency** basis, not a cost basis —
-TTFT is the requirement. Making it config-switchable and benchmarking all three converts the
-disagreement into a published number, which is the outcome the brief asks for either way.
-Say the word and Opus 5 becomes the default.
+**Decided at Gate A:** Haiku 4.5 default, all three benchmarked for TTFT. The model choice
+becomes a published number rather than an assertion.
 
 **Rejected.**
 - *Local quantized generator (Qwen/Llama on CPU)* — no network hop, but CPU-only generation on
@@ -259,9 +267,37 @@ but not benchmarked in depth.
   *negative* result. The brief explicitly endorses this ("ship the simpler one and publish the
   comparison"), but it must be presented as measurement, not as an excuse.
 
-## Open — needs Gate A sign-off
+## 11. Gate A sign-off — what was decided
 
-1. **Corpus scope** — 20k queries × EN+hi+ta+bn (~400 MB) as proposed, or wider/narrower?
-2. **Generator default** — Haiku 4.5 for TTFT (proposed) vs. Opus 5 (house default)?
-3. **Repo layout** — this directory is untracked inside the `Desktop/Project` git repo. The
-   submission needs its own repo to push to a HF Space.
+| Question | Decision | Note |
+|---|---|---|
+| Corpus scope | **Full validation, all 14 languages** | Overrides the sampled-subset recommendation. Viability rests on language partitioning (§1). |
+| Generator default | **`claude-haiku-4-5`**, all three benchmarked | §7 |
+| Repo layout | **`git init` here**, parent `.gitignore` updated | Standalone repo, clean history |
+
+## 12. Open — deployment target (blocks Gate D only)
+
+Verified via `HfApi().whoami()` on account `srg101`: **`isPro: False`, `canPay: False`, no
+orgs.** On a free account, **both Gradio and Docker Spaces require a paid plan**; only Static
+Spaces and up to 2 **ZeroGPU** Spaces are free, and **ZeroGPU is Gradio-only — it does not
+support Docker**. The brief requires a Docker Space (§10, for frontend control).
+
+Options, in order of preference:
+
+1. **Deploy under the teammate account the brief already names** (`ansh123456789/ragingoa`) if
+   it carries PRO — zero cost, matches the brief verbatim.
+2. **PRO on `srg101`** (~$9/mo) → Docker Space at `cpu-basic` (2 vCPU / 16 GB). Note this is a
+   thin machine for a 7.3 GB partitioned index; Gate C measures whether the budget survives it.
+3. **ZeroGPU Gradio Space** — free, and the GPU would speed embedding, but Gradio instead of
+   Docker means rebuilding the §10 interface as custom Gradio components. Feasible, more work,
+   less frontend control.
+4. **Static Space frontend + API hosted elsewhere** — preserves the designed UI, splits the
+   deployment.
+
+Gates B and C are deployment-agnostic and proceed regardless.
+
+### Hardware of record (for the benchmark)
+
+Local build/bench machine: **Intel i7-14650HX, 16 physical / 24 logical cores, 15.7 GB RAM,
+NVIDIA RTX 4050 Laptop (4 GB), Windows 11.** Index build uses the GPU; all latency numbers in
+Gate C are reported **CPU-only** with thread count stated, since the Space has no GPU.
