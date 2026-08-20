@@ -27,6 +27,7 @@ import anthropic
 from pydantic import ValidationError
 
 from ..harness.budget import Budget
+from ..config import get as cfg_get
 from ..harness.contracts import (Answer, Citation, DraftAnswer, RefusalReason,
                                  RetrievalSet)
 from .tools import ANSWER_SCHEMA, SYSTEM_PROMPT, TOOLS
@@ -78,7 +79,7 @@ class Generator:
         self.max_tokens = max_tokens
         self.tool_executor = tool_executor
         self.client = anthropic.AsyncAnthropic(
-            api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"))
+            api_key=api_key or cfg_get("ANTHROPIC_API_KEY"))
 
     # ------------------------------------------------------------- prompting
     def _messages(self, query: str, rs: RetrievalSet, lang: str,

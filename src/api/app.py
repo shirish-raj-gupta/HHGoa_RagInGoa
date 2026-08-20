@@ -28,6 +28,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from ..config import load_dotenv, status as key_status
 from ..generation.generator import DEFAULT_MODEL, Generator
 from ..guardrails.output_rails import apply_output_rails
 from ..harness.contracts import Trace
@@ -43,6 +44,8 @@ logging.basicConfig(
     format='{"ts":"%(asctime)s","lvl":"%(levelname)s","logger":"%(name)s",'
            '"msg":"%(message)s"}',
 )
+
+load_dotenv()          # no-op on HF Spaces, where secrets are already env
 
 ARTIFACTS = Path(os.environ.get("RAG_ARTIFACTS", "artifacts"))
 ONNX_DIR = ARTIFACTS / "e5-small-onnx"
@@ -135,9 +138,11 @@ class QueryIn(BaseModel):
 
 @app.get("/health")
 async def health():
+    # key_status reports booleans only - never the key itself
     return {"ready": S.ready, "boot_ms": round(S.boot_ms, 1),
             "langs": S.corpus_langs, "chunks": S.n_chunks,
-            "budget_ms": BUDGET_MS, "model": os.environ.get("RAG_MODEL", DEFAULT_MODEL)}
+            "budget_ms": BUDGET_MS, "model": os.environ.get("RAG_MODEL", DEFAULT_MODEL),
+            "keys": key_status()}
 
 
 @app.get("/trace/{request_id}")

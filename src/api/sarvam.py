@@ -41,6 +41,7 @@ from typing import AsyncIterator, Callable
 
 import websockets
 
+from ..config import get as cfg_get
 from ..harness.stage import CircuitBreaker, RetryPolicy, UpstreamError
 
 log = logging.getLogger("sarvam")
@@ -75,7 +76,7 @@ class SarvamSTT:
                  sample_rate: int = 16000, stream_type: str = "fast",
                  mode: str = "transcribe", endpointing: str = "vad",
                  breaker: CircuitBreaker | None = None):
-        self.api_key = api_key or os.environ.get("SARVAM_API_KEY")
+        self.api_key = api_key or cfg_get("SARVAM_API_KEY")
         self.language_code = language_code
         self.sample_rate = sample_rate
         self.stream_type = stream_type
