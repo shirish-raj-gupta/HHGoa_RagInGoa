@@ -342,3 +342,130 @@ Gates B and C are deployment-agnostic and proceed regardless.
 Local build/bench machine: **Intel i7-14650HX, 16 physical / 24 logical cores, 15.7 GB RAM,
 NVIDIA RTX 4050 Laptop (4 GB), Windows 11.** Index build uses the GPU; all latency numbers in
 Gate C are reported **CPU-only** with thread count stated, since the Space has no GPU.
+
+---
+
+## 13. Revisions after measurement (Gates B and C)
+
+An ADR that never changes was written after the fact. These are the decisions this
+document got wrong, and what replaced them. Each one was found by running something,
+not by rethinking it.
+
+### 13.1 Generation provider: Anthropic → Groq
+
+**Superseded §7.** The available key is Groq. Capabilities were re-verified against the
+live API rather than assumed: of the 13 models served, only the `gpt-oss` family
+returns schema-valid JSON for this task — `qwen/qwen3.6-27b` fails strict validation
+with a 400 on every attempt, despite being the stronger multilingual model on paper.
+`openai/gpt-oss-120b` answers Hindi and Tamil in-language with correct citations and
+refuses out-of-context questions.
+
+Two provider constraints shaped the design:
+
+- **`tools` and `response_format` are mutually exclusive** (400: *"json mode cannot be
+  combined with tool/function calling"*). The brief requires both, so generation runs
+  in two phases — tool phase, then strict-schema answer phase — with the tool phase
+  **deadline-gated** and its skip recorded in `actions[]`.
+- **Strict schema requires `required` to list every property.** `refusal_reason` is now
+  required-and-nullable, which is the more honest shape regardless.
+
+### 13.2 Streaming does not buy TTFT here
+
+**Superseded §8's assumption.** Measured: with strict schema, Groq returns the
+completion as **one chunk, 0 ms spread** — TTFT equals total. Plain text streams 44
+deltas, but they land within ~90 ms of each other after a ~1.2–1.5 s wait, because
+`gpt-oss` reasons before emitting. Streaming is retained for the UI contract, but it is
+not a latency lever on this provider, and `TTFT_MS` is reported as what it is.
+
+### 13.3 Speculative retrieval is real, and nearly worthless
+
+**Superseded §8.** Verified live: Sarvam emits `transcript.partial` mid-utterance
+(9 partials for English, 14 for Hindi), speculation fires at ~60% of the utterance, and
+it hides 864–1364 ms of retrieval inside speech.
+
+It saves almost nothing. The core loop it hides costs **7–13 ms** against a ~2.9 s STT
+and ~1 s generation — roughly **0.3% of end-to-end**. The trick is impressive when
+retrieval is slow; ours is not. It stays because it is free and correctness-preserving
+(a diverged transcript simply re-runs), but it is not a headline.
+
+### 13.4 The index must be built ahead of time, not at boot
+
+**New, and it was a hard blocker.** The API re-embedded the corpus on every start. At
+14.3M passages and ~156 psg/s on CPU that is a **four-hour cold start** — the Space
+would never become ready. Partitions are now built offline and memory-mapped at boot.
+
+Passage text was the other half: 14.3M texts is ~4.3 GB of RAM on top of the index.
+Text now lives in per-language SQLite, zlib-compressed (**24.6 GB → 5.7 GB**), read
+only for retrieved passages, warm p50 **0.278 ms** per 5-id batch.
+
+### 13.5 HNSW parameters are measured, and defaults are refused
+
+**Extends §4.** The recall-vs-latency sweep runs against **exact search** as ground
+truth. Library defaults return 0.9648 of the true top-10; the chosen point returns
+**0.9925**. `build_index` now refuses to run on unmeasured parameters.
+
+The operating point separates the two kinds of knob: `expansion_search` is
+**query-time** (costs latency, and the `Budget` already degrades it), while
+`connectivity` and `expansion_add` are **build-time** (cost memory permanently). So the
+build optimises only the build-time pair, at minimum footprint.
+
+### 13.6 The ScalarKind.I8 finding was wrong
+
+**Corrects §4.** This document claimed I8 was broken, citing 0.085 self-retrieval. That
+was measured on **random** unit vectors and does not transfer. At identical component
+scale (sd 0.0510 in both cases):
+
+| vectors | F32 | F16 | I8 |
+|---|---:|---:|---:|
+| random unit | 0.980 | 0.995 | **0.085** |
+| real e5 | 0.990 | 0.990 | **0.990** |
+
+Random vectors in 384 dimensions are isotropic and mutually near-equidistant, so int8
+erases the only distinctions available. Real embeddings are anisotropic — e5
+concentrates in a narrow cone — so a true self-match survives quantization. **I8 is not
+broken**; it costs ~5 points of recall against exact (0.941 vs 0.993), which is why F16
+is still chosen. The lesson is about the test, not the dtype: a synthetic sanity check
+produced a confident false positive.
+
+### 13.7 The relevance gate was calibrated against the wrong thing
+
+**Corrects §9.** The first calibration scored **AUC 0.5080** — random. Two independent
+errors:
+
+1. It thresholded the **RRF fused score**. RRF is rank-derived, so the top-1 score is
+   ~2/60 for almost every query (43 distinct values across 2,707 queries). Re-measured
+   directly: **AUC 0.5158**. No threshold on that number can work. The gate now
+   thresholds **dense top-1 cosine**.
+2. It used **unanswerable** queries as negatives. Those are *on-domain* — their
+   candidates came from a real search engine — so they test answer scope, which is the
+   output-side groundedness rail's job. The input gate asks "is this in the corpus at
+   all", so its negatives are now 2,000 real queries held out of the index and verified
+   absent by content hash.
+
+| negatives | score | AUC |
+|---|---|---:|
+| out-of-corpus | dense cosine | **0.9026** |
+| unanswerable, in-domain | dense cosine | 0.7191 |
+| unanswerable, in-domain | RRF | 0.5158 |
+
+Operating point is **Youden J** (τ = 0.88644; 18.8% false-answer, 15.8% false-refusal),
+not the FAR ≤ 10% point, which refuses **33.6% of answerable queries**. The argument is
+defence in depth: the output-side groundedness rail independently catches ungrounded
+answers, so tightening the input gate past balanced buys redundant safety at a large
+recall cost.
+
+### 13.8 Chunking: the negative result is stronger than expected
+
+**Confirms and sharpens §5.** Across 25 arms and three languages, tested with a paired
+bootstrap: **no strategy beats the passage-atomic control significantly in any
+language, and several lose significantly.** Losses steepen as the language gets
+lower-resource (`hierarchical_c64`: −0.0122 English, −0.0432 Hindi, −0.1107 Tamil).
+
+The finding nobody would design for: `sentence_pack_128` — the *script-aware* strategy
+built specifically to respect the danda and Tamil punctuation — is a **significant loss
+on Tamil** while harmless on English and Hindi.
+
+Retrieval quality itself collapses across languages on identical parallel content
+(0.8814 → 0.6786 → 0.4972), an effect an order of magnitude larger than anything
+chunking does. That is a property of `multilingual-e5-small`, and it is the strongest
+argument for the cross-lingual English fallback in §4.
