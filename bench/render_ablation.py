@@ -156,6 +156,36 @@ def main() -> int:
 
     L += [f"## Recall@5 by query type — {primary}", "", by_query_type(pr), ""]
 
+    # Significance, if it has been run. Without this the table is a ranking of
+    # numbers that may all be the same number.
+    sig_files = sorted(Path("bench").glob("significance*.json"))
+    if sig_files:
+        L += [
+            "## Are these differences real?",
+            "",
+            "Recall@5 differences of 0.001 on ~2,700 queries are two or three "
+            "queries. Before any ordering is claimed, it is tested with a "
+            "**paired bootstrap** (same queries for every arm, 10,000 resamples) "
+            "from [`bench/significance.py`](../bench/significance.py). Paired is "
+            "the correct test: only queries whose gold passage actually got split "
+            "can differ between arms.",
+            "",
+        ]
+        for f in sig_files:
+            sg = json.loads(f.read_text(encoding="utf-8"))
+            L += [f"### {sg['lang']} — vs `{sg['baseline']}`", "",
+                  "| Arm | Recall@5 | Δ | 95% CI | Queries won/lost | Verdict |",
+                  "|---|---:|---:|---|---:|---|"]
+            for name, r in sg["vs_baseline"].items():
+                verdict = "**significant**" if r["significant"] \
+                    else "indistinguishable"
+                L.append(
+                    f"| `{name}` | {sg['recall'][name]:.4f} | {r['delta']:+.5f} | "
+                    f"[{r['ci95_lo']:+.5f}, {r['ci95_hi']:+.5f}] | "
+                    f"+{r['discordant_wins']}/−{r['discordant_losses']} | "
+                    f"{verdict} |")
+            L.append("")
+
     others = [l for l in by_lang if l != primary]
     if others:
         L += ["## Per-language breakdown", ""]

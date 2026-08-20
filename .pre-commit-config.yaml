@@ -1,0 +1,40 @@
+# Secret scan is the point of this file (brief §11). The rest is hygiene.
+#
+#   pip install pre-commit && pre-commit install
+#
+# SARVAM_API_KEY and ANTHROPIC_API_KEY come from HF Space secrets. The hooks
+# below exist so a key cannot reach the repo by accident - a leaked key in git
+# history is not fixable by deleting the line.
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: detect-private-key
+      - id: check-added-large-files
+        # index artifacts and parquet belong in the Space, not in git
+        args: ["--maxkb=2048"]
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+
+  - repo: local
+    hooks:
+      # Belt and braces: gitleaks is regex-based and generic, this catches the
+      # two specific vendor key shapes this project actually uses.
+      - id: no-vendor-keys
+        name: no Sarvam/Anthropic keys in tracked files
+        entry: python scripts/scan_secrets.py
+        language: system
+        pass_filenames: true
