@@ -180,8 +180,13 @@ class CoreLoop:
         # skipped (sparse-only degradation) there is no calibrated score to
         # compare, so it fails open and says so rather than refusing on a
         # number the threshold was never fitted to.
-        rel = ir.check_relevance(rs.relevance_score, self.tau)             if rs.relevance_score is not None             else ir.RailResult(True, ir._ev("relevance", True,
-                                            "no dense score (degraded to sparse)"))
+        if rs.relevance_score is None:
+            rel = ir.RailResult(True, ir._ev(
+                "relevance", True, "no dense score (degraded to sparse)"))
+        else:
+            rel = ir.check_relevance(
+                rs.relevance_score, self.tau,
+                code_switched=ir.is_code_switched(nq.text))
         guard(rel.event)
         if not rel.passed:
             trace.core_rag_loop_ms = (time.perf_counter_ns() - t_core0) / 1e6

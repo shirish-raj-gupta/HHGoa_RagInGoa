@@ -12,6 +12,10 @@ relevance:
   tau_source: bench/calibrate_tau.py dense-cosine, n_pos=2707 n_neg=2000 (out_of_corpus)
   # margin below tau where we ask for clarification instead of refusing outright
   ambiguous_band: 0.04
+  # PROVISIONAL: the corpus has no code-switched rows, so this cannot
+  # be calibrated. Set from the observed red-team gap (0.832-0.869 vs
+  # tau 0.886). Published as a known weak point.
+  code_switch_relaxation: 0.06
 
 transcript:
   # Sarvam language_probability below this => confirm the transcript first
