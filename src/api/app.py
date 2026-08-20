@@ -144,11 +144,33 @@ def _lookup_texts(passage_ids: list[str]) -> dict[str, str]:
     return out
 
 
+def _fetch_index_if_missing() -> None:
+    """
+    On a Space the index arrives from a dataset repo, not the image. An 18GB
+    corpus does not belong in a Space repo, and baking it into the image would
+    make every code change a multi-GB rebuild.
+    """
+    repo = os.environ.get("RAG_INDEX_REPO")
+    if not repo or any(INDEX_DIR.glob("*.usearch")):
+        return
+    from huggingface_hub import snapshot_download
+    langs = [l.strip() for l in
+             os.environ.get("RAG_LANGS", "eng_Latn").split(",") if l.strip()]
+    patterns = [f"{l}*" for l in langs] + ["manifest.json", "e5-small-onnx/*"]
+    log.info("pulling index for %s from %s", langs, repo)
+    t = time.perf_counter_ns()
+    snapshot_download(repo_id=repo, repo_type="dataset",
+                      local_dir=str(INDEX_DIR), allow_patterns=patterns,
+                      token=os.environ.get("HF_TOKEN"))
+    log.info("index pulled in %.0fs", (time.perf_counter_ns() - t) / 1e9)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     t0 = time.perf_counter_ns()
     langs = os.environ.get("RAG_LANGS", "eng_Latn,hin_Deva,tam_Taml").split(",")
     try:
+        await asyncio.to_thread(_fetch_index_if_missing)
         await asyncio.to_thread(_load, [l.strip() for l in langs if l.strip()])
         S.ready = True
     except Exception as e:                                   # pragma: no cover
