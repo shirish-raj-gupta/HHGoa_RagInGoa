@@ -17,6 +17,12 @@ Scoring : chunks resolve to their passage_id and the best rank per passage
 Dense retrieval only. Chunking is a property of what gets embedded, so mixing
 in BM25 here would confound the comparison; hybrid fusion is measured at Gate C.
 
+Retrieval is EXACT (brute-force cosine), not ANN. An approximate index adds
+graph-quality noise that, on this corpus, was larger than the chunking effect
+being measured - one arm scored R@5 0.316 purely because its HNSW graph built
+badly. Exact search makes a difference in this table a difference in chunking.
+HNSW parameters are tuned and published separately (bench/sweep_hnsw.py).
+
     python -m bench.ablate_chunking --slice data/slice --langs eng_Latn
 """
 from __future__ import annotations
@@ -31,7 +37,7 @@ import pandas as pd
 
 from src.chunking.base import Passage
 from src.chunking.strategies import build_registry
-from src.index.dense import DensePartition
+from src.index.exact import ExactPartition
 from src.index.embedder import MODEL_ID, OnnxEmbedder, E5Tokenizer
 
 ONNX_DIR = Path("artifacts/e5-small-onnx")
@@ -66,7 +72,8 @@ def dedupe_by_passage(hits) -> list[str]:
 
 # ------------------------------------------------------------------ one arm
 def run_arm(name, chunker, corpus_df, queries_df, embed, lang,
-            k=10, latency_sample=200, seed=0, vec_cache: dict | None = None) -> dict:
+            k=10, latency_sample=200, seed=0, vec_cache: dict | None = None,
+            lat_embed=None) -> dict:
     t0 = time.perf_counter_ns()
     passages = [Passage(r.passage_id, r.doc_id, r.text, r.lang, r.script)
                 for r in corpus_df.itertuples()]
@@ -117,7 +124,10 @@ def run_arm(name, chunker, corpus_df, queries_df, embed, lang,
         vec_cache[fp] = {"V": V, "arm": name}
 
     # ---- index
-    part = DensePartition(lang, dim=V.shape[1])
+    # EXACT search on purpose: this ablation measures chunking, and an
+    # approximate index injects graph-quality noise larger than the effect
+    # being measured. HNSW is tuned separately in bench/sweep_hnsw.py.
+    part = ExactPartition(lang, dim=V.shape[1])
     t0 = time.perf_counter_ns()
     part.add(V, [c.chunk_id for c in chunks], [c.passage_id for c in chunks])
     t_index = (time.perf_counter_ns() - t0) / 1e6
@@ -147,10 +157,14 @@ def run_arm(name, chunker, corpus_df, queries_df, embed, lang,
     rng = np.random.default_rng(seed)
     sample = qs["query"].iloc[rng.choice(len(qs), min(latency_sample, len(qs)),
                                          replace=False)].tolist()
+    # Always measured on the CPU int8 session, even when the corpus was
+    # embedded on GPU: the Space has no GPU, so a CUDA number here would be a
+    # latency the deployed system can never achieve.
+    lat = lat_embed or embed
     t_emb_single = []
     for q in sample:
         t = time.perf_counter_ns()
-        embed.encode_queries([q])
+        lat.encode_queries([q])
         t_emb_single.append((time.perf_counter_ns() - t) / 1e6)
 
     return {
@@ -175,6 +189,8 @@ def run_arm(name, chunker, corpus_df, queries_df, embed, lang,
         "build_embed_ms": round(t_embed_corpus, 1),
         "build_index_ms": round(t_index, 1),
         "eval_queries": len(qs),
+        "corpus_embed_provider": getattr(embed, "provider", "?"),
+        "latency_provider": getattr(lat, "provider", "?"),
         "recall_by_query_type": {k: round(float(np.mean(v)), 4)
                                  for k, v in sorted(per_type.items())},
     }
@@ -188,10 +204,22 @@ def main() -> int:
     ap.add_argument("--threads", type=int, default=8)
     ap.add_argument("--out", type=Path, default=Path("bench/chunking_results.json"))
     ap.add_argument("--max-queries", type=int, default=0)
+    ap.add_argument("--gpu", action="store_true",
+                    help="embed the corpus on CUDA using the fp32 export "
+                         "(int8 has no CUDA kernels and crashes the EP)")
     a = ap.parse_args()
 
     tok = E5Tokenizer(ONNX_DIR)
-    embed = OnnxEmbedder(ONNX_DIR / "model_int8.onnx", ONNX_DIR, threads=a.threads)
+    # CPU int8 session: production path, and the only one used for latency
+    lat_embed = OnnxEmbedder(ONNX_DIR / "model_int8.onnx", ONNX_DIR,
+                             threads=a.threads)
+    if a.gpu:
+        embed = OnnxEmbedder(ONNX_DIR / "fp32" / "model.onnx", ONNX_DIR,
+                             threads=a.threads, use_gpu=True)
+        print(f"corpus embedding on {embed.provider}; "
+              f"latency on {lat_embed.provider}")
+    else:
+        embed = lat_embed
 
     def embed_fn(texts):                       # for SemanticBreakpointChunker
         return embed.encode_passages(list(texts), batch=64)
@@ -218,7 +246,7 @@ def main() -> int:
                 print(f"  !! unknown arm {n}"); continue
             t0 = time.time()
             r = run_arm(n, registry[n], corpus, queries, embed, lang,
-                        vec_cache=vec_cache)
+                        vec_cache=vec_cache, lat_embed=lat_embed)
             results.append(r)
             print(f"  {n:22s} chunks={r['chunks']:>7,} "
                   f"R@5={r['recall_at_5']:.4f} MRR@10={r['mrr_at_10']:.4f} "

@@ -18,6 +18,7 @@ CORE_RAG_LOOP claim impossible (ADR 0001 section 3).
 from __future__ import annotations
 
 import shutil
+import sys
 import time
 from pathlib import Path
 
@@ -28,6 +29,12 @@ from transformers import AutoTokenizer
 from ..chunking.base import Tokenizer
 
 MODEL_ID = "intfloat/multilingual-e5-small"
+# int8 is a CPU-only optimization here: the dynamically-quantized graph has no
+# usable CUDA kernels and crashes the CUDA EP outright (STATUS_STACK_BUFFER_
+# OVERRUN). GPU index builds therefore use the fp32 export, which is fine -
+# fp32 and int8 agree to 0.990 mean cosine, so the vectors are interchangeable.
+# Measured on an RTX 4050 (6GB): fp32 CUDA 1,018 psg/s at batch 16 vs int8 CPU
+# 156 psg/s at 16 threads, i.e. 3.9h vs 25h for the full 14.3M-passage build.
 DIM = 384
 MAX_LEN = 512
 
@@ -83,15 +90,42 @@ class E5Tokenizer(Tokenizer):
 class OnnxEmbedder:
     """Warm, in-process, int8. One session, reused."""
 
+    @staticmethod
+    def register_cuda_dlls() -> None:
+        """
+        Windows onnxruntime does not discover the nvidia pip wheels' DLLs, and
+        `os.add_dll_directory` does not cover transitive loads either - the
+        provider DLL still fails on cublasLt/cudart. Prepending the wheel bin
+        directories to PATH before the CUDA provider is created is what works.
+        """
+        import glob
+        import os
+        dirs = glob.glob(os.path.join(sys.prefix, "Lib", "site-packages",
+                                      "nvidia", "*", "bin"))
+        if dirs:
+            os.environ["PATH"] = os.pathsep.join(dirs + [os.environ.get("PATH", "")])
+        for d in dirs:
+            try:
+                os.add_dll_directory(d)
+            except (OSError, AttributeError):
+                pass
+
     def __init__(self, model_path: str | Path, tokenizer_dir: str | Path,
-                 threads: int = 0, warm: bool = True):
+                 threads: int = 0, warm: bool = True, use_gpu: bool = False):
         so = ort.SessionOptions()
         so.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
         if threads:
             so.intra_op_num_threads = threads
             so.inter_op_num_threads = 1
-        self.session = ort.InferenceSession(
-            str(model_path), so, providers=["CPUExecutionProvider"])
+        providers = ["CPUExecutionProvider"]
+        if use_gpu:
+            self.register_cuda_dlls()
+            providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
+        self.session = ort.InferenceSession(str(model_path), so, providers=providers)
+        self.provider = self.session.get_providers()[0]
+        if use_gpu and self.provider != "CUDAExecutionProvider":
+            log_msg = f"GPU requested but running on {self.provider}"
+            print(f"[embedder] WARNING: {log_msg}", file=sys.stderr)
         self.tok = AutoTokenizer.from_pretrained(str(tokenizer_dir))
         self._inputs = {i.name for i in self.session.get_inputs()}
         self.threads = threads
