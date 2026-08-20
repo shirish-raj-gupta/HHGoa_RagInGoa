@@ -1,0 +1,2906 @@
+{
+ "dataset": "ai4bharat/MSMARCO-XI",
+ "revision": "refs/convert/parquet",
+ "embed_model_for_tokens": "intfloat/multilingual-e5-small",
+ "shards": [
+  {
+   "split": "validation",
+   "shard": 0,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "asm_Beng",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "asm_Beng",
+     "asm_Beng"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 5887103,
+     "uncompressed": 17062406
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 280050916,
+     "uncompressed": 809523797
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 4286380,
+     "uncompressed": 10475045
+    }
+   }
+  },
+  {
+   "split": "validation",
+   "shard": 1,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "ben_Beng",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "ben_Beng",
+     "ben_Beng"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 5665756,
+     "uncompressed": 16146214
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 272854894,
+     "uncompressed": 819890815
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 4195864,
+     "uncompressed": 10487241
+    }
+   }
+  },
+  {
+   "split": "validation",
+   "shard": 2,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "guj_Gujr",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "guj_Gujr",
+     "guj_Gujr"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 5616794,
+     "uncompressed": 15781565
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 271466695,
+     "uncompressed": 784387446
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 4105295,
+     "uncompressed": 10182021
+    }
+   }
+  },
+  {
+   "split": "validation",
+   "shard": 3,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "hin_Deva",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "hin_Deva",
+     "hin_Deva"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 5680608,
+     "uncompressed": 17218389
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 271853813,
+     "uncompressed": 808749859
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 4292815,
+     "uncompressed": 11468709
+    }
+   }
+  },
+  {
+   "split": "validation",
+   "shard": 4,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "kan_Knda",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "kan_Knda",
+     "kan_Knda"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 6221153,
+     "uncompressed": 18687899
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 291799117,
+     "uncompressed": 890612457
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 4653500,
+     "uncompressed": 11884570
+    }
+   }
+  },
+  {
+   "split": "validation",
+   "shard": 5,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "mal_Mlym",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "mal_Mlym",
+     "mal_Mlym"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 6285124,
+     "uncompressed": 18428670
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 302419749,
+     "uncompressed": 955642883
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 4832208,
+     "uncompressed": 12489164
+    }
+   }
+  },
+  {
+   "split": "validation",
+   "shard": 6,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "mar_Deva",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "mar_Deva",
+     "mar_Deva"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 5813053,
+     "uncompressed": 16034701
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 283396075,
+     "uncompressed": 847958662
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 4349271,
+     "uncompressed": 11322374
+    }
+   }
+  },
+  {
+   "split": "validation",
+   "shard": 7,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "npi_Deva",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "npi_Deva",
+     "npi_Deva"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 5674082,
+     "uncompressed": 16977401
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 276583018,
+     "uncompressed": 854246657
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 4196744,
+     "uncompressed": 11057916
+    }
+   }
+  },
+  {
+   "split": "validation",
+   "shard": 8,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "ory_Orya",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "ory_Orya",
+     "ory_Orya"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 5943343,
+     "uncompressed": 17616296
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 276131693,
+     "uncompressed": 824027628
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 4379057,
+     "uncompressed": 11242631
+    }
+   }
+  },
+  {
+   "split": "validation",
+   "shard": 9,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "pan_Guru",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "pan_Guru",
+     "pan_Guru"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 5703676,
+     "uncompressed": 17528329
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 269595234,
+     "uncompressed": 795415397
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 4176680,
+     "uncompressed": 10894488
+    }
+   }
+  },
+  {
+   "split": "validation",
+   "shard": 10,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "san_Deva",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "san_Deva",
+     "san_Deva"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 5997648,
+     "uncompressed": 16775938
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 303388441,
+     "uncompressed": 988887197
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 4766323,
+     "uncompressed": 14048842
+    }
+   }
+  },
+  {
+   "split": "validation",
+   "shard": 11,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "tam_Taml",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "tam_Taml",
+     "tam_Taml"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 6157889,
+     "uncompressed": 19393017
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 301954765,
+     "uncompressed": 1004722051
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 4875319,
+     "uncompressed": 13948289
+    }
+   }
+  },
+  {
+   "split": "validation",
+   "shard": 12,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "tel_Telu",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "tel_Telu",
+     "tel_Telu"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 5830261,
+     "uncompressed": 16272744
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 283892106,
+     "uncompressed": 850103291
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 4359813,
+     "uncompressed": 10812323
+    }
+   }
+  },
+  {
+   "split": "validation",
+   "shard": 13,
+   "rows": 97941,
+   "row_groups": 1,
+   "target_lang": "urd_Arab",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    2,
+    1102432
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "urd_Arab",
+     "urd_Arab"
+    ],
+    "query_id": [
+     2,
+     1102432
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 4741874,
+     "uncompressed": 11108727
+    },
+    "query_id": {
+     "compressed": 663145,
+     "uncompressed": 991942
+    },
+    "query_type": {
+     "compressed": 35678,
+     "uncompressed": 36818
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 173036837,
+     "uncompressed": 314319586
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 230850918,
+     "uncompressed": 564425656
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 104604,
+     "uncompressed": 307334
+    },
+    "Eng_Query": {
+     "compressed": 2561319,
+     "uncompressed": 3944510
+    },
+    "Eng_Answer": {
+     "compressed": 3648092,
+     "uncompressed": 5962618
+    },
+    "query": {
+     "compressed": 3553400,
+     "uncompressed": 7536438
+    }
+   }
+  },
+  {
+   "split": "train",
+   "shard": 0,
+   "rows": 778638,
+   "row_groups": 1,
+   "target_lang": "asm_Beng",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    1,
+    1185869
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "asm_Beng",
+     "asm_Beng"
+    ],
+    "query_id": [
+     1,
+     1185869
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 46666723,
+     "uncompressed": 140307325
+    },
+    "query_id": {
+     "compressed": 4070248,
+     "uncompressed": 6508369
+    },
+    "query_type": {
+     "compressed": 289122,
+     "uncompressed": 292691
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 1388785963,
+     "uncompressed": 2652526420
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 2265749874,
+     "uncompressed": 6751125492
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 891228,
+     "uncompressed": 2511660
+    },
+    "Eng_Query": {
+     "compressed": 20315227,
+     "uncompressed": 30774357
+    },
+    "Eng_Answer": {
+     "compressed": 28427028,
+     "uncompressed": 45682780
+    },
+    "query": {
+     "compressed": 34118080,
+     "uncompressed": 81291424
+    }
+   }
+  },
+  {
+   "split": "train",
+   "shard": 1,
+   "rows": 778638,
+   "row_groups": 1,
+   "target_lang": "ben_Beng",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    1,
+    1185869
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "ben_Beng",
+     "ben_Beng"
+    ],
+    "query_id": [
+     1,
+     1185869
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 45039047,
+     "uncompressed": 132802377
+    },
+    "query_id": {
+     "compressed": 4070248,
+     "uncompressed": 6508369
+    },
+    "query_type": {
+     "compressed": 289122,
+     "uncompressed": 292691
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 1388859535,
+     "uncompressed": 2652518714
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 2206038215,
+     "uncompressed": 6843546902
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 891290,
+     "uncompressed": 2511659
+    },
+    "Eng_Query": {
+     "compressed": 20315227,
+     "uncompressed": 30774357
+    },
+    "Eng_Answer": {
+     "compressed": 28427028,
+     "uncompressed": 45682780
+    },
+    "query": {
+     "compressed": 33429925,
+     "uncompressed": 82206127
+    }
+   }
+  },
+  {
+   "split": "train",
+   "shard": 2,
+   "rows": 778638,
+   "row_groups": 1,
+   "target_lang": "guj_Gujr",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    1,
+    1185869
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "guj_Gujr",
+     "guj_Gujr"
+    ],
+    "query_id": [
+     1,
+     1185869
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 45489887,
+     "uncompressed": 138941860
+    },
+    "query_id": {
+     "compressed": 4070248,
+     "uncompressed": 6508369
+    },
+    "query_type": {
+     "compressed": 289122,
+     "uncompressed": 292691
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 1388855249,
+     "uncompressed": 2652520431
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 2197358278,
+     "uncompressed": 6575384234
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 891287,
+     "uncompressed": 2511660
+    },
+    "Eng_Query": {
+     "compressed": 20315227,
+     "uncompressed": 30774357
+    },
+    "Eng_Answer": {
+     "compressed": 28427028,
+     "uncompressed": 45682780
+    },
+    "query": {
+     "compressed": 32731839,
+     "uncompressed": 79639642
+    }
+   }
+  },
+  {
+   "split": "train",
+   "shard": 3,
+   "rows": 778638,
+   "row_groups": 1,
+   "target_lang": "hin_Deva",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    1,
+    1185869
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "hin_Deva",
+     "hin_Deva"
+    ],
+    "query_id": [
+     1,
+     1185869
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 45204255,
+     "uncompressed": 144322086
+    },
+    "query_id": {
+     "compressed": 4070248,
+     "uncompressed": 6508369
+    },
+    "query_type": {
+     "compressed": 289122,
+     "uncompressed": 292691
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 1388836085,
+     "uncompressed": 2652519536
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 2197541803,
+     "uncompressed": 6756903123
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 891389,
+     "uncompressed": 2511660
+    },
+    "Eng_Query": {
+     "compressed": 20315227,
+     "uncompressed": 30774357
+    },
+    "Eng_Answer": {
+     "compressed": 28427028,
+     "uncompressed": 45682780
+    },
+    "query": {
+     "compressed": 34227141,
+     "uncompressed": 89695486
+    }
+   }
+  },
+  {
+   "split": "train",
+   "shard": 4,
+   "rows": 778638,
+   "row_groups": 1,
+   "target_lang": "kan_Knda",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    1,
+    1185869
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "kan_Knda",
+     "kan_Knda"
+    ],
+    "query_id": [
+     1,
+     1185869
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 49357514,
+     "uncompressed": 153198504
+    },
+    "query_id": {
+     "compressed": 4070248,
+     "uncompressed": 6508369
+    },
+    "query_type": {
+     "compressed": 289122,
+     "uncompressed": 292691
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 1388838214,
+     "uncompressed": 2652520548
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 2363218015,
+     "uncompressed": 7463872251
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 891177,
+     "uncompressed": 2511661
+    },
+    "Eng_Query": {
+     "compressed": 20315227,
+     "uncompressed": 30774357
+    },
+    "Eng_Answer": {
+     "compressed": 28427028,
+     "uncompressed": 45682780
+    },
+    "query": {
+     "compressed": 37192368,
+     "uncompressed": 93629211
+    }
+   }
+  },
+  {
+   "split": "train",
+   "shard": 5,
+   "rows": 778638,
+   "row_groups": 1,
+   "target_lang": "mal_Mlym",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    1,
+    1185869
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "mal_Mlym",
+     "mal_Mlym"
+    ],
+    "query_id": [
+     1,
+     1185869
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 50245831,
+     "uncompressed": 156691233
+    },
+    "query_id": {
+     "compressed": 4070248,
+     "uncompressed": 6508369
+    },
+    "query_type": {
+     "compressed": 289122,
+     "uncompressed": 292691
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 1388828947,
+     "uncompressed": 2652523451
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 2455123222,
+     "uncompressed": 8037031581
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 891301,
+     "uncompressed": 2511660
+    },
+    "Eng_Query": {
+     "compressed": 20315227,
+     "uncompressed": 30774357
+    },
+    "Eng_Answer": {
+     "compressed": 28427028,
+     "uncompressed": 45682780
+    },
+    "query": {
+     "compressed": 38665169,
+     "uncompressed": 98725271
+    }
+   }
+  },
+  {
+   "split": "train",
+   "shard": 6,
+   "rows": 765873,
+   "row_groups": 1,
+   "target_lang": "mar_Deva",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    1,
+    1185869
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "mar_Deva",
+     "mar_Deva"
+    ],
+    "query_id": [
+     1,
+     1185869
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 44264040,
+     "uncompressed": 121749310
+    },
+    "query_id": {
+     "compressed": 4007973,
+     "uncompressed": 6406249
+    },
+    "query_type": {
+     "compressed": 285389,
+     "uncompressed": 287897
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 1365213146,
+     "uncompressed": 2602150815
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 2260214190,
+     "uncompressed": 7013191138
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 875459,
+     "uncompressed": 2469754
+    },
+    "Eng_Query": {
+     "compressed": 19987840,
+     "uncompressed": 30274983
+    },
+    "Eng_Answer": {
+     "compressed": 27863071,
+     "uncompressed": 44796331
+    },
+    "query": {
+     "compressed": 34058379,
+     "uncompressed": 86011257
+    }
+   }
+  },
+  {
+   "split": "train",
+   "shard": 7,
+   "rows": 754154,
+   "row_groups": 1,
+   "target_lang": "npi_Deva",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    1,
+    1185869
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "npi_Deva",
+     "npi_Deva"
+    ],
+    "query_id": [
+     1,
+     1185869
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 42743391,
+     "uncompressed": 129057425
+    },
+    "query_id": {
+     "compressed": 3950846,
+     "uncompressed": 6312497
+    },
+    "query_type": {
+     "compressed": 280997,
+     "uncompressed": 283505
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 1343110509,
+     "uncompressed": 2551944077
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 2162647955,
+     "uncompressed": 6879317281
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 860340,
+     "uncompressed": 2429433
+    },
+    "Eng_Query": {
+     "compressed": 19693736,
+     "uncompressed": 29816202
+    },
+    "Eng_Answer": {
+     "compressed": 27270373,
+     "uncompressed": 43898674
+    },
+    "query": {
+     "compressed": 32600906,
+     "uncompressed": 85898852
+    }
+   }
+  },
+  {
+   "split": "train",
+   "shard": 8,
+   "rows": 782282,
+   "row_groups": 1,
+   "target_lang": "ory_Orya",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    1,
+    1185869
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "ory_Orya",
+     "ory_Orya"
+    ],
+    "query_id": [
+     1,
+     1185869
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 46535265,
+     "uncompressed": 136958797
+    },
+    "query_id": {
+     "compressed": 4092502,
+     "uncompressed": 6555491
+    },
+    "query_type": {
+     "compressed": 290196,
+     "uncompressed": 294071
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 1395267030,
+     "uncompressed": 2664777632
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 2247597530,
+     "uncompressed": 6941896702
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 893383,
+     "uncompressed": 2524281
+    },
+    "Eng_Query": {
+     "compressed": 20355586,
+     "uncompressed": 30922065
+    },
+    "Eng_Answer": {
+     "compressed": 28466150,
+     "uncompressed": 45878228
+    },
+    "query": {
+     "compressed": 35120977,
+     "uncompressed": 88839825
+    }
+   }
+  },
+  {
+   "split": "train",
+   "shard": 9,
+   "rows": 778638,
+   "row_groups": 1,
+   "target_lang": "pan_Guru",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    1,
+    1185869
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "pan_Guru",
+     "pan_Guru"
+    ],
+    "query_id": [
+     1,
+     1185869
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 46579924,
+     "uncompressed": 161095330
+    },
+    "query_id": {
+     "compressed": 4070248,
+     "uncompressed": 6508369
+    },
+    "query_type": {
+     "compressed": 289122,
+     "uncompressed": 292691
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 1388835761,
+     "uncompressed": 2652521088
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 2185977393,
+     "uncompressed": 6692833388
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 891352,
+     "uncompressed": 2511661
+    },
+    "Eng_Query": {
+     "compressed": 20315227,
+     "uncompressed": 30774357
+    },
+    "Eng_Answer": {
+     "compressed": 28427028,
+     "uncompressed": 45682780
+    },
+    "query": {
+     "compressed": 33386265,
+     "uncompressed": 85807452
+    }
+   }
+  },
+  {
+   "split": "train",
+   "shard": 10,
+   "rows": 778638,
+   "row_groups": 1,
+   "target_lang": "san_Deva",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    1,
+    1185869
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "san_Deva",
+     "san_Deva"
+    ],
+    "query_id": [
+     1,
+     1185869
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 46914093,
+     "uncompressed": 134635417
+    },
+    "query_id": {
+     "compressed": 4070248,
+     "uncompressed": 6508369
+    },
+    "query_type": {
+     "compressed": 289122,
+     "uncompressed": 292691
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 1388797867,
+     "uncompressed": 2652520727
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 2473950905,
+     "uncompressed": 8408104150
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 891263,
+     "uncompressed": 2511667
+    },
+    "Eng_Query": {
+     "compressed": 20315227,
+     "uncompressed": 30774357
+    },
+    "Eng_Answer": {
+     "compressed": 28427028,
+     "uncompressed": 45682780
+    },
+    "query": {
+     "compressed": 37856555,
+     "uncompressed": 108033118
+    }
+   }
+  },
+  {
+   "split": "train",
+   "shard": 11,
+   "rows": 778638,
+   "row_groups": 1,
+   "target_lang": "tam_Taml",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    1,
+    1185869
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "tam_Taml",
+     "tam_Taml"
+    ],
+    "query_id": [
+     1,
+     1185869
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 49148545,
+     "uncompressed": 163231536
+    },
+    "query_id": {
+     "compressed": 4070248,
+     "uncompressed": 6508369
+    },
+    "query_type": {
+     "compressed": 289122,
+     "uncompressed": 292691
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 1388863335,
+     "uncompressed": 2652520631
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 2456795268,
+     "uncompressed": 8440154060
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 891386,
+     "uncompressed": 2511660
+    },
+    "Eng_Query": {
+     "compressed": 20315227,
+     "uncompressed": 30774357
+    },
+    "Eng_Answer": {
+     "compressed": 28427028,
+     "uncompressed": 45682780
+    },
+    "query": {
+     "compressed": 38909113,
+     "uncompressed": 109365439
+    }
+   }
+  },
+  {
+   "split": "train",
+   "shard": 12,
+   "rows": 770089,
+   "row_groups": 1,
+   "target_lang": "urd_Arab",
+   "source_lang": "eng_Latn",
+   "query_id_range": [
+    1,
+    1185869
+   ],
+   "col_stats": {
+    "source_lang": [
+     "eng_Latn",
+     "eng_Latn"
+    ],
+    "target_lang": [
+     "urd_Arab",
+     "urd_Arab"
+    ],
+    "query_id": [
+     1,
+     1185869
+    ],
+    "query_type": [
+     "DESCRIPTION",
+     "PERSON"
+    ]
+   },
+   "col_sizes": {
+    "source_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "target_lang": {
+     "compressed": 86,
+     "uncompressed": 82
+    },
+    "meta.frequency_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.max_tokens": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.model_name": {
+     "compressed": 149,
+     "uncompressed": 145
+    },
+    "meta.presence_penalty": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.temperature": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "meta.top_p": {
+     "compressed": 102,
+     "uncompressed": 98
+    },
+    "Answer": {
+     "compressed": 36781113,
+     "uncompressed": 87035116
+    },
+    "query_id": {
+     "compressed": 4028577,
+     "uncompressed": 6439977
+    },
+    "query_type": {
+     "compressed": 286813,
+     "uncompressed": 289472
+    },
+    "passages.English_passages.list.element": {
+     "compressed": 1373234327,
+     "uncompressed": 2620599066
+    },
+    "passages.Translated_passages.list.element": {
+     "compressed": 1847898597,
+     "uncompressed": 4716249094
+    },
+    "passages.is_selected.list.element": {
+     "compressed": 881565,
+     "uncompressed": 2484207
+    },
+    "Eng_Query": {
+     "compressed": 20091522,
+     "uncompressed": 30433144
+    },
+    "Eng_Answer": {
+     "compressed": 28104429,
+     "uncompressed": 45162835
+    },
+    "query": {
+     "compressed": 27918865,
+     "uncompressed": 58060124
+    }
+   }
+  }
+ ],
+ "parallelism": {
+  "asm_Beng": {
+   "reference": true
+  },
+  "ben_Beng": {
+   "query_id_identical": true,
+   "eng_query_identical": true
+  },
+  "guj_Gujr": {
+   "query_id_identical": true,
+   "eng_query_identical": true
+  },
+  "hin_Deva": {
+   "query_id_identical": true,
+   "eng_query_identical": true
+  },
+  "kan_Knda": {
+   "query_id_identical": true,
+   "eng_query_identical": true
+  },
+  "mal_Mlym": {
+   "query_id_identical": true,
+   "eng_query_identical": true
+  },
+  "mar_Deva": {
+   "query_id_identical": true,
+   "eng_query_identical": true
+  },
+  "npi_Deva": {
+   "query_id_identical": true,
+   "eng_query_identical": true
+  },
+  "ory_Orya": {
+   "query_id_identical": true,
+   "eng_query_identical": true
+  },
+  "pan_Guru": {
+   "query_id_identical": true,
+   "eng_query_identical": true
+  },
+  "san_Deva": {
+   "query_id_identical": true,
+   "eng_query_identical": true
+  },
+  "tam_Taml": {
+   "query_id_identical": true,
+   "eng_query_identical": true
+  },
+  "tel_Telu": {
+   "query_id_identical": true,
+   "eng_query_identical": true
+  },
+  "urd_Arab": {
+   "query_id_identical": true,
+   "eng_query_identical": true
+  }
+ },
+ "labels": {
+  "rows": 97941,
+  "unique_query_id": 97940,
+  "query_type_counts": {
+   "DESCRIPTION": 52912,
+   "NUMERIC": 24741,
+   "ENTITY": 8427,
+   "PERSON": 6206,
+   "LOCATION": 5655
+  },
+  "passages_per_query": {
+   "count": 97941.0,
+   "mean": 9.98095792364791,
+   "std": 0.35520986855784814,
+   "min": 1.0,
+   "50%": 10.0,
+   "90%": 10.0,
+   "99%": 10.0,
+   "max": 27.0
+  },
+  "selected_per_query": {
+   "0": 44046,
+   "1": 50864,
+   "2": 2604,
+   "3": 339,
+   "4": 69,
+   "5": 16,
+   "6": 3
+  },
+  "pct_with_label": 55.02802707752627,
+  "pct_no_answer_present": 44.91581666513513,
+  "crosstab_noanswer_x_hasselected": {
+   "False": {
+    "False": 55,
+    "True": 43991
+   },
+   "True": {
+    "False": 53895,
+    "True": 0
+   }
+  }
+ },
+ "text": {
+  "distributions": {
+   "passage_en_tokens": {
+    "count": 40000.0,
+    "mean": 77.810725,
+    "std": 29.76709932088487,
+    "min": 1.0,
+    "50%": 72.0,
+    "90%": 120.0,
+    "95%": 139.0,
+    "99%": 176.0,
+    "max": 319.0
+   },
+   "passage_indic_tokens": {
+    "count": 40000.0,
+    "mean": 97.633275,
+    "std": 117.0626295162342,
+    "min": 2.0,
+    "50%": 87.0,
+    "90%": 141.0,
+    "95%": 167.0,
+    "99%": 219.01000000000204,
+    "max": 4756.0
+   },
+   "query_en_tokens": {
+    "count": 20000.0,
+    "mean": 8.5699,
+    "std": 3.7770527261827866,
+    "min": 2.0,
+    "50%": 8.0,
+    "90%": 13.0,
+    "95%": 15.0,
+    "99%": 21.0,
+    "max": 71.0
+   },
+   "query_indic_tokens": {
+    "count": 20000.0,
+    "mean": 13.0616,
+    "std": 66.34949674433041,
+    "min": 1.0,
+    "50%": 10.0,
+    "90%": 17.0,
+    "95%": 20.0,
+    "99%": 28.0,
+    "max": 3414.0
+   },
+   "passage_en_chars": {
+    "count": 977545.0,
+    "mean": 316.18995647259203,
+    "std": 116.05396503258565,
+    "min": 3.0,
+    "50%": 295.0,
+    "90%": 491.0,
+    "95%": 562.0,
+    "99%": 693.0,
+    "max": 1391.0
+   },
+   "passage_indic_chars": {
+    "count": 977545.0,
+    "mean": 323.9527786444614,
+    "std": 330.6402606120523,
+    "min": 1.0,
+    "50%": 292.0,
+    "90%": 472.0,
+    "95%": 552.0,
+    "99%": 708.0,
+    "max": 21390.0
+   }
+  },
+  "pct_en_over_512_tok": 0.0,
+  "pct_indic_over_512_tok": 0.1825,
+  "pct_en_under_128_tok": 92.2175,
+  "pct_indic_under_128_tok": 85.9475,
+  "indic_over_en_token_ratio_median": 1.2083333333333333,
+  "script_en": {
+   "LATIN": 4000
+  },
+  "script_indic": {
+   "LATIN": 11,
+   "DEVANAGARI": 3988,
+   "ARABIC": 1
+  },
+  "indic_passages_over_3000_chars": 1778,
+  "indic_passage_instances": 977545,
+  "degeneration_marker_hits": 0
+ },
+ "dedup": {
+  "instances": 977545,
+  "exact_unique_en": 950721,
+  "exact_unique_indic": 953398,
+  "exact_dup_pct_en": 2.7440168994777747,
+  "exact_dup_pct_indic": 2.470167613767138,
+  "max_repeat_counts": [
+   345,
+   192,
+   119
+  ],
+  "near_dup_sample": 30000,
+  "near_dup_pct": 0.64
+ }
+}
