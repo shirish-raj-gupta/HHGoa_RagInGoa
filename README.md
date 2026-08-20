@@ -74,9 +74,29 @@ All eight required strategies are implemented behind one `Chunker` interface and
 | `fixed_128_o0` | 0.8678 |
 | `semantic_p85/p90/p95` | 0.8485–0.8508 |
 
-**The entire chunking design space is worth 3.3 points of Recall@5, and the arm that wins is the one that does nothing.** On a corpus built as retrieval units, re-cutting can only lose context. That is a result, and it is reported as one rather than buried under a strategy picked for looking sophisticated.
+**The entire chunking design space is worth 3.3 points of Recall@5, and the arm that wins is the one that does nothing.** On a corpus built as retrieval units, re-cutting can only lose context.
 
-The three-way tie at the top is **exact, not approximate**: each arm's emitted chunk text is fingerprinted with BLAKE2b before embedding, and arms with matching fingerprints are proven to be the same retrieval system rather than assumed to be.
+The three-way tie at the top is **exact, not approximate**: each arm's emitted chunk text is fingerprinted with BLAKE2b before embedding, so arms with matching fingerprints are proven to be the same retrieval system rather than assumed to be.
+
+A ranking of 25 numbers would be over-claiming, so every gap is tested with a **paired bootstrap** (10,000 resamples, same queries per arm) across all three languages:
+
+> **No chunking strategy beats the passage-atomic control by a statistically significant margin, in any language. Several lose by one.**
+
+The losses sharpen as the language gets lower-resource — `hierarchical_c64` costs −0.0122 on English, −0.0432 on Hindi and **−0.1107 on Tamil**, all significant. A weaker encoder leans harder on surrounding context, so removing context costs it more.
+
+The sharpest finding is one nobody would design for: **`sentence_pack_128` — the script-aware strategy built specifically to respect Indic sentence boundaries — is a significant loss on Tamil** (−0.0163) while being harmless on English and Hindi. The strategy most obviously motivated by this dataset is the one that measurably hurts its hardest language.
+
+### The effect that dwarfs chunking
+
+The 14 shards are *parallel* — same queries, same passages, only the language differs — so this isolates language and nothing else:
+
+| Language | Recall@5 (control) |
+|---|---:|
+| `eng_Latn` | 0.8814 |
+| `hin_Deva` | 0.6786 |
+| `tam_Taml` | 0.4972 |
+
+**A 38-point collapse on identical content**, an order of magnitude larger than anything chunking does. That is a property of `multilingual-e5-small`, not of the corpus, and it is the strongest argument for the cross-lingual English fallback in the ADR.
 
 ---
 

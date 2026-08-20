@@ -249,11 +249,26 @@ def main() -> int:
                 "0.1110 on Tamil — the same operation, three times the damage as "
                 "you go down the resource ladder. The mechanism is intuitive: a "
                 "weaker encoder leans harder on surrounding context, so removing "
-                "context costs it more. Consistent with that, **`late_chunk_96` — "
-                "the one strategy that keeps document context inside the chunk "
-                "vector — is the only arm to beat the control on Hindi and Tamil**, "
-                "while losing on English. Whether those two wins are real is "
-                "tested below rather than asserted.",
+                "context costs it more. Every one of those losses is statistically "
+                "significant, and they get *more* significant as the language gets "
+                "lower-resource.",
+                "",
+                "`late_chunk_96` — the one strategy that keeps document context "
+                "inside the chunk vector — is the only arm that edges above the "
+                "control on Hindi (+0.0011) and Tamil (+0.0033). **Tested, both "
+                "intervals straddle zero, so neither is a win.** It would have been "
+                "a tidy story; it is not a result, and it is not claimed as one. "
+                "What can be said is narrower: late chunking is the only arm that "
+                "never significantly loses in any language.",
+                "",
+                "The sharpest finding here is one nobody would design for: "
+                "**`sentence_pack_128`, the script-aware strategy built specifically "
+                "to respect Indic sentence boundaries, is a significant LOSS on "
+                "Tamil** (−0.0163, CI [−0.0245, −0.0085]) while being harmless on "
+                "English and Hindi. Respecting the danda and Tamil punctuation does "
+                "not pay for the context it costs. The strategy most obviously "
+                "motivated by this dataset is the one that measurably hurts its "
+                "hardest language.",
                 "",
             ]
         L += ["## Per-language breakdown", ""]

@@ -56,6 +56,37 @@ This is the predicted consequence of the corpus shape: English passages are p50 
 | `semantic_p95` | 0.845 | 0.774 | 0.934 | 0.865 | 0.865 |
 | `semantic_p85` | 0.842 | 0.778 | 0.929 | 0.861 | 0.865 |
 
+## Are these differences real?
+
+Recall@5 differences of 0.001 on ~2,700 queries are two or three queries. Before any ordering is claimed, it is tested with a **paired bootstrap** (same queries for every arm, 10,000 resamples) from [`bench/significance.py`](../bench/significance.py). Paired is the correct test: only queries whose gold passage actually got split can differ between arms.
+
+### eng_Latn — vs `passage_atomic`
+
+| Arm | Recall@5 | Δ | 95% CI | Queries won/lost | Verdict |
+|---|---:|---:|---|---:|---|
+| `late_chunk_96` | 0.8785 | -0.00259 | [-0.00665, +0.00111] | +11/−18 | indistinguishable |
+| `sentence_pack_128` | 0.8788 | -0.00222 | [-0.00591, +0.00111] | +9/−15 | indistinguishable |
+| `fixed_128_o0` | 0.8678 | -0.01330 | [-0.01884, -0.00813] | +9/−45 | **significant** |
+| `hierarchical_c64` | 0.8689 | -0.01219 | [-0.02143, -0.00296] | +68/−101 | **significant** |
+
+### hin_Deva — vs `passage_atomic`
+
+| Arm | Recall@5 | Δ | 95% CI | Queries won/lost | Verdict |
+|---|---:|---:|---|---:|---|
+| `late_chunk_96` | 0.6794 | +0.00111 | [-0.00296, +0.00517] | +17/−14 | indistinguishable |
+| `sentence_pack_128` | 0.6794 | +0.00111 | [-0.00443, +0.00665] | +30/−27 | indistinguishable |
+| `fixed_128_o0` | 0.6675 | -0.01071 | [-0.01699, -0.00443] | +22/−51 | **significant** |
+| `hierarchical_c64` | 0.6350 | -0.04322 | [-0.05652, -0.03029] | +109/−226 | **significant** |
+
+### tam_Taml — vs `passage_atomic`
+
+| Arm | Recall@5 | Δ | 95% CI | Queries won/lost | Verdict |
+|---|---:|---:|---|---:|---|
+| `late_chunk_96` | 0.5002 | +0.00334 | [-0.00186, +0.00891] | +33/−24 | indistinguishable |
+| `sentence_pack_128` | 0.4805 | -0.01634 | [-0.02451, -0.00854] | +40/−84 | **significant** |
+| `fixed_128_o0` | 0.4482 | -0.04864 | [-0.05867, -0.03899] | +29/−160 | **significant** |
+| `hierarchical_c64` | 0.3862 | -0.11066 | [-0.12588, -0.09543] | +94/−392 | **significant** |
+
 ## Cross-lingual — the effect that dwarfs chunking
 
 Recall@5 for the arms run on every language. The shards are **parallel**: same `query_id`s, same passages, only the language differs. So this table isolates language and nothing else.
@@ -83,7 +114,11 @@ Two things fall out of this, and neither is about chunking parameters:
 
 1. **Retrieval quality collapses with language resource level.** The control scores 0.8814 on `eng_Latn`, 0.6786 on `hin_Deva`, 0.4972 on `tam_Taml`. On identical content. That gap is an order of magnitude larger than anything chunking does, and it is a property of `multilingual-e5-small`, not of the corpus. It is the strongest argument for the cross-lingual English fallback in [ADR 0001](adr/0001-architecture.md).
 
-2. **Splitting hurts more the weaker the embedding is.** `hierarchical_c64` costs 0.0125 on English, 0.0428 on Hindi and 0.1110 on Tamil — the same operation, three times the damage as you go down the resource ladder. The mechanism is intuitive: a weaker encoder leans harder on surrounding context, so removing context costs it more. Consistent with that, **`late_chunk_96` — the one strategy that keeps document context inside the chunk vector — is the only arm to beat the control on Hindi and Tamil**, while losing on English. Whether those two wins are real is tested below rather than asserted.
+2. **Splitting hurts more the weaker the embedding is.** `hierarchical_c64` costs 0.0125 on English, 0.0428 on Hindi and 0.1110 on Tamil — the same operation, three times the damage as you go down the resource ladder. The mechanism is intuitive: a weaker encoder leans harder on surrounding context, so removing context costs it more. Every one of those losses is statistically significant, and they get *more* significant as the language gets lower-resource.
+
+`late_chunk_96` — the one strategy that keeps document context inside the chunk vector — is the only arm that edges above the control on Hindi (+0.0011) and Tamil (+0.0033). **Tested, both intervals straddle zero, so neither is a win.** It would have been a tidy story; it is not a result, and it is not claimed as one. What can be said is narrower: late chunking is the only arm that never significantly loses in any language.
+
+The sharpest finding here is one nobody would design for: **`sentence_pack_128`, the script-aware strategy built specifically to respect Indic sentence boundaries, is a significant LOSS on Tamil** (−0.0163, CI [−0.0245, −0.0085]) while being harmless on English and Hindi. Respecting the danda and Tamil punctuation does not pay for the context it costs. The strategy most obviously motivated by this dataset is the one that measurably hurts its hardest language.
 
 ## Per-language breakdown
 
@@ -114,6 +149,12 @@ Two things fall out of this, and neither is about chunking parameters:
 **`passage_atomic`** takes the top Recall@5 at **0.8814** (MRR@10 0.6285, nDCG@10 0.7090). It is tied *exactly* by `fixed_512_o0`, `metadata_aware`, which is not a coincidence — those arms emit byte-identical chunks (see the fingerprints above). The worst arm, `semantic_p85`, scores 0.8485 — a total spread of **0.0329** across every strategy tried.
 
 That spread is the headline result. On this corpus **chunking is close to a no-op**: the entire design space is worth 3.3 points of Recall@5, and the arm that wins is the one that does nothing at all. That is the predicted consequence of passages that are already p50 72 tokens and never exceed the embedding window — the dataset was built as retrieval units, and re-cutting them can only lose context.
+
+But the ranking above is the weaker way to say it, because most of those gaps are not resolvable at this sample size. The **paired bootstrap** below is the honest version:
+
+> **No chunking strategy beats the passage-atomic control by a statistically significant margin, in any language tested. Several lose by one.**
+
+The arms that appear to edge out the control differ by single-digit numbers of queries and their confidence intervals straddle zero; the arms that lose badly — aggressive fixed-size splitting and hierarchical parent–child — lose with intervals lying entirely below zero. So the defensible conclusion is not "strategy X is best" but *"chunking here either does nothing measurable or actively hurts"*. Shipping the control follows from that, and it is also the cheapest option: fewest chunks, smallest index, fastest retrieval.
 
 ### What we gave up, and where each arm lost
 
