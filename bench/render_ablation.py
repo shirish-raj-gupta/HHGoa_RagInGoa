@@ -235,8 +235,11 @@ def main() -> int:
         "isolates chunking; the deployed system uses HNSW and pays index error on top "
         "(see `bench/sweep_hnsw.py`).",
         "3. **`Retrieve p50` is exact-search latency over ~50k vectors**, not the "
-        "production number. Production retrieval is HNSW over a language partition; "
-        "Gate C reports that separately.",
+        "production number, and these runs shared a machine with other jobs — one "
+        "arm recorded 70 ms for work its neighbours did in 3 ms. Read the column "
+        "as *\"more chunks cost more to scan\"* and nothing finer. Production "
+        "retrieval is HNSW over a language partition and is measured, on a quiet "
+        "machine, at Gate C.",
         "4. **Query-embed latency is not in the table, on purpose.** Embedding one "
         "query is the same work no matter how the corpus was chunked, so a per-arm "
         "column would report machine contention rather than the strategy — this run "

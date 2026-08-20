@@ -102,19 +102,57 @@ def main() -> int:
     sparse = SparsePartition(a.lang)
     sparse.build(corpus.text.tolist(), corpus.passage_id.tolist())
 
-    print("[3/4] scoring answerable vs unanswerable", flush=True)
-    pos_q = queries[queries.answerable]
-    neg_q = queries[~queries.answerable].head(a.max_neg)
-    scores: dict[str, list[float]] = {"pos": [], "neg": []}
-    for tag, qs in (("pos", pos_q), ("neg", neg_q)):
-        QV = embed.encode_queries(qs["query"].tolist(), batch=16 if a.gpu else 64)
-        for i in range(len(qs)):
-            dh = dense.search(QV[i], k=10)
-            sh = sparse.search(qs["query"].iloc[i], k=10)
-            fused = rrf(dh, sh, top_k=5)
-            scores[tag].append(fused[0].score if fused else 0.0)
+    print("[3/4] scoring", flush=True)
 
-    pos = np.array(scores["pos"]); neg = np.array(scores["neg"])
+    def score_all(texts: list[str]) -> tuple[list[float], list[float]]:
+        """
+        Returns (dense_cosine, rrf_score) for the top hit of each query.
+
+        The gate thresholds the DENSE COSINE. The RRF score is computed only so
+        the doc can show why it cannot be used: RRF is rank-derived, so the
+        top-1 fused score is ~2/60 for nearly every query (43 distinct values
+        across 2,707 queries in the first run) and carries no signal about
+        match quality at all. That first attempt scored AUC 0.508.
+        """
+        cos, fus = [], []
+        QV = embed.encode_queries(texts, batch=16 if a.gpu else 64)
+        for i, txt in enumerate(texts):
+            dh = dense.search(QV[i], k=10)
+            sh = sparse.search(txt, k=10)
+            cos.append(dh[0].score if dh else 0.0)
+            f = rrf(dh, sh, top_k=5)
+            fus.append(f[0].score if f else 0.0)
+        return cos, fus
+
+    pos_q = queries[queries.answerable]
+    pos, pos_rrf = score_all(pos_q["query"].tolist())
+
+    # Negatives, kept SEPARATE because they test different guardrails.
+    neg_sets: dict[str, list[float]] = {}
+    oob = Path("bench/negatives.jsonl")
+    if oob.exists():
+        rows = [json.loads(l) for l in oob.read_text(encoding="utf-8").splitlines()
+                if l.strip()][:a.max_neg]
+        neg_sets["out_of_corpus"], _ = score_all([r["query"] for r in rows])
+        print(f"      out_of_corpus negatives: {len(rows)}")
+    una = queries[~queries.answerable].head(a.max_neg)
+    neg_sets["unanswerable_in_domain"], _ = score_all(una["query"].tolist())
+    print(f"      unanswerable negatives:  {len(una)}")
+
+    # The gate is an IS-THIS-IN-THE-CORPUS check, so it calibrates against
+    # out-of-corpus queries. Unanswerable-but-on-domain is an answer-scope
+    # problem and belongs to the output-side groundedness rail; it is scored
+    # here only to show, with a number, that retrieval score cannot detect it.
+    primary = "out_of_corpus" if "out_of_corpus" in neg_sets         else "unanswerable_in_domain"
+    pos = np.array(pos)
+    neg = np.array(neg_sets[primary])
+    all_aucs = {k: auc_of(roc(pos, np.array(v))) for k, v in neg_sets.items()}
+    rrf_auc = auc_of(roc(np.array(pos_rrf),
+                         np.array(score_all(una["query"].tolist())[1])))
+    print(f"      calibrating against: {primary}")
+    for k, v in all_aucs.items():
+        print(f"      AUC({k}) = {v:.4f}")
+    print(f"      AUC(RRF score, for comparison) = {rrf_auc:.4f}")
     curve = roc(pos, neg)
     area = auc_of(curve)
 
@@ -144,6 +182,10 @@ def main() -> int:
         "pos_p10": float(np.percentile(pos, 10)),
         "neg_p90": float(np.percentile(neg, 90)),
         "auc": area, "chosen": chosen, "youden": best_j, "max_f1": best_f1,
+        "score_used": "dense_top1_cosine",
+        "negative_set": primary,
+        "auc_by_negative_set": all_aucs,
+        "auc_rrf_score_for_comparison": rrf_auc,
         "target_false_answer_rate": a.target_false_answer_rate,
         "curve": curve,
         "raw_scores": {"pos": pos.tolist(), "neg": neg.tolist()},

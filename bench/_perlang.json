@@ -341,6 +341,40 @@
     "NUMERIC": 0.5781,
     "PERSON": 0.5027
    }
+  },
+  {
+   "strategy": "late_chunk_96",
+   "lang": "tam_Taml",
+   "chunks": 70205,
+   "passages": 49235,
+   "chunk_fingerprint": null,
+   "identical_to": null,
+   "chunks_per_passage": 1.426,
+   "degenerate_chunks": 0,
+   "degenerate_pct": 0.0,
+   "index_mb": 107.8,
+   "self_retrieval": 1.0,
+   "index_ok": true,
+   "recall_at_5": 0.5006,
+   "mrr_at_10": 0.3278,
+   "ndcg_at_10": 0.39,
+   "embed_p50_ms": 3.48,
+   "embed_p95_ms": 4.52,
+   "retrieve_p50_ms": 2.954,
+   "retrieve_p95_ms": 3.435,
+   "build_chunk_ms": 37029.1,
+   "build_embed_ms": 77186.9,
+   "build_index_ms": 53.8,
+   "eval_queries": 2693,
+   "corpus_embed_provider": "CUDAExecutionProvider",
+   "latency_provider": "CPUExecutionProvider",
+   "recall_by_query_type": {
+    "DESCRIPTION": 0.4525,
+    "ENTITY": 0.4696,
+    "LOCATION": 0.547,
+    "NUMERIC": 0.5903,
+    "PERSON": 0.5459
+   }
   }
  ]
 }

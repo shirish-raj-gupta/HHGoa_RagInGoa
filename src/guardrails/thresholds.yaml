@@ -8,8 +8,8 @@
 
 relevance:
   # top-1 fused score below this => "not covered by this corpus"
-  tau: null            # SET BY bench/calibrate_tau.py - null means uncalibrated
-  tau_source: uncalibrated
+  tau: 0.03201   # calibrated, AUC=0.5080
+  tau_source: bench/calibrate_tau.py lang=eng_Latn n_pos=2707 n_neg=2000
   # margin below tau where we ask for clarification instead of refusing outright
   ambiguous_band: 0.04
 

@@ -2,3 +2,11 @@ The tokenizer you are loading from 'artifacts\e5-small-onnx' with an incorrect r
 [1/4] embedding 49,611 passages
       602s (82 psg/s)
 [2/4] building dense + sparse
+[3/4] scoring answerable vs unanswerable
+[4/4] pos n=2707 mean=0.0322 | neg n=2000 mean=0.0315
+      AUC = 0.5080
+      target-FAR  tau=0.03201 false_answer=0.753 false_refusal=0.155 f1=0.704
+      Youden J    tau=0.03201 false_answer=0.753 false_refusal=0.155 f1=0.704
+      max F1      tau=0.03069 false_answer=0.921 false_refusal=0.021 f1=0.736
+wrote bench\tau_calibration.json
+updated src\guardrails\thresholds.yaml -> tau=0.03201
