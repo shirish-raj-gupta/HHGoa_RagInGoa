@@ -31,26 +31,32 @@ class Hit:
 class DensePartition:
     """One HNSW index over one language's chunks."""
 
-    # MEASURED, do not "optimize" back to I8. usearch's ScalarKind.I8 expects
-    # values in int8 range, not L2-normalized floats in [-1,1], and it does not
-    # scale them for you. Feeding it unit vectors destroys the distance function
-    # and therefore the HNSW graph. Self-retrieval (search a vector against an
-    # index that CONTAINS it, expect rank 0) on 20k random unit vectors:
+    # Chosen by measurement (bench/sweep_hnsw.py), against EXACT search as
+    # ground truth. On 49,611 real e5 vectors:
     #
-    #     dtype   ef_search=64   ef_search=256
-    #     F32          99.0%          100.0%
-    #     F16         100.0%           99.5%
-    #     I8            9.0%            1.0%     <- broken
+    #   dtype  M   ea   es   recall@10 vs exact   self-retr   p50      size
+    #   f16    16  256  128  0.9925               0.995       1.80ms   44.5MB
+    #   f32    32  256   64  0.9882               0.995       0.42ms   88.9MB
+    #   i8     16  256  512  0.9412               1.000       3.58ms   22.3MB
     #
-    # Pre-scaling by 127 does not help (9.5%); casting to int8 is worse (6.5%).
-    # The failure is not uniform, which is what makes it dangerous: on real
-    # embeddings it produced a plausible ablation table with one inexplicable
-    # row (fixed_128_o0 R@5=0.474 against 0.864 for its neighbours), because
-    # graph quality became a lottery per build rather than consistently bad.
+    # F16 gives the best recall per byte, and at 15 partitions memory is the
+    # binding constraint (12.8GB vs 21.9GB for f32 across the full corpus).
     #
-    # F16 costs 2 B/dim instead of 1 but is numerically sound. This is NOT the
-    # same int8 as the ONNX model quantization, which IS validated and kept
-    # (0.990 mean cosine agreement with fp32 across five scripts).
+    # A WARNING ABOUT THE SANITY CHECK BELOW, because it misled this project
+    # once. Self-retrieval on RANDOM unit vectors reports I8 at 0.085 and looks
+    # like a smoking gun. It is an artifact: random vectors in 384 dimensions
+    # are isotropic and mutually near-equidistant, so int8 quantization erases
+    # the only distinctions there are. Real embeddings are anisotropic - e5
+    # concentrates in a narrow cone, so a vector's true self-match sits far
+    # above its neighbours and survives quantization intact. Measured on real
+    # e5 vectors at identical component scale (sd 0.0510 in both cases):
+    #
+    #   random unit vectors   F32 0.980   F16 0.995   I8 0.085
+    #   real e5 vectors       F32 0.990   F16 0.990   I8 0.990
+    #
+    # So I8 is NOT broken - it simply costs ~5 points of recall against exact.
+    # The real lesson is about the test, not the dtype: a synthetic sanity
+    # check can produce a confident false positive, and this one did.
     DTYPE = ScalarKind.F16
 
     def __init__(self, lang: str, dim: int = 384, *,
@@ -58,6 +64,10 @@ class DensePartition:
                  expansion_search: int = 64, dtype: ScalarKind | None = None):
         self.lang, self.dim = lang, dim
         self.expansion_search = expansion_search
+        # the ACTUAL dtype, not the class default - size_bytes read
+        # self.DTYPE and so under-reported f32 by 2x, which made the
+        # HNSW sweep pick f32 believing it was the smaller option
+        self.dtype = dtype or self.DTYPE
         self.index = Index(
             ndim=dim,
             metric=MetricKind.Cos,
@@ -161,7 +171,7 @@ class DensePartition:
         "Index MB" column - compute it instead.
         """
         bytes_per_scalar = {ScalarKind.F32: 4, ScalarKind.F16: 2,
-                            ScalarKind.I8: 1}.get(self.DTYPE, 4)
+                            ScalarKind.I8: 1}.get(self.dtype, 4)
         vectors = len(self.chunk_ids) * self.dim * bytes_per_scalar
         graph = len(self.chunk_ids) * self.index.connectivity * 2 * 4
         return vectors + graph

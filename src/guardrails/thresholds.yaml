@@ -8,8 +8,8 @@
 
 relevance:
   # top-1 fused score below this => "not covered by this corpus"
-  tau: 0.03201   # calibrated, AUC=0.5080
-  tau_source: bench/calibrate_tau.py lang=eng_Latn n_pos=2707 n_neg=2000
+  tau: 0.88644   # Youden J, AUC=0.9026 vs out-of-corpus negatives
+  tau_source: bench/calibrate_tau.py dense-cosine, n_pos=2707 n_neg=2000 (out_of_corpus)
   # margin below tau where we ask for clarification instead of refusing outright
   ambiguous_band: 0.04
 

@@ -226,14 +226,26 @@ def test_injection_is_screened_on_the_transcript():
     assert ir.check_injection("what is a corporation").passed
 
 
-def test_relevance_gate_fails_open_when_uncalibrated():
+def test_relevance_gate_fails_open_when_uncalibrated(monkeypatch):
     """
     An uncalibrated tau must not silently apply an invented constant. It fails
     open AND says so, so the trace shows the gate was not enforced.
+
+    Patches the config rather than passing tau=None, so the test asserts the
+    BEHAVIOUR and does not quietly start passing (or failing) whenever
+    thresholds.yaml is recalibrated.
     """
+    monkeypatch.setitem(ir.THRESHOLDS["relevance"], "tau", None)
     r = ir.check_relevance(0.01, tau=None)
     assert r.passed
     assert "uncalibrated" in r.event.detail.lower()
+
+
+def test_relevance_gate_refuses_below_calibrated_tau(monkeypatch):
+    """And when it IS calibrated, a low-scoring query is refused."""
+    monkeypatch.setitem(ir.THRESHOLDS["relevance"], "tau", 0.80)
+    assert not ir.check_relevance(0.10).passed
+    assert ir.check_relevance(0.95).passed
 
 
 def test_partitions_return_stored_vectors_not_recomputed():

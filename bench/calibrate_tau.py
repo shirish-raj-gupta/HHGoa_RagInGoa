@@ -77,6 +77,8 @@ def main() -> int:
                          "queries we are willing to answer anyway")
     ap.add_argument("--out", type=Path, default=Path("bench/tau_calibration.json"))
     ap.add_argument("--write-thresholds", action="store_true")
+    ap.add_argument("--conservative", action="store_true",
+                    help="use --target-false-answer-rate instead of Youden J")
     ap.add_argument("--gpu", action="store_true",
                     help="embed on CUDA using the fp32 export")
     a = ap.parse_args()
