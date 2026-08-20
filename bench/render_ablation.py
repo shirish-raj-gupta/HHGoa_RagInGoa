@@ -282,6 +282,23 @@ def main() -> int:
         f"never exceed the embedding window — the dataset was built as retrieval units, "
         f"and re-cutting them can only lose context.",
         "",
+        "But the ranking above is the weaker way to say it, because most of those "
+        "gaps are not resolvable at this sample size. The **paired bootstrap** "
+        "below is the honest version:",
+        "",
+        "> **No chunking strategy beats the passage-atomic control by a "
+        "statistically significant margin, in any language tested. Several lose "
+        "by one.**",
+        "",
+        "The arms that appear to edge out the control differ by single-digit "
+        "numbers of queries and their confidence intervals straddle zero; the arms "
+        "that lose badly — aggressive fixed-size splitting and hierarchical "
+        "parent–child — lose with intervals lying entirely below zero. So the "
+        "defensible conclusion is not \"strategy X is best\" but *\"chunking here "
+        "either does nothing measurable or actively hurts\"*. Shipping the control "
+        "follows from that, and it is also the cheapest option: fewest chunks, "
+        "smallest index, fastest retrieval.",
+        "",
         "### What we gave up, and where each arm lost",
         "",
         "| Arm | Cost paid | What it bought |",
