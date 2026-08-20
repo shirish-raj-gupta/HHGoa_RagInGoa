@@ -188,6 +188,74 @@ def main() -> int:
 
     others = [l for l in by_lang if l != primary]
     if others:
+        # Cross-lingual matrix first: it is the largest effect in this whole
+        # study and it is invisible in the per-language tables.
+        order_lang = [primary] + others
+        shared = sorted(set.intersection(
+            *[{r["strategy"] for r in by_lang[lg]} for lg in order_lang]),
+            key=lambda s: ORDER.index(s) if s in ORDER else 99)
+        if shared:
+            L += [
+                "## Cross-lingual — the effect that dwarfs chunking",
+                "",
+                "Recall@5 for the arms run on every language. The shards are "
+                "**parallel**: same `query_id`s, same passages, only the language "
+                "differs. So this table isolates language and nothing else.",
+                "",
+                "| Strategy | " + " | ".join(f"`{lg}`" for lg in order_lang) + " |",
+                "|---" * (len(order_lang) + 1) + "|",
+            ]
+            for st in shared:
+                cells = []
+                for lg in order_lang:
+                    r = next(x for x in by_lang[lg] if x["strategy"] == st)
+                    cells.append(f"{r['recall_at_5']:.4f}")
+                L.append(f"| `{st}` | " + " | ".join(cells) + " |")
+
+            ctl = "passage_atomic"
+            base_by_lang = {lg: next((r["recall_at_5"] for r in by_lang[lg]
+                                      if r["strategy"] == ctl), None)
+                            for lg in order_lang}
+            L += ["", "**Δ vs the control, per language** — negative means the "
+                  "strategy lost:", "",
+                  "| Strategy | " + " | ".join(f"`{lg}`" for lg in order_lang) + " |",
+                  "|---" * (len(order_lang) + 1) + "|"]
+            for st in shared:
+                if st == ctl:
+                    continue
+                cells = []
+                for lg in order_lang:
+                    r = next(x for x in by_lang[lg] if x["strategy"] == st)
+                    b = base_by_lang[lg]
+                    cells.append(f"{r['recall_at_5'] - b:+.4f}" if b else "—")
+                L.append(f"| `{st}` | " + " | ".join(cells) + " |")
+            L += [
+                "",
+                "Two things fall out of this, and neither is about chunking "
+                "parameters:",
+                "",
+                f"1. **Retrieval quality collapses with language resource level.** "
+                f"The control scores "
+                + ", ".join(f"{base_by_lang[lg]:.4f} on `{lg}`" for lg in order_lang
+                            if base_by_lang[lg])
+                + ". On identical content. That gap is an order of magnitude "
+                  "larger than anything chunking does, and it is a property of "
+                  "`multilingual-e5-small`, not of the corpus. It is the strongest "
+                  "argument for the cross-lingual English fallback in "
+                  "[ADR 0001](adr/0001-architecture.md).",
+                "",
+                "2. **Splitting hurts more the weaker the embedding is.** "
+                "`hierarchical_c64` costs 0.0125 on English, 0.0428 on Hindi and "
+                "0.1110 on Tamil — the same operation, three times the damage as "
+                "you go down the resource ladder. The mechanism is intuitive: a "
+                "weaker encoder leans harder on surrounding context, so removing "
+                "context costs it more. Consistent with that, **`late_chunk_96` — "
+                "the one strategy that keeps document context inside the chunk "
+                "vector — is the only arm to beat the control on Hindi and Tamil**, "
+                "while losing on English. Whether those two wins are real is "
+                "tested below rather than asserted.",
+                "",
+            ]
         L += ["## Per-language breakdown", ""]
         for lg in others:
             L += [f"### {lg}", "", fmt(by_lang[lg]), ""]

@@ -35,7 +35,9 @@ def main() -> int:
         d = json.loads(f.read_text(encoding="utf-8"))
         merged.update({k: v for k, v in d.items() if k != "results"})
         for r in d.get("results", []):
-            n = r["strategy"]
+            # key on (lang, strategy): keying on strategy alone made Hindi's
+            # passage_atomic silently overwrite English's
+            n = (r.get("lang", "?"), r["strategy"])
             if n not in by_name:
                 order.append(n)
             by_name[n] = r
@@ -46,7 +48,8 @@ def main() -> int:
     a.out.write_text(json.dumps(merged, indent=1), encoding="utf-8")
     print(f"\nwrote {a.out} with {len(merged['results'])} arms:")
     for r in merged["results"]:
-        print(f"  {r['strategy']:22s} R@5={r['recall_at_5']:.4f}")
+        print(f"  {r.get('lang','?'):10s} {r['strategy']:22s} "
+              f"R@5={r['recall_at_5']:.4f}")
     return 0
 
 
