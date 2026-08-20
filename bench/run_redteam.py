@@ -70,8 +70,12 @@ def evaluate_one(row: dict, embed, parts: dict, tau: float | None) -> dict:
             part = parts.get(lang) or parts.get("eng_Latn")
             sp = part["sparse"]
             qv = embed.encode_queries([clean])[0]
-            fused = rrf(part["dense"].search(qv, k=10), sp.search(clean, k=10), top_k=5)
-            top = fused[0].score if fused else 0.0
+            dh = part["dense"].search(qv, k=10)
+            fused = rrf(dh, sp.search(clean, k=10), top_k=5)
+            # dense top-1 cosine: the score tau is calibrated on. Using the RRF
+            # fused score here refused 100% of benign queries, because RRF
+            # scores sit near 2/60 and tau is ~0.89.
+            top = dh[0].score if dh else 0.0
             rel = ir.check_relevance(top, tau)
             row = {**row, "top_score": round(top, 5), "lang_detected": lang}
             if not rel.passed:

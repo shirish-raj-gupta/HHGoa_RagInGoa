@@ -109,7 +109,12 @@ class RetrievalSet(Strict):
     query: str
     lang: str
     chunks: list[RetrievedChunk] = Field(default_factory=list)
-    top_score: float = 0.0
+    top_score: float = 0.0          # RRF fused score - rank-derived, for ranking
+    # Dense top-1 COSINE. Kept separate from top_score because the relevance
+    # gate is calibrated on cosine, and RRF scores are rank-derived (~2/60 for
+    # nearly every query). Feeding one to a threshold fitted on the other
+    # refused 100% of benign queries - caught by the red-team set.
+    relevance_score: float | None = None
     degraded: list[str] = Field(default_factory=list)
 
     @property

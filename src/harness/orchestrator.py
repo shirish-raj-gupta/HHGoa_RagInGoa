@@ -165,6 +165,7 @@ class CoreLoop:
         rs = RetrievalSet(
             request_id=trace.request_id, query=nq.text, lang=nq.lang,
             top_score=fused[0].score if fused else 0.0,
+            relevance_score=(dense_hits[0].score if dense_hits else None),
             degraded=[f"{d.stage}:{d.action}" for d in budget.degradations],
             chunks=[RetrievedChunk(
                 passage_id=f.passage_id, chunk_id=f.passage_id,
@@ -175,7 +176,12 @@ class CoreLoop:
         )
 
         # ---- T6 relevance gate (the "not in corpus" refusal)
-        rel = ir.check_relevance(rs.top_score, self.tau)
+        # The gate reads the DENSE COSINE, not the fused score. If dense was
+        # skipped (sparse-only degradation) there is no calibrated score to
+        # compare, so it fails open and says so rather than refusing on a
+        # number the threshold was never fitted to.
+        rel = ir.check_relevance(rs.relevance_score, self.tau)             if rs.relevance_score is not None             else ir.RailResult(True, ir._ev("relevance", True,
+                                            "no dense score (degraded to sparse)"))
         guard(rel.event)
         if not rel.passed:
             trace.core_rag_loop_ms = (time.perf_counter_ns() - t_core0) / 1e6

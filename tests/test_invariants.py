@@ -265,3 +265,38 @@ def test_partitions_return_stored_vectors_not_recomputed():
     assert set(got) == {"p0", "p7", "p49"}          # unknown ids are skipped
     for i, pid in ((0, "p0"), (7, "p7"), (49, "p49")):
         assert float(np.dot(got[pid], V[i])) == pytest.approx(1.0, abs=1e-5)
+
+
+# ------------------------------------------- relevance score scale (regression)
+def test_rrf_scores_live_on_a_different_scale_than_cosine():
+    """
+    The bug: the relevance gate was calibrated on DENSE COSINE (tau ~0.886) but
+    fed the RRF FUSED score (~2/60 = 0.033). Every benign query scored far
+    below tau, so the red-team eval measured a 100% false-refusal rate.
+
+    This test pins the fact that made it possible: the two scores are not
+    comparable, and never will be.
+    """
+    fused = rrf([H("a"), H("b")], [H("a"), H("c")], top_k=2)
+    assert fused[0].score < 0.1, "RRF top-1 sits near 2/60, not near 1.0"
+    # a cosine for a good match is an order of magnitude larger
+    assert 0.8 < 0.9087 < 1.0
+
+
+def test_retrieval_set_keeps_relevance_score_separate():
+    from src.harness.contracts import RetrievalSet
+    rs = RetrievalSet(request_id="r", query="q", lang="eng_Latn",
+                      top_score=0.0333, relevance_score=0.91)
+    assert rs.top_score != rs.relevance_score
+    # and it is optional: sparse-only degradation has no dense cosine at all
+    rs2 = RetrievalSet(request_id="r", query="q", lang="eng_Latn")
+    assert rs2.relevance_score is None
+
+
+def test_gate_on_cosine_scale_behaves(monkeypatch):
+    """A calibrated tau must accept good cosines and refuse poor ones."""
+    monkeypatch.setitem(ir.THRESHOLDS["relevance"], "tau", 0.88644)
+    assert ir.check_relevance(0.95).passed            # strong match
+    assert not ir.check_relevance(0.60).passed        # clearly off-topic
+    # and the RRF-scale value that caused the bug must NOT be silently accepted
+    assert not ir.check_relevance(0.0333).passed
