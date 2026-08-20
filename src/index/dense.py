@@ -182,6 +182,10 @@ class DensePartition:
         # tracks the hot set rather than the full partition
         p.index.view(str(path)) if view else p.index.load(str(path))
         p.chunk_ids, p.passage_ids = meta["chunk_ids"], meta["passage_ids"]
+        # rebuild the passage->key map; without it MMR silently gets no vectors
+        # and falls back to plain RRF order
+        for off, pid in enumerate(p.passage_ids):
+            p._key_of_passage.setdefault(pid, off)
         return p
 
 

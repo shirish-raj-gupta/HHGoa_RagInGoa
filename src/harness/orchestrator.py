@@ -44,12 +44,17 @@ class CoreLoop:
 
     def __init__(self, embedder, dense_index, sparse_index, *,
                  tau: float | None = None, chunk_texts: dict[str, str] | None = None,
+                 text_lookup=None,
                  chunk_strategy: str = "passage_atomic"):
         self.embed = embedder
         self.dense = dense_index
         self.sparse = sparse_index
         self.tau = tau
         self.chunk_texts = chunk_texts or {}
+        # `text_lookup` fetches passage text on demand (SQLite in production);
+        # `chunk_texts` is the in-memory path the benchmarks and ablation use.
+        # Holding 14.3M texts in RAM is ~4.3GB, so production must not.
+        self.text_lookup = text_lookup
         self.chunk_strategy = chunk_strategy
 
     # ------------------------------------------------------------- stages
@@ -153,13 +158,17 @@ class CoreLoop:
         trace.stages.append(StageTiming(name="fuse", started_ms=t0,
                                         duration_ms=budget.elapsed_ms - t0))
 
+        pids = [f.passage_id for f in fused]
+        texts_for = (self.text_lookup(pids) if self.text_lookup
+                     else {p: self.chunk_texts.get(p, "") for p in pids})
+
         rs = RetrievalSet(
             request_id=trace.request_id, query=nq.text, lang=nq.lang,
             top_score=fused[0].score if fused else 0.0,
             degraded=[f"{d.stage}:{d.action}" for d in budget.degradations],
             chunks=[RetrievedChunk(
                 passage_id=f.passage_id, chunk_id=f.passage_id,
-                text=self.chunk_texts.get(f.passage_id, ""), lang=nq.lang,
+                text=texts_for.get(f.passage_id, ""), lang=nq.lang,
                 score=f.score, rank=f.rank, dense_rank=f.dense_rank,
                 sparse_rank=f.sparse_rank, chunk_strategy=self.chunk_strategy)
                 for f in fused],

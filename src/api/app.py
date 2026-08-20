@@ -33,9 +33,10 @@ from ..generation.generator import DEFAULT_MODEL, Generator
 from ..guardrails.output_rails import apply_output_rails
 from ..harness.contracts import Trace
 from ..harness.orchestrator import CoreLoop
-from ..index.dense import DenseIndex
+from ..index.dense import DenseIndex, DensePartition
 from ..index.embedder import OnnxEmbedder, E5Tokenizer
-from ..index.sparse import SparseIndex
+from ..index.sparse import SparseIndex, SparsePartition
+from ..index.textstore import TextStore
 from .sarvam import SarvamSTT, SpeculativeRetriever
 
 log = logging.getLogger("api")
@@ -50,6 +51,7 @@ load_dotenv()          # no-op on HF Spaces, where secrets are already env
 ARTIFACTS = Path(os.environ.get("RAG_ARTIFACTS", "artifacts"))
 ONNX_DIR = ARTIFACTS / "e5-small-onnx"
 SLICE_DIR = Path(os.environ.get("RAG_SLICE", "data/slice"))
+INDEX_DIR = Path(os.environ.get("RAG_INDEX", "artifacts/index"))
 WEB_DIR = Path(__file__).resolve().parents[2] / "web"
 BUDGET_MS = float(os.environ.get("RAG_BUDGET_MS", "200"))
 THREADS = int(os.environ.get("RAG_THREADS", "8"))
@@ -77,40 +79,69 @@ class State:
     boot_ms: float = 0.0
     corpus_langs: list[str] = []
     n_chunks: int = 0
+    texts: dict = {}
 
 
 S = State()
 
 
 def _load(langs: list[str]) -> None:
-    """Build the in-process indices. Called once, at boot."""
+    """
+    Load the PREBUILT index from disk. Never re-embed at boot.
+
+    The previous version embedded the corpus on every start. At 14.3M passages
+    and ~156 passages/s on CPU that is a four-hour cold start - a Space would
+    never come up. Partitions are memory-mapped (usearch `view`), so resident
+    memory tracks the hot set rather than the ~12.8GB total, and passage text
+    lives in SQLite so only retrieved rows are ever read.
+    """
     S.embedder = OnnxEmbedder(ONNX_DIR / "model_int8.onnx", ONNX_DIR,
                               threads=THREADS, warm=True)
-    dense, sparse, texts = DenseIndex(), SparseIndex(), {}
+    dense, sparse = DenseIndex(), SparseIndex()
     for lang in langs:
-        d = SLICE_DIR / lang
-        if not (d / "corpus.parquet").exists():
-            log.warning("no corpus for %s, skipping", lang)
+        vec = INDEX_DIR / f"{lang}.usearch"
+        if not vec.exists():
+            log.warning("no prebuilt partition for %s, skipping", lang)
             continue
-        c = pd.read_parquet(d / "corpus.parquet")
-        V = S.embedder.encode_passages(c.text.tolist(), batch=64)
-        dense.add(lang, V, c.passage_id.tolist(), c.passage_id.tolist())
-        sparse.build(lang, c.text.tolist(), c.passage_id.tolist())
-        texts.update(dict(zip(c.passage_id, c.text)))
-        S.corpus_langs.append(lang)
-        # fail loudly at boot rather than serving a silently broken index
-        sr = dense.partitions[lang].self_retrieval_rate(100)
-        log.info("loaded %s: %d passages, self_retrieval=%.3f", lang, len(c), sr)
+        part = DensePartition.load(vec, view=True)
+        dense.partitions[lang] = part
+
+        bm = INDEX_DIR / f"{lang}.bm25"
+        if bm.exists():
+            sparse.partitions[lang] = SparsePartition.load(bm)
+        else:
+            log.warning("no BM25 for %s - dense only", lang)
+
+        db = INDEX_DIR / f"{lang}.texts.db"
+        if db.exists():
+            S.texts[lang] = TextStore(db)
+
+        sr = part.self_retrieval_rate(100)
+        log.info("loaded %s: %d vectors, self_retrieval=%.3f", lang,
+                 len(part.chunk_ids), sr)
         if sr < 0.95:
             raise RuntimeError(f"index for {lang} is broken (self_retrieval={sr:.3f})")
+        S.corpus_langs.append(lang)
 
     tau = None
     tj = Path("bench/tau_calibration.json")
     if tj.exists():
         tau = json.loads(tj.read_text(encoding="utf-8"))["chosen"]["tau"]
-    S.core = CoreLoop(S.embedder, dense, sparse, tau=tau, chunk_texts=texts)
+    S.core = CoreLoop(S.embedder, dense, sparse, tau=tau,
+                      text_lookup=_lookup_texts)
     S.generator = Generator(model=os.environ.get("RAG_MODEL", DEFAULT_MODEL))
-    S.n_chunks = dense.n_chunks
+    S.n_chunks = sum(len(p.chunk_ids) for p in dense.partitions.values())
+
+
+def _lookup_texts(passage_ids: list[str]) -> dict[str, str]:
+    """Fetch only the passages actually retrieved, from every open store."""
+    out: dict[str, str] = {}
+    for st in S.texts.values():
+        missing = [p for p in passage_ids if p not in out]
+        if not missing:
+            break
+        out.update(st.get(missing))
+    return out
 
 
 @asynccontextmanager
