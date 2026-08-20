@@ -216,7 +216,12 @@ class LateChunker(Chunker):
         spans = self.tok.token_spans(p.text)
         n = len(spans)
         if n <= self.target:
-            c = self._whole(p, degenerate=False, late=True, tok_lo=0, tok_hi=n)
+            # Degenerate on purpose-of-reporting grounds: with a single span,
+            # late pooling averages the whole passage, which is exactly what
+            # passage-atomic produces. Reporting it as non-degenerate made the
+            # ablation table internally inconsistent (0% no-op at 1.19
+            # chunks/passage), so it is flagged honestly.
+            c = self._whole(p, degenerate=True, late=True, tok_lo=0, tok_hi=n)
             c.extra["late_chunk"] = True
             return [c]
 

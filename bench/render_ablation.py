@@ -39,9 +39,9 @@ def fmt(rows: list[dict], baseline: str = "passage_atomic") -> str:
     # per-arm figure measures machine contention, not the strategy (the run
     # recorded 2.60ms-31.40ms across arms that all do the same thing). It is
     # reported once, separately, from a quiet measurement.
-    out = ["| Strategy | Chunks | chunks/psg | Index MB | Recall@5 | MRR@10 | "
-           "nDCG@10 | Retrieve p50 | Note |",
-           "|---|---:|---:|---:|---:|---:|---:|---:|---|"]
+    out = ["| Strategy | Chunks | chunks/psg | No-op % | Index MB | Recall@5 | "
+           "MRR@10 | nDCG@10 | Retrieve p50 | Note |",
+           "|---|---:|---:|---:|---:|---:|---:|---:|---:|---|"]
     for r in sorted(rows, key=lambda r: ORDER.index(r["strategy"])
                     if r["strategy"] in ORDER else 99):
         note = NOTES.get(r["strategy"], r["strategy"])
@@ -52,9 +52,14 @@ def fmt(rows: list[dict], baseline: str = "passage_atomic") -> str:
             delta = r["recall_at_5"] - base["recall_at_5"]
             d = f" ({delta:+.4f})" if abs(delta) > 1e-9 else " (=)"
         bold = "**" if r["strategy"] == baseline else ""
+        # "No-op %" = chunks where the strategy TRIED to split and could not.
+        # passage_atomic and metadata_aware return the whole passage by design,
+        # so the question does not apply to them - shown as n/a, not 0%.
+        noop = "n/a" if r["strategy"] in ("passage_atomic", "metadata_aware") \
+            else f"{r['degenerate_pct']:.0f}%"
         out.append(
             f"| {bold}`{r['strategy']}`{bold} | {r['chunks']:,} | "
-            f"{r['chunks_per_passage']:.2f} | {r['index_mb']:.1f} | "
+            f"{r['chunks_per_passage']:.2f} | {noop} | {r['index_mb']:.1f} | "
             f"{bold}{r['recall_at_5']:.4f}{bold}{d} | {r['mrr_at_10']:.4f} | "
             f"{r['ndcg_at_10']:.4f} | {r['retrieve_p50_ms']:.3f} ms | {note} |")
     return "\n".join(out)
@@ -86,7 +91,14 @@ def main() -> int:
 
     primary = "eng_Latn" if "eng_Latn" in by_lang else list(by_lang)[0]
     pr = by_lang[primary]
-    win = max(pr, key=lambda r: r["recall_at_5"])
+    # Several arms tie EXACTLY because they emit byte-identical chunks. Picking
+    # one with max() would be arbitrary and would name a splitter as the winner
+    # when the control it is identical to is the thing we would actually ship.
+    top = max(r["recall_at_5"] for r in pr)
+    tied = [r["strategy"] for r in pr if r["recall_at_5"] == top]
+    win = next((r for r in pr if r["strategy"] == "passage_atomic"
+                and r["recall_at_5"] == top), None) \
+        or max(pr, key=lambda r: r["recall_at_5"])
     base = next((r for r in pr if r["strategy"] == "passage_atomic"), win)
     collapsed = [r for r in pr if r.get("identical_to")]
 
@@ -155,10 +167,15 @@ def main() -> int:
     L += [
         "## Interpretation",
         "",
-        f"**{win['strategy']}** takes the top Recall@5 at **{win['recall_at_5']:.4f}** "
-        f"(MRR@10 {win['mrr_at_10']:.4f}, nDCG@10 {win['ndcg_at_10']:.4f}). The worst "
-        f"arm, `{lo['strategy']}`, scores {lo['recall_at_5']:.4f} — a total spread of "
-        f"**{spread:.4f}** across every strategy tried.",
+        (f"**`{win['strategy']}`** takes the top Recall@5 at "
+         f"**{win['recall_at_5']:.4f}** (MRR@10 {win['mrr_at_10']:.4f}, nDCG@10 "
+         f"{win['ndcg_at_10']:.4f})."
+         + (f" It is tied *exactly* by "
+            + ", ".join(f"`{s}`" for s in tied if s != win["strategy"])
+            + ", which is not a coincidence — those arms emit byte-identical "
+              "chunks (see the fingerprints above)." if len(tied) > 1 else "")
+         + f" The worst arm, `{lo['strategy']}`, scores {lo['recall_at_5']:.4f} — "
+           f"a total spread of **{spread:.4f}** across every strategy tried."),
         "",
         f"That spread is the headline result. On this corpus **chunking is close to a "
         f"no-op**: the entire design space is worth {100 * spread:.1f} points of "
