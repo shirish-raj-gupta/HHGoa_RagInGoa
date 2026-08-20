@@ -35,6 +35,40 @@
     "NUMERIC": 0.7605,
     "PERSON": 0.6703
    }
+  },
+  {
+   "strategy": "fixed_128_o0",
+   "lang": "hin_Deva",
+   "chunks": 56447,
+   "passages": 49556,
+   "chunk_fingerprint": "e1402c53c1ca0db329008e2cb13ef8f1",
+   "identical_to": null,
+   "chunks_per_passage": 1.139,
+   "degenerate_chunks": 42773,
+   "degenerate_pct": 75.78,
+   "index_mb": 86.7,
+   "self_retrieval": 1.0,
+   "index_ok": true,
+   "recall_at_5": 0.6675,
+   "mrr_at_10": 0.4451,
+   "ndcg_at_10": 0.5222,
+   "embed_p50_ms": 3.78,
+   "embed_p95_ms": 5.27,
+   "retrieve_p50_ms": 2.886,
+   "retrieve_p95_ms": 3.821,
+   "build_chunk_ms": 20663.6,
+   "build_embed_ms": 74805.0,
+   "build_index_ms": 52.3,
+   "eval_queries": 2707,
+   "corpus_embed_provider": "CUDAExecutionProvider",
+   "latency_provider": "CPUExecutionProvider",
+   "recall_by_query_type": {
+    "DESCRIPTION": 0.6261,
+    "ENTITY": 0.625,
+    "LOCATION": 0.7582,
+    "NUMERIC": 0.747,
+    "PERSON": 0.6703
+   }
   }
  ]
 }
