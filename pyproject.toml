@@ -1,0 +1,55 @@
+[project]
+name = "raginggoa"
+version = "0.1.0"
+description = "Voice-enabled RAG over MS MARCO-XI for HH Goa 2026 Task #2"
+requires-python = ">=3.11"
+
+dependencies = [
+    # web
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "websockets>=13.0",
+    "pydantic>=2.9",
+    "httpx>=0.27",
+    "orjson>=3.10",
+    "pyyaml>=6.0",
+    # retrieval - all in-process, no network hop on the critical path
+    "onnxruntime>=1.19",
+    "transformers>=4.44",
+    "tokenizers>=0.20",
+    "usearch>=2.12",
+    "bm25s>=0.2",
+    "numpy>=1.26",
+    "scipy>=1.13",
+    # data
+    "pyarrow>=17.0",
+    "pandas>=2.2",
+    "huggingface_hub>=0.25",
+    # generation
+    "anthropic>=0.40",
+]
+
+[project.optional-dependencies]
+# Only needed to RE-EXPORT the ONNX model; the Space ships the artifact and
+# never imports torch, which keeps the image ~2GB smaller.
+export = ["torch>=2.2", "optimum[onnxruntime]>=1.20", "onnx>=1.16"]
+# GPU index builds. int8 has no usable CUDA kernels, so GPU uses the fp32
+# export - see src/index/embedder.py.
+gpu = ["onnxruntime-gpu>=1.19", "nvidia-cudnn-cu12", "nvidia-cublas-cu12",
+       "nvidia-cuda-runtime-cu12", "nvidia-cufft-cu12", "nvidia-curand-cu12"]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.24", "ruff>=0.6"]
+
+[tool.ruff]
+line-length = 90
+target-version = "py311"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["src"]

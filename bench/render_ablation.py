@@ -146,13 +146,48 @@ def main() -> int:
         for lg in others:
             L += [f"### {lg}", "", fmt(by_lang[lg]), ""]
 
+    lo = min(pr, key=lambda r: r["recall_at_5"])
+    spread = win["recall_at_5"] - lo["recall_at_5"]
     L += [
         "## Interpretation",
         "",
         f"**{win['strategy']}** takes the top Recall@5 at **{win['recall_at_5']:.4f}** "
-        f"(MRR@10 {win['mrr_at_10']:.4f}, nDCG@10 {win['ndcg_at_10']:.4f}).",
+        f"(MRR@10 {win['mrr_at_10']:.4f}, nDCG@10 {win['ndcg_at_10']:.4f}). The worst "
+        f"arm, `{lo['strategy']}`, scores {lo['recall_at_5']:.4f} — a total spread of "
+        f"**{spread:.4f}** across every strategy tried.",
         "",
-        "_Written after the numbers landed — see the committed JSON._",
+        f"That spread is the headline result. On this corpus **chunking is close to a "
+        f"no-op**: the entire design space is worth {100 * spread:.1f} points of "
+        f"Recall@5, and the arm that wins is the one that does nothing at all. That is "
+        f"the predicted consequence of passages that are already p50 72 tokens and "
+        f"never exceed the embedding window — the dataset was built as retrieval units, "
+        f"and re-cutting them can only lose context.",
+        "",
+        "### What we gave up, and where each arm lost",
+        "",
+        "| Arm | Cost paid | What it bought |",
+        "|---|---|---|",
+        "| `hierarchical_c64` | 1.74× the chunks, 1.74× the index | nothing — worst or near-worst recall |",
+        "| `doc2query` | 2.0× the chunks, 2.0× the index | nothing measurable **but see the caveat below** |",
+        "| `late_chunk_96` | 1.19× chunks, slowest arm to build | essentially parity with the control |",
+        "| `fixed_128_o0` | fewest chunks of the splitting arms | the biggest loss — splitting 7% of passages costs real recall |",
+        "| `sentence_pack_128` | script-aware boundaries | recovers most of what `fixed_128` loses |",
+        "",
+        "### Caveats we are not hiding",
+        "",
+        "1. **The `doc2query` arm is not a fair test of doc2query.** It ran with the "
+        "lead-sentence heuristic fallback, not model-generated hypothetical questions, "
+        "because generating 3 questions for 49,611 passages was out of budget for this "
+        "run. Its result says *\"indexing the lead sentence as an extra surface does not "
+        "help\"* — it does **not** say doc2query fails. Treat the row as untested.",
+        "2. **Retrieval here is exact, not ANN.** These numbers are an upper bound that "
+        "isolates chunking; the deployed system uses HNSW and pays index error on top "
+        "(see `bench/sweep_hnsw.py`).",
+        "3. **`Retrieve p50` is exact-search latency over ~50k vectors**, not the "
+        "production number. Production retrieval is HNSW over a language partition; "
+        "Gate C reports that separately.",
+        "4. **`Embed p50` is measured on the CPU int8 session** even when the corpus was "
+        "embedded on GPU, because the Space has no GPU.",
         "",
     ]
     a.out.parent.mkdir(parents=True, exist_ok=True)

@@ -110,13 +110,12 @@ def run_arm(name, chunker, corpus_df, queries_df, embed, lang,
         for c in chunks:
             by_pid.setdefault(c.passage_id, []).append(c)
         text_of = dict(zip(corpus_df.passage_id, corpus_df.text))
-        vecs, order = [], []
-        for pid, cs in by_pid.items():
-            spans = [(c.extra.get("tok_lo", 0), c.extra.get("tok_hi", 512)) for c in cs]
-            vecs.append(embed.encode_late(text_of[pid], spans))
-            order.extend(cs)
+        pids = list(by_pid)
+        spans = [[(c.extra.get("tok_lo", 0), c.extra.get("tok_hi", 512))
+                  for c in by_pid[pid]] for pid in pids]
+        vecs = embed.encode_late_batch([text_of[p] for p in pids], spans, batch=32)
         V = np.vstack(vecs)
-        chunks = order
+        chunks = [c for pid in pids for c in by_pid[pid]]
     else:
         V = embed.encode_passages([c.text for c in chunks], batch=64)
     t_embed_corpus = (time.perf_counter_ns() - t0) / 1e6

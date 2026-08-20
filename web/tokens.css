@@ -1,0 +1,88 @@
+/* HH Goa 2026 - pre-dawn Goa. Less noise. More signal.
+   Colour carries state; nothing is coloured for decoration. */
+
+:root {
+  --hh-night:  #0B0E1A;   /* pre-dawn indigo - page base            */
+  --hh-deep:   #141A2E;   /* surface, cards, panels                 */
+  --hh-sand:   #EDE3D2;   /* primary text                           */
+  --hh-sun:    #FF9E3D;   /* sunrise amber - the single accent      */
+  --hh-coral:  #FF5F52;   /* horizon coral - over-budget, refusals  */
+  --hh-palm:   #2FBF8F;   /* palm green - grounded, verified, pass  */
+
+  --line:      #232B45;
+  --muted:     #8A93AD;
+  --dim:       #5A6484;
+
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --body: "Public Sans", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
+  --display: Archivo, "Arial Narrow", var(--body);
+
+  --r: 10px;
+  --pad: clamp(14px, 2.2vw, 22px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--hh-night);
+  color: var(--hh-sand);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Monospace is earned here - this app is mostly telemetry. */
+.mono, .num, code, pre, .pid, .stage-name { font-family: var(--mono); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* lowercase eyebrows, no exclamation marks */
+.eyebrow {
+  font-family: var(--display);
+  font-weight: 700;
+  font-stretch: expanded;
+  letter-spacing: .16em;
+  text-transform: lowercase;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.panel {
+  background: var(--hh-deep);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: var(--pad);
+}
+
+.pass { color: var(--hh-palm); }
+.fail { color: var(--hh-coral); }
+.live { color: var(--hh-sun); }
+
+/* Visible keyboard focus everywhere - unannounced quality floor. */
+:focus-visible {
+  outline: 2px solid var(--hh-sun);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The sunline still FILLS with reduced motion - it just stops animating. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}

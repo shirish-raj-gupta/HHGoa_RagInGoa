@@ -196,6 +196,43 @@ class OnnxEmbedder:
             V[idx] = self._forward([texts[j] for j in idx])
         return V
 
+    def encode_late_batch(self, passages: list[str],
+                          spans_per_passage: list[list[tuple[int, int]]],
+                          batch: int = 32) -> list[np.ndarray]:
+        """
+        Batched late chunking.
+
+        Same semantics as encode_late but amortizes the forward pass over many
+        passages. The per-passage version issues one session.run per passage,
+        which on GPU is dominated by launch overhead (49,611 launches held the
+        card at ~40% utilization); batching keeps the device busy.
+
+        Returns one (n_chunks, DIM) array per passage, in input order.
+        """
+        out: list[np.ndarray] = [None] * len(passages)          # type: ignore
+        order = sorted(range(len(passages)), key=lambda i: len(passages[i]))
+        prefix_len = len(self.tok("passage:", add_special_tokens=False)["input_ids"]) + 1
+
+        for s in range(0, len(order), batch):
+            idx = order[s:s + batch]
+            enc = self.tok([f"passage: {passages[i]}" for i in idx],
+                           padding=True, truncation=True, max_length=MAX_LEN,
+                           return_tensors="np")
+            hidden = self.session.run(None, self._feed(enc))[0]   # (B, T, DIM)
+            mask = enc["attention_mask"]
+            for row, i in enumerate(idx):
+                h, m = hidden[row], mask[row]
+                valid = int(m.sum())
+                vecs = []
+                for lo, hi in spans_per_passage[i]:
+                    seg = h[prefix_len + lo: min(prefix_len + hi, valid)]
+                    if seg.size == 0:
+                        seg = h[:valid] if valid else h
+                    vecs.append(seg.mean(0))
+                V = np.vstack(vecs).astype(np.float32)
+                out[i] = V / (np.linalg.norm(V, axis=1, keepdims=True) + 1e-9)
+        return out
+
     def encode_late(self, passage: str, spans: list[tuple[int, int]]) -> np.ndarray:
         """
         Late chunking: embed the FULL passage once, then mean-pool token
