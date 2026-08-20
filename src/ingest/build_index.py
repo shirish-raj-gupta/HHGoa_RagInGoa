@@ -49,9 +49,10 @@ def human(n: float) -> str:
 
 
 def build_language(lang: str, corpus: pd.DataFrame, embed: OnnxEmbedder,
-                   out: Path, slab: int, batch: int, gpu: bool) -> dict:
+                   out: Path, slab: int, batch: int, gpu: bool,
+                   hnsw: dict) -> dict:
     t0 = time.perf_counter()
-    part = DensePartition(lang, dim=384)
+    part = DensePartition(lang, dim=384, **hnsw)
     texts = corpus.text.tolist()
     pids = corpus.passage_id.tolist()
     n = len(texts)
@@ -112,7 +113,50 @@ def main() -> int:
                     help="0 = 16 on GPU (measured optimum), 64 on CPU")
     ap.add_argument("--force", action="store_true",
                     help="rebuild languages that already have a partition")
+    ap.add_argument("--connectivity", type=int, default=0)
+    ap.add_argument("--expansion-add", type=int, default=0)
+    ap.add_argument("--expansion-search", type=int, default=0)
     a = ap.parse_args()
+
+    # HNSW parameters come from the measured sweep (bench/sweep_hnsw.py), not
+    # from library defaults. Measured on 49,611 real e5 vectors against exact
+    # search as ground truth:
+    #
+    #   M=16 ea=128 es=64  (defaults)  recall@10 vs exact 0.9648, p50 1.03ms
+    #   M=16 ea=256 es=128             recall@10 vs exact 0.9925, p50 1.80ms
+    #
+    # The defaults are not broken, but they silently discard ~3.5% of the true
+    # top-10 for 0.8ms - a bad trade when the budget is 200ms and retrieval is
+    # single-digit ms either way. Refusing to fall back to them is deliberate:
+    # an index built on unmeasured parameters is exactly the failure this
+    # project already hit once.
+    #
+    # Production partitions are ~950k vectors, ~19x the sweep. HNSW recall
+    # degrades with scale at fixed ef, so the operating point chosen here is
+    # deliberately more conservative than the sweep's optimum, and every
+    # partition is self-retrieval checked at build time regardless.
+    hnsw: dict = {}
+    sweep = Path("bench/hnsw_sweep.json")
+    if sweep.exists():
+        ch = json.loads(sweep.read_text(encoding="utf-8")).get("chosen") or {}
+        if ch:
+            hnsw = {"connectivity": ch["M"],
+                    "expansion_add": ch["expansion_add"],
+                    "expansion_search": ch["expansion_search"]}
+            print(f"HNSW from sweep: {hnsw} "
+                  f"(recall_vs_exact={ch.get('recall_at_10_vs_exact')}, "
+                  f"self_retrieval={ch.get('self_retrieval')})")
+    for k, v in (("connectivity", a.connectivity),
+                 ("expansion_add", a.expansion_add),
+                 ("expansion_search", a.expansion_search)):
+        if v:
+            hnsw[k] = v
+    if not hnsw:
+        raise SystemExit(
+            "refusing to build with library-default HNSW parameters: they "
+            "measured 0.84 self-retrieval on real embeddings. Run "
+            "`python -m bench.sweep_hnsw` first, or pass --connectivity "
+            "--expansion-add --expansion-search explicitly.")
 
     langs = [l.strip() for l in a.langs.split(",") if l.strip()] or \
         sorted(p.name for p in a.slice.iterdir()
@@ -139,7 +183,8 @@ def main() -> int:
             continue
         corpus = pd.read_parquet(a.slice / lang / "corpus.parquet")
         print(f"[{i}/{len(langs)}] {lang}: {len(corpus):,} passages", flush=True)
-        info = build_language(lang, corpus, embed, a.out, a.slab, batch, a.gpu)
+        info = build_language(lang, corpus, embed, a.out, a.slab, batch, a.gpu,
+                              hnsw)
         manifest["languages"][lang] = info
         del corpus
         gc.collect()
