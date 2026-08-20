@@ -136,11 +136,17 @@ class CoreLoop:
         t0 = budget.elapsed_ms
         fused = rrf(dense_hits, sparse_hits, top_k=max(k_final * 4, 20))
         if fused and budget.allow_mmr():
-            vecs = {}
-            for f in fused[:20]:
-                txt = self.chunk_texts.get(f.passage_id)
-                if txt:
-                    vecs[f.passage_id] = self.embed.encode_passages([txt])[0]
+            # Read candidate vectors OUT OF THE INDEX. Re-embedding the passage
+            # text here (one forward pass per candidate) cost 260-420ms of a
+            # 200ms budget and made fuse dominate the entire loop - measured,
+            # not theorized. The vectors are already stored; this is a lookup.
+            vecs: dict = {}
+            for lg in self.dense.route(nq.lang):
+                part = self.dense.partitions[lg]
+                if not (missing := [f.passage_id for f in fused[:20]
+                                    if f.passage_id not in vecs]):
+                    break
+                vecs.update(part.get_vectors(missing))
             fused = mmr(fused, vecs, lam=0.7, k=k_final)
         else:
             fused = fused[:k_final]

@@ -31,15 +31,28 @@ class ExactPartition:
         self.V: np.ndarray | None = None
         self.chunk_ids: list[str] = []
         self.passage_ids: list[str] = []
+        self._row_of_passage: dict[str, int] = {}
 
     def add(self, vectors: np.ndarray, chunk_ids: list[str],
             passage_ids: list[str]) -> None:
+        start = len(self.chunk_ids)
         V = np.ascontiguousarray(vectors, dtype=np.float32)
         # normalize defensively; cosine == dot product only if we do
         V /= (np.linalg.norm(V, axis=1, keepdims=True) + 1e-9)
         self.V = V if self.V is None else np.vstack([self.V, V])
+        for off, pid in enumerate(passage_ids):
+            self._row_of_passage.setdefault(pid, start + off)
         self.chunk_ids.extend(chunk_ids)
         self.passage_ids.extend(passage_ids)
+
+    def get_vectors(self, passage_ids: list[str]) -> dict[str, np.ndarray]:
+        """Same contract as DensePartition.get_vectors - a memory lookup."""
+        out = {}
+        for pid in passage_ids:
+            r = self._row_of_passage.get(pid)
+            if r is not None and self.V is not None:
+                out[pid] = self.V[r]
+        return out
 
     def search(self, qvec: np.ndarray, k: int = 10,
                expansion_search: int | None = None) -> list[Hit]:

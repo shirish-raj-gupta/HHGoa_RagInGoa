@@ -68,6 +68,8 @@ class DensePartition:
         )
         self.chunk_ids: list[str] = []
         self.passage_ids: list[str] = []
+        # passage_id -> index key, so MMR can read vectors instead of re-embedding
+        self._key_of_passage: dict[str, int] = {}
 
     def add(self, vectors: np.ndarray, chunk_ids: list[str],
             passage_ids: list[str]) -> None:
@@ -76,6 +78,36 @@ class DensePartition:
         self.index.add(keys, vectors.astype(np.float32), log=False)
         self.chunk_ids.extend(chunk_ids)
         self.passage_ids.extend(passage_ids)
+        for off, pid in enumerate(passage_ids):
+            self._key_of_passage.setdefault(pid, start + off)
+
+    def get_vectors(self, passage_ids: list[str]) -> dict[str, np.ndarray]:
+        """
+        Read stored vectors back out of the index, by passage.
+
+        MMR needs candidate vectors. The orchestrator used to get them by
+        re-embedding the passage TEXT, one forward pass per candidate, on the
+        critical path - which cost 260-420ms of a 200ms budget and made the
+        fuse stage dominate the whole loop. The vectors are already in the
+        index; reading them is a memory lookup.
+
+        Vectors come back at index precision (F16), which is ample for a
+        diversity comparison.
+        """
+        keys, out = [], {}
+        for pid in passage_ids:
+            k = self._key_of_passage.get(pid)
+            if k is not None:
+                keys.append((pid, k))
+        if not keys:
+            return out
+        got = self.index.get(np.asarray([k for _, k in keys], dtype=np.uint64))
+        if got is None:
+            return out
+        arr = np.atleast_2d(np.asarray(got, dtype=np.float32))
+        for (pid, _), row in zip(keys, arr):
+            out[pid] = row
+        return out
 
     def search(self, qvec: np.ndarray, k: int = 10,
                expansion_search: int | None = None) -> list[Hit]:

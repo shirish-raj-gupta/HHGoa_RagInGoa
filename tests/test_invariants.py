@@ -234,3 +234,22 @@ def test_relevance_gate_fails_open_when_uncalibrated():
     r = ir.check_relevance(0.01, tau=None)
     assert r.passed
     assert "uncalibrated" in r.event.detail.lower()
+
+
+def test_partitions_return_stored_vectors_not_recomputed():
+    """
+    The bug: MMR obtained candidate vectors by re-embedding passage TEXT, one
+    forward pass per candidate, on the critical path. That cost 260-420ms of a
+    200ms budget and made `fuse` the dominant stage. Vectors must come back
+    from the index as a lookup.
+    """
+    rng = np.random.default_rng(3)
+    V = rng.normal(size=(50, 8)).astype(np.float32)
+    V /= np.linalg.norm(V, axis=1, keepdims=True)
+    part = ExactPartition("eng_Latn", dim=8)
+    part.add(V, [f"c{i}" for i in range(50)], [f"p{i}" for i in range(50)])
+
+    got = part.get_vectors(["p0", "p7", "p49", "p_missing"])
+    assert set(got) == {"p0", "p7", "p49"}          # unknown ids are skipped
+    for i, pid in ((0, "p0"), (7, "p7"), (49, "p49")):
+        assert float(np.dot(got[pid], V[i])) == pytest.approx(1.0, abs=1e-5)
