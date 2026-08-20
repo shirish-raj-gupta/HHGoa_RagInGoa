@@ -138,7 +138,7 @@ uvicorn src.api.app:app --port 7860
 
 GPU index builds use a separate extra (`pip install -e ".[gpu]"`). On an RTX 4050 the fp32 CUDA path runs at **1,018 passages/s** against **156/s** for int8 on 16 CPU threads — 3.9 h versus 25 h for the full 14.3M-passage build. int8 has no usable CUDA kernels and crashes the provider, so GPU builds use fp32; the two agree to 0.990 mean cosine, so the vectors are interchangeable.
 
-`SARVAM_API_KEY` and `ANTHROPIC_API_KEY` come from Space secrets. Never in code, never in the repo.
+`SARVAM_API_KEY` and `GROQ_API_KEY` come from Space secrets. Never in code, never in the repo.
 
 ---
 

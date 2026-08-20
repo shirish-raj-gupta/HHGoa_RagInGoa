@@ -25,7 +25,7 @@ RUN pip install --upgrade pip && pip install --no-cache-dir \
     "pydantic>=2.9" "httpx>=0.27" "orjson>=3.10" "pyyaml>=6.0" \
     "onnxruntime>=1.19" "transformers>=4.44" "tokenizers>=0.20" \
     "usearch>=2.12" "bm25s>=0.2" "numpy>=1.26" "scipy>=1.13" \
-    "pyarrow>=17.0" "pandas>=2.2" "huggingface_hub>=0.25" "anthropic>=0.40"
+    "pyarrow>=17.0" "pandas>=2.2" "huggingface_hub>=0.25" "groq>=1.6"
 
 COPY --chown=user src ./src
 COPY --chown=user web ./web
@@ -34,7 +34,7 @@ COPY --chown=user docs ./docs
 
 USER user
 
-# SARVAM_API_KEY and ANTHROPIC_API_KEY come from Space secrets, never the image.
+# SARVAM_API_KEY and GROQ_API_KEY come from Space secrets, never the image.
 # RAG_ARTIFACTS / RAG_SLICE point at the index pulled at boot.
 ENV RAG_ARTIFACTS=/home/user/app/artifacts \
     RAG_SLICE=/home/user/app/data/slice \

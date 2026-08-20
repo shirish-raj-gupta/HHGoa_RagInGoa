@@ -1,0 +1,52 @@
+{
+ "lang": "tam_Taml",
+ "baseline": "passage_atomic",
+ "k": 5,
+ "n_queries": 2693,
+ "n_boot": 10000,
+ "recall": {
+  "passage_atomic": 0.49684,
+  "late_chunk_96": 0.50019,
+  "sentence_pack_128": 0.48051,
+  "fixed_128_o0": 0.4482,
+  "hierarchical_c64": 0.38619
+ },
+ "vs_baseline": {
+  "late_chunk_96": {
+   "delta": 0.00334,
+   "ci95_lo": -0.00186,
+   "ci95_hi": 0.00891,
+   "p_better": 0.8705,
+   "discordant_wins": 33,
+   "discordant_losses": 24,
+   "significant": false
+  },
+  "sentence_pack_128": {
+   "delta": -0.01634,
+   "ci95_lo": -0.02451,
+   "ci95_hi": -0.00854,
+   "p_better": 0.0002,
+   "discordant_wins": 40,
+   "discordant_losses": 84,
+   "significant": true
+  },
+  "fixed_128_o0": {
+   "delta": -0.04864,
+   "ci95_lo": -0.05867,
+   "ci95_hi": -0.03899,
+   "p_better": 0.0,
+   "discordant_wins": 29,
+   "discordant_losses": 160,
+   "significant": true
+  },
+  "hierarchical_c64": {
+   "delta": -0.11066,
+   "ci95_lo": -0.12588,
+   "ci95_hi": -0.09543,
+   "p_better": 0.0,
+   "discordant_wins": 94,
+   "discordant_losses": 392,
+   "significant": true
+  }
+ }
+}

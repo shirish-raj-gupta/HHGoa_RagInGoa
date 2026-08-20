@@ -1,0 +1,52 @@
+{
+ "lang": "hin_Deva",
+ "baseline": "passage_atomic",
+ "k": 5,
+ "n_queries": 2707,
+ "n_boot": 10000,
+ "recall": {
+  "passage_atomic": 0.67824,
+  "late_chunk_96": 0.67935,
+  "sentence_pack_128": 0.67935,
+  "fixed_128_o0": 0.66753,
+  "hierarchical_c64": 0.63502
+ },
+ "vs_baseline": {
+  "late_chunk_96": {
+   "delta": 0.00111,
+   "ci95_lo": -0.00296,
+   "ci95_hi": 0.00517,
+   "p_better": 0.6709,
+   "discordant_wins": 17,
+   "discordant_losses": 14,
+   "significant": false
+  },
+  "sentence_pack_128": {
+   "delta": 0.00111,
+   "ci95_lo": -0.00443,
+   "ci95_hi": 0.00665,
+   "p_better": 0.6262,
+   "discordant_wins": 30,
+   "discordant_losses": 27,
+   "significant": false
+  },
+  "fixed_128_o0": {
+   "delta": -0.01071,
+   "ci95_lo": -0.01699,
+   "ci95_hi": -0.00443,
+   "p_better": 0.0001,
+   "discordant_wins": 22,
+   "discordant_losses": 51,
+   "significant": true
+  },
+  "hierarchical_c64": {
+   "delta": -0.04322,
+   "ci95_lo": -0.05652,
+   "ci95_hi": -0.03029,
+   "p_better": 0.0,
+   "discordant_wins": 109,
+   "discordant_losses": 226,
+   "significant": true
+  }
+ }
+}
