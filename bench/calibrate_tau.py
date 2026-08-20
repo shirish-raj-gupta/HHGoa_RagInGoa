@@ -31,7 +31,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.index.dense import DensePartition
+from src.index.exact import ExactPartition
 from src.index.embedder import OnnxEmbedder, E5Tokenizer
 from src.index.fusion import rrf
 from src.index.sparse import SparsePartition
@@ -77,20 +77,27 @@ def main() -> int:
                          "queries we are willing to answer anyway")
     ap.add_argument("--out", type=Path, default=Path("bench/tau_calibration.json"))
     ap.add_argument("--write-thresholds", action="store_true")
+    ap.add_argument("--gpu", action="store_true",
+                    help="embed on CUDA using the fp32 export")
     a = ap.parse_args()
 
     d = a.slice / a.lang
     corpus = pd.read_parquet(d / "corpus.parquet")
     queries = pd.read_parquet(d / "queries.parquet")
 
-    embed = OnnxEmbedder(ONNX_DIR / "model_int8.onnx", ONNX_DIR, threads=a.threads)
+    model = (ONNX_DIR / "fp32" / "model.onnx") if a.gpu else (ONNX_DIR / "model_int8.onnx")
+    embed = OnnxEmbedder(model, ONNX_DIR, threads=a.threads, use_gpu=a.gpu)
     print(f"[1/4] embedding {len(corpus):,} passages", flush=True)
     t0 = time.time()
-    V = embed.encode_passages(corpus.text.tolist(), batch=64)
+    V = embed.encode_passages(corpus.text.tolist(), batch=16 if a.gpu else 64)
     print(f"      {time.time()-t0:.0f}s ({len(corpus)/(time.time()-t0):.0f} psg/s)")
 
     print("[2/4] building dense + sparse", flush=True)
-    dense = DensePartition(a.lang, dim=V.shape[1])
+    # Exact, not HNSW: tau is a threshold on fused scores, and RRF scores are
+    # rank-derived, so a badly-built graph would shift every score and calibrate
+    # the gate against index error instead of relevance. The deployed HNSW is
+    # tuned to >=0.98 recall vs exact, so the scores it produces match.
+    dense = ExactPartition(a.lang, dim=V.shape[1])
     dense.add(V, corpus.passage_id.tolist(), corpus.passage_id.tolist())
     sparse = SparsePartition(a.lang)
     sparse.build(corpus.text.tolist(), corpus.passage_id.tolist())
@@ -100,7 +107,7 @@ def main() -> int:
     neg_q = queries[~queries.answerable].head(a.max_neg)
     scores: dict[str, list[float]] = {"pos": [], "neg": []}
     for tag, qs in (("pos", pos_q), ("neg", neg_q)):
-        QV = embed.encode_queries(qs["query"].tolist(), batch=64)
+        QV = embed.encode_queries(qs["query"].tolist(), batch=16 if a.gpu else 64)
         for i in range(len(qs)):
             dh = dense.search(QV[i], k=10)
             sh = sparse.search(qs["query"].iloc[i], k=10)

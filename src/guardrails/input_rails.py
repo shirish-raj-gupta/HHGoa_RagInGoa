@@ -36,6 +36,42 @@ SCRIPT_TO_LANG = {
 AMBIGUOUS_SCRIPTS = {"DEVANAGARI": ("hin_Deva", "mar_Deva", "npi_Deva", "san_Deva"),
                      "BENGALI": ("ben_Beng", "asm_Beng")}
 
+# Scripts that are definitely not in this corpus. Without these, CJK and
+# Cyrillic fell through to the eng_Latn default and were answered instead of
+# refused - caught by the red-team set (unsupported_language scored 0/2).
+UNSUPPORTED_SCRIPTS = {
+    "CJK": "zho_Hans", "HIRAGANA": "jpn_Jpan", "KATAKANA": "jpn_Jpan",
+    "HANGUL": "kor_Hang", "CYRILLIC": "rus_Cyrl", "GREEK": "ell_Grek",
+    "THAI": "tha_Thai", "HEBREW": "heb_Hebr", "ARMENIAN": "hye_Armn",
+    "GEORGIAN": "kat_Geor", "ETHIOPIC": "amh_Ethi", "KHMER": "khm_Khmr",
+    "LAO": "lao_Laoo", "MYANMAR": "mya_Mymr", "SINHALA": "sin_Sinh",
+}
+
+# Latin script is NOT a language. French/Spanish/German all read as LATIN and
+# were being answered as English - the same red-team failure. These are
+# function-word profiles: cheap, no model, and function words are exactly what
+# survives in a short spoken query. Only used to REFUSE, never to route, so a
+# false positive costs a refusal rather than a wrong-language answer.
+LATIN_STOPWORDS = {
+    "fra_Latn": {"le", "la", "les", "des", "une", "est", "quelle", "quel", "que",
+                 "qui", "dans", "pour", "avec", "sur", "vous", "je", "ne", "pas",
+                 "ce", "cette", "aux", "du", "et", "en", "il", "elle", "capitale"},
+    "spa_Latn": {"el", "los", "las", "una", "es", "qué", "cuál", "cómo", "que",
+                 "para", "con", "por", "como", "más", "pero", "su", "sus", "del",
+                 "y", "en", "un", "se", "no", "cuando"},
+    "deu_Latn": {"der", "die", "das", "und", "ist", "was", "wie", "ein", "eine",
+                 "nicht", "mit", "für", "auf", "von", "zu", "den", "dem", "sich",
+                 "auch", "werden", "hauptstadt"},
+    "por_Latn": {"o", "os", "as", "uma", "é", "que", "qual", "como", "para",
+                 "com", "por", "não", "mais", "seu", "sua", "dos", "das", "em"},
+    "ita_Latn": {"il", "lo", "gli", "una", "è", "che", "quale", "come", "per",
+                 "con", "non", "più", "suo", "sua", "dei", "delle", "nel"},
+}
+# English function words, so an English query is never mistaken for one of the above
+ENGLISH_STOPWORDS = {"the", "a", "an", "is", "are", "what", "which", "how", "who",
+                     "of", "in", "on", "for", "to", "and", "do", "does", "can",
+                     "was", "were", "with", "by", "from", "why", "when", "where"}
+
 # Sarvam BCP-47 -> FLORES-200. The dataset and the STT vendor disagree on
 # language codes; this table is the only place that knows it.
 SARVAM_TO_FLORES = {
@@ -70,18 +106,48 @@ INJECTION_RE = [re.compile(p, re.IGNORECASE | re.UNICODE) for p in INJECTION_PAT
 # PII redacted BEFORE anything is logged.
 PII_PATTERNS = {
     "email": re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+"),
-    "phone_in": re.compile(r"\b(?:\+?91[\s-]?)?[6-9]\d{9}\b"),
+    # allow separators INSIDE the number: "+91 98765 43210" was slipping past
+    # a pattern that only tolerated them after the country code
+    "phone_in": re.compile(r"(?<!\d)(?:\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}(?!\d)"),
     "aadhaar": re.compile(r"\b\d{4}\s?\d{4}\s?\d{4}\b"),
     "pan": re.compile(r"\b[A-Z]{5}\d{4}[A-Z]\b"),
     "card": re.compile(r"\b(?:\d[ -]?){13,19}\b"),
 }
 
+# Patterns are deliberately verb+object, not bare nouns: "bomb" alone would
+# refuse "who invented the atomic bomb", which is a legitimate corpus question.
+#
+# The Indic patterns are here because the red-team set caught the English-only
+# version passing "घर पर बम कैसे बनाएं" (how to make a bomb at home). An
+# English-only safety layer on an Indic-language product is not a safety layer.
 UNSAFE_CATEGORIES = {
-    "weapons": [r"\b(build|make|construct)\s+(a\s+)?(bomb|explosive|ied)\b",
-                r"\bpipe\s+bomb\b", r"\bnerve\s+agent\b"],
-    "self_harm": [r"\b(how\s+to\s+)?(kill|hurt)\s+myself\b", r"\bsuicide\s+method"],
-    "illicit": [r"\b(synthesi[sz]e|cook|manufacture)\s+(meth|fentanyl|heroin)\b"],
-    "malware": [r"\bwrite\s+(a\s+)?(ransomware|keylogger|botnet)\b"],
+    "weapons": [
+        r"\b(build|make|construct|assemble)\s+(a\s+|an\s+)?"
+        r"(bomb|explosive|ied|grenade|silencer)\b",
+        r"\bpipe\s+bomb\b", r"\bnerve\s+agent\b", r"\bnapalm\b",
+        r"\b(how|steps?|instructions?)\b.{0,30}\b(bomb|explosive|detonat)",
+        r"बम\s*(कैसे|बनान|बनाएं|बनाना)", r"विस्फोटक\s*(कैसे|बनान)",
+        r"குண்டு\s*(எப்படி|தயாரி)",
+    ],
+    "self_harm": [
+        r"\b(how\s+to\s+)?(kill|hurt|harm)\s+(myself|my\s?self)\b",
+        r"\bsuicide\s+(method|technique|way)", r"\bend\s+my\s+life\b",
+        r"आत्महत्या\s*(कैसे|करने)",
+    ],
+    "illicit": [
+        # "meth" needed the optional tail: "methamphetamine" never matched
+        r"\b(synthesi[sz]e|cook|manufacture|produce|make)\s+"
+        r"(meth(amphetamine)?|fentanyl|heroin|cocaine|lsd|mdma)\b",
+        r"\b(how|steps?|instructions?)\b.{0,40}\b(synthesi[sz]e|cook)\b"
+        r".{0,20}\b(meth(amphetamine)?|fentanyl|heroin)\b",
+        r"\bdrug\s+lab\b",
+        r"(मेथ|हेरोइन|ड्रग्स)\s*(कैसे|बनान)",
+    ],
+    "malware": [
+        r"\bwrite\s+(a\s+|an\s+)?(ransomware|keylogger|botnet|virus|trojan)\b",
+        r"\b(create|build)\s+(a\s+)?(ransomware|keylogger|botnet)\b",
+        r"\bddos\s+(attack|script)\b",
+    ],
 }
 UNSAFE_RE = {k: [re.compile(p, re.I) for p in v] for k, v in UNSAFE_CATEGORIES.items()}
 
@@ -149,6 +215,19 @@ def identify_language(text: str, stt_lang: str | None = None) -> tuple[str, floa
     alone cannot decide (Devanagari covers hi/mr/ne/sa; Bengali covers bn/as).
     """
     script = detect_script(text)
+    if script in UNSUPPORTED_SCRIPTS:
+        return UNSUPPORTED_SCRIPTS[script], 0.95
+    if script == "LATIN":
+        # disambiguate Latin script before defaulting to English
+        words = {w.strip(".,!?;:¿¡\"'").lower() for w in text.split()}
+        if words:
+            eng = len(words & ENGLISH_STOPWORDS)
+            best, hits = max(((l, len(words & sw))
+                              for l, sw in LATIN_STOPWORDS.items()),
+                             key=lambda kv: kv[1])
+            # need a clear win over English to call it a foreign language
+            if hits >= 2 and hits > eng:
+                return best, min(0.9, 0.5 + 0.1 * hits)
     if script in AMBIGUOUS_SCRIPTS:
         cands = AMBIGUOUS_SCRIPTS[script]
         if stt_lang and SARVAM_TO_FLORES.get(stt_lang) in cands:

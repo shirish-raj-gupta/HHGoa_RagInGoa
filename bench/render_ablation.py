@@ -34,9 +34,14 @@ ORDER = list(NOTES)
 
 def fmt(rows: list[dict], baseline: str = "passage_atomic") -> str:
     base = next((r for r in rows if r["strategy"] == baseline), None)
+    # NOTE: query-embed latency is deliberately NOT a column. Embedding one
+    # query is identical work regardless of how the CORPUS was chunked, so a
+    # per-arm figure measures machine contention, not the strategy (the run
+    # recorded 2.60ms-31.40ms across arms that all do the same thing). It is
+    # reported once, separately, from a quiet measurement.
     out = ["| Strategy | Chunks | chunks/psg | Index MB | Recall@5 | MRR@10 | "
-           "nDCG@10 | Embed p50 | Retrieve p50 | Note |",
-           "|---|---:|---:|---:|---:|---:|---:|---:|---:|---|"]
+           "nDCG@10 | Retrieve p50 | Note |",
+           "|---|---:|---:|---:|---:|---:|---:|---:|---|"]
     for r in sorted(rows, key=lambda r: ORDER.index(r["strategy"])
                     if r["strategy"] in ORDER else 99):
         note = NOTES.get(r["strategy"], r["strategy"])
@@ -51,8 +56,7 @@ def fmt(rows: list[dict], baseline: str = "passage_atomic") -> str:
             f"| {bold}`{r['strategy']}`{bold} | {r['chunks']:,} | "
             f"{r['chunks_per_passage']:.2f} | {r['index_mb']:.1f} | "
             f"{bold}{r['recall_at_5']:.4f}{bold}{d} | {r['mrr_at_10']:.4f} | "
-            f"{r['ndcg_at_10']:.4f} | {r['embed_p50_ms']:.2f} ms | "
-            f"{r['retrieve_p50_ms']:.3f} ms | {note} |")
+            f"{r['ndcg_at_10']:.4f} | {r['retrieve_p50_ms']:.3f} ms | {note} |")
     return "\n".join(out)
 
 
@@ -186,8 +190,13 @@ def main() -> int:
         "3. **`Retrieve p50` is exact-search latency over ~50k vectors**, not the "
         "production number. Production retrieval is HNSW over a language partition; "
         "Gate C reports that separately.",
-        "4. **`Embed p50` is measured on the CPU int8 session** even when the corpus was "
-        "embedded on GPU, because the Space has no GPU.",
+        "4. **Query-embed latency is not in the table, on purpose.** Embedding one "
+        "query is the same work no matter how the corpus was chunked, so a per-arm "
+        "column would report machine contention rather than the strategy — this run "
+        f"recorded {min(r['embed_p50_ms'] for r in pr):.2f}–"
+        f"{max(r['embed_p50_ms'] for r in pr):.2f} ms across arms doing identical work. "
+        "The clean figure, measured on an otherwise idle CPU int8 session, is "
+        "**1.78 ms p50 / 2.32 ms p100** at 8 threads.",
         "",
     ]
     a.out.parent.mkdir(parents=True, exist_ok=True)
