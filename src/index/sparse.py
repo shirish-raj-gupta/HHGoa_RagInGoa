@@ -12,6 +12,9 @@ which is 34% of this corpus by query_type (NUMERIC + ENTITY).
 """
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import re
 import unicodedata
 from dataclasses import dataclass
@@ -86,6 +89,31 @@ class SparsePartition:
                                       show_progress=False)
         return [SparseHit(self.passage_ids[int(i)], float(s), r)
                 for r, (i, s) in enumerate(zip(idx[0], sc[0]))]
+
+    # ------------------------------------------------------------ persistence
+    # Rebuilding BM25 for ~1M passages at every boot would add minutes to cold
+    # start, and a Space pays cold start on every restart. Persist it instead.
+    def save(self, path: Path) -> None:
+        path = Path(path)
+        path.mkdir(parents=True, exist_ok=True)
+        if self._bm25 is None:
+            raise RuntimeError(f"{self.lang}: nothing to save, build() first")
+        self._bm25.save(str(path), allow_pickle=True)
+        (path / "partition.json").write_text(json.dumps({
+            "lang": self.lang,
+            "passage_ids": self.passage_ids,
+            "vocab": self._vocab,
+        }), encoding="utf-8")
+
+    @classmethod
+    def load(cls, path: Path) -> "SparsePartition":
+        path = Path(path)
+        meta = json.loads((path / "partition.json").read_text(encoding="utf-8"))
+        p = cls(meta["lang"])
+        p.passage_ids = meta["passage_ids"]
+        p._vocab = meta["vocab"]
+        p._bm25 = bm25s.BM25.load(str(path), allow_pickle=True)
+        return p
 
 
 class SparseIndex:

@@ -72,7 +72,10 @@ def hits_per_query(corpus: pd.DataFrame, queries: pd.DataFrame, chunker,
         seen, rank = [], 0
         # resolve chunks to passages, best rank per passage, so an arm cannot
         # win by flooding the top-k with many chunks of one passage
-        for h in part.search(QV[i], k=k * 8):
+        # 30-candidate pool, matching bench/ablate_chunking.py exactly so the
+        # two files report the same metric. (Runs can still differ by ~1 query:
+        # GPU matmul is not bit-deterministic, so a borderline rank can flip.)
+        for h in part.search(QV[i], k=30):
             if h.passage_id not in seen:
                 seen.append(h.passage_id)
                 rank += 1
