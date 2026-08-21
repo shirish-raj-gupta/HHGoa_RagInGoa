@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import json
 import platform
 import statistics
@@ -103,7 +104,19 @@ async def main() -> int:
             print(f"  skip {lang}: no corpus")
             continue
         c = pd.read_parquet(d / "corpus.parquet")
-        V = embed.encode_passages(c.text.tolist(), batch=64)
+        # Same cache (and same key) as bench/run_redteam.py, so a benchmark run
+        # reuses vectors already computed rather than spending 16 minutes
+        # regenerating identical ones. Embedding is not what is being measured
+        # here; per-query latency is, and that is timed separately below.
+        key = hashlib.blake2b(
+            f"{lang}|{len(c)}|model_int8.onnx".encode(), digest_size=8).hexdigest()
+        cache = Path("bench/.emb_cache") / f"{key}.npy"
+        if cache.exists():
+            V = np.load(cache)
+        else:
+            V = embed.encode_passages(c.text.tolist(), batch=64)
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            np.save(cache, V)
         dense.add(lang, V, c.passage_id.tolist(), c.passage_id.tolist())
         sparse.build(lang, c.text.tolist(), c.passage_id.tolist())
         texts.update(dict(zip(c.passage_id, c.text)))
@@ -120,10 +133,10 @@ async def main() -> int:
         if sr < 0.95:
             raise SystemExit(f"index for {lang} is broken (self_retrieval={sr:.3f})")
 
+    # tau=None on purpose: the gate looks up tau_by_lang per query. A single
+    # global threshold refused 72.7% of answerable Tamil queries in the first
+    # Gate C run, so passing one here would re-introduce exactly that bug.
     tau = None
-    tj = Path("bench/tau_calibration.json")
-    if tj.exists():
-        tau = json.loads(tj.read_text(encoding="utf-8"))["chosen"]["tau"]
     loop = CoreLoop(embed, dense, sparse, tau=tau, chunk_texts=texts)
     build_ms = (time.perf_counter_ns() - t_boot) / 1e6
     print(f"  index build {build_ms/1000:.1f}s  tau={tau}")

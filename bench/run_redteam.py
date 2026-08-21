@@ -84,7 +84,7 @@ def evaluate_one(row: dict, embed, parts: dict, tau: float | None) -> dict:
             # scores sit near 2/60 and tau is ~0.89.
             top = dh[0].score if dh else 0.0
             rel = ir.check_relevance(
-                top, tau, code_switched=ir.is_code_switched(clean))
+                top, tau, code_switched=ir.is_code_switched(clean), lang=lang)
             row = {**row, "top_score": round(top, 5), "lang_detected": lang}
             if not rel.passed:
                 fired.append("relevance")
@@ -107,10 +107,11 @@ def main() -> int:
     ap.add_argument("--out", type=Path, default=Path("bench/redteam_results.json"))
     a = ap.parse_args()
 
+    # tau stays None unless explicitly overridden: check_relevance resolves
+    # tau_by_lang per query, including the languages whose gate is disabled.
     tau = a.tau
-    tj = Path("bench/tau_calibration.json")
-    if tau is None and tj.exists():
-        tau = json.loads(tj.read_text(encoding="utf-8"))["chosen"]["tau"]
+    by_lang = (ir.THRESHOLDS["relevance"].get("tau_by_lang") or {})
+    auc_by = (ir.THRESHOLDS["relevance"].get("auc_by_lang") or {})
 
     model = (ONNX_DIR / "fp32" / "model.onnx") if a.gpu else (ONNX_DIR / "model_int8.onnx")
     embed = OnnxEmbedder(model, ONNX_DIR, threads=a.threads, use_gpu=a.gpu)
@@ -176,7 +177,9 @@ def main() -> int:
     ben = [r for r in results if r["category"] in ANSWER_CATEGORIES]
     summary = {
         "tau": tau,
-        "tau_calibrated": tau is not None,
+        "tau_by_lang": by_lang,
+        "auc_by_lang": auc_by,
+        "tau_calibrated": bool(tau is not None or by_lang),
         "n_total": len(results),
         "n_adversarial": len(adv), "n_benign": len(ben),
         "block_rate": round(sum(r["refused"] for r in adv) / max(1, len(adv)), 4),
@@ -191,9 +194,15 @@ def main() -> int:
           f"({sum(r['refused'] for r in adv)}/{len(adv)} adversarial)")
     print(f"false-refusal rate  {summary['false_refusal_rate']:.3f} "
           f"({sum(r['refused'] for r in ben)}/{len(ben)} benign)")
-    if tau is None:
+    if tau is None and by_lang:
+        print("\nrelevance gate, per language:")
+        for lg in sorted(by_lang):
+            t, au = by_lang[lg], auc_by.get(lg)
+            state = f"tau={t:.5f}" if t is not None else "DISABLED (AUC below floor)"
+            print(f"  {lg:10s} {state:34s} AUC={au}")
+    elif tau is None:
         print("WARNING: tau uncalibrated - the relevance gate FAILED OPEN for "
-              "every query, so off_topic/unanswerable are expected to fail here.")
+              "every query.")
     print(f"\n{'category':24s} {'n':>3} {'refused':>8} {'correct':>8}")
     for k, v in sorted(by_cat.items()):
         print(f"  {k:22s} {v['n']:>3} {v['refused']:>8} {v['correct']:>8}")

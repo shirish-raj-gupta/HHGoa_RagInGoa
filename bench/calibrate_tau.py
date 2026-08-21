@@ -75,13 +75,20 @@ def main() -> int:
     ap.add_argument("--target-false-answer-rate", type=float, default=0.10,
                     help="operating point: max fraction of unanswerable "
                          "queries we are willing to answer anyway")
-    ap.add_argument("--out", type=Path, default=Path("bench/tau_calibration.json"))
+    ap.add_argument("--out", type=Path, default=None,
+                    help="default: bench/tau_calibration_<lang>.json")
     ap.add_argument("--write-thresholds", action="store_true")
+    ap.add_argument("--min-auc", type=float, default=0.75,
+                    help="below this the gate is left DISABLED for the language: "
+                         "a threshold on a curve that cannot discriminate refuses "
+                         "at random while looking principled")
     ap.add_argument("--conservative", action="store_true",
                     help="use --target-false-answer-rate instead of Youden J")
     ap.add_argument("--gpu", action="store_true",
                     help="embed on CUDA using the fp32 export")
     a = ap.parse_args()
+    if a.out is None:
+        a.out = Path(f"bench/tau_calibration_{a.lang}.json")
 
     d = a.slice / a.lang
     corpus = pd.read_parquet(d / "corpus.parquet")
@@ -91,7 +98,18 @@ def main() -> int:
     embed = OnnxEmbedder(model, ONNX_DIR, threads=a.threads, use_gpu=a.gpu)
     print(f"[1/4] embedding {len(corpus):,} passages", flush=True)
     t0 = time.time()
-    V = embed.encode_passages(corpus.text.tolist(), batch=16 if a.gpu else 64)
+    import hashlib
+    key = hashlib.blake2b(
+        f"{a.lang}|{len(corpus)}|model_int8.onnx".encode(), digest_size=8).hexdigest()
+    cache = Path("bench/.emb_cache") / f"{key}.npy"
+    if cache.exists() and not a.gpu:
+        V = np.load(cache)
+        print("      (cached embeddings)")
+    else:
+        V = embed.encode_passages(corpus.text.tolist(), batch=16 if a.gpu else 64)
+        if not a.gpu:
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            np.save(cache, V)
     print(f"      {time.time()-t0:.0f}s ({len(corpus)/(time.time()-t0):.0f} psg/s)")
 
     print("[2/4] building dense + sparse", flush=True)
@@ -131,7 +149,7 @@ def main() -> int:
 
     # Negatives, kept SEPARATE because they test different guardrails.
     neg_sets: dict[str, list[float]] = {}
-    oob = Path("bench/negatives.jsonl")
+    oob = Path(f"bench/negatives_{a.lang}.jsonl")
     if oob.exists():
         rows = [json.loads(l) for l in oob.read_text(encoding="utf-8").splitlines()
                 if l.strip()][:a.max_neg]
@@ -159,12 +177,27 @@ def main() -> int:
     area = auc_of(curve)
 
     # Operating point: the LOWEST tau whose false-answer rate meets target.
-    # Chosen this way round because refusing a good question is cheap (the
-    # user rephrases) while confidently answering an unanswerable one is the
-    # failure this whole gate exists to prevent.
-    feasible = [c for c in curve if c["false_answer_rate"] <= a.target_false_answer_rate]
-    chosen = min(feasible, key=lambda c: c["tau"]) if feasible else \
-        max(curve, key=lambda c: c["youden_j"])
+    # Youden J by default: the balanced point. Holding false-answers at 10%
+    # costs a 29-67% false-REFUSAL rate depending on language - refusing most
+    # answerable questions, which is an unusable product and unnecessary
+    # because the output-side groundedness rail independently catches
+    # ungrounded answers. Pass --conservative to use the target-FAR point.
+    #
+    # A HARD FLOOR on AUC, because a threshold fitted to a curve that cannot
+    # discriminate is worse than no threshold: it refuses at random and looks
+    # principled doing it. Tamil measures AUC 0.6895 (positives mean 0.8739 vs
+    # negatives 0.8605 - nearly the same distribution), so its gate is disabled
+    # and the output-side grounding rail carries that language instead.
+    chosen = max(curve, key=lambda c: c["youden_j"])
+    if a.conservative:
+        feasible = [c for c in curve
+                    if c["false_answer_rate"] <= a.target_false_answer_rate]
+        if feasible:
+            chosen = min(feasible, key=lambda c: c["tau"])
+    usable = area >= a.min_auc
+    if not usable:
+        print(f"      AUC {area:.4f} < {a.min_auc} - gate NOT usable for "
+              f"{a.lang}; leaving it disabled")
     best_j = max(curve, key=lambda c: c["youden_j"])
     best_f1 = max(curve, key=lambda c: c["f1"])
 
@@ -183,7 +216,7 @@ def main() -> int:
         "pos_mean": float(pos.mean()), "neg_mean": float(neg.mean()),
         "pos_p10": float(np.percentile(pos, 10)),
         "neg_p90": float(np.percentile(neg, 90)),
-        "auc": area, "chosen": chosen, "youden": best_j, "max_f1": best_f1,
+        "auc": area, "usable": usable, "min_auc": a.min_auc, "chosen": chosen, "youden": best_j, "max_f1": best_f1,
         "score_used": "dense_top1_cosine",
         "negative_set": primary,
         "auc_by_negative_set": all_aucs,
@@ -195,6 +228,25 @@ def main() -> int:
     print(f"wrote {a.out}")
 
     if a.write_thresholds:
+        # Per-language tau. A single global threshold calibrated on English
+        # refused 72.7% of ANSWERABLE Tamil queries in the Gate C benchmark
+        # (100% of the Tamil `description` stratum), because Tamil retrieval
+        # scores are simply lower - the cosine distribution shifts with the
+        # language, so one number cannot serve all of them.
+        import yaml as _yaml
+        tp = Path("src/guardrails/thresholds.yaml")
+        cfg = _yaml.safe_load(tp.read_text(encoding="utf-8"))
+        cfg.setdefault("relevance", {}).setdefault("tau_by_lang", {})
+        if usable:
+            cfg["relevance"]["tau_by_lang"][a.lang] = round(float(chosen["tau"]), 5)
+        else:
+            cfg["relevance"]["tau_by_lang"][a.lang] = None
+        cfg["relevance"].setdefault("auc_by_lang", {})[a.lang] = round(area, 4)
+        tp.write_text(_yaml.safe_dump(cfg, sort_keys=False, allow_unicode=True),
+                      encoding="utf-8")
+        print(f"updated {tp} -> tau_by_lang[{a.lang}]="
+              f"{format(chosen['tau'], '.5f') if usable else 'null (AUC too low)'}")
+        return 0
         p = Path("src/guardrails/thresholds.yaml")
         s = p.read_text(encoding="utf-8")
         s = s.replace("  tau: null            # SET BY bench/calibrate_tau.py"

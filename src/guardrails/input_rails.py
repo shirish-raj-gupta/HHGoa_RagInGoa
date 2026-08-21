@@ -319,7 +319,8 @@ def is_code_switched(text: str) -> bool:
 
 # ------------------------------------------------------------ relevance gate
 def check_relevance(top_score: float, tau: float | None = None,
-                    code_switched: bool = False) -> RailResult:
+                    code_switched: bool = False,
+                    lang: str | None = None) -> RailResult:
     """
     Off-topic / out-of-domain gate.
 
@@ -328,6 +329,22 @@ def check_relevance(top_score: float, tau: float | None = None,
     say so in the trace, rather than silently applying an invented constant.
     """
     cfg = THRESHOLDS["relevance"]
+    # Per-language tau. One global threshold calibrated on English refused
+    # 72.7% of ANSWERABLE Tamil queries in the Gate C benchmark - 100% of the
+    # Tamil `description` stratum - because the cosine distribution shifts with
+    # the language. A language whose entry is null has NO usable gate: its AUC
+    # was below the floor (Tamil 0.6895), and a threshold fitted to a curve
+    # that cannot discriminate refuses at random while looking principled. Those
+    # languages fail open here and lean on the output-side groundedness rail.
+    by_lang = cfg.get("tau_by_lang") or {}
+    if tau is None and lang is not None and lang in by_lang:
+        tau = by_lang[lang]
+        if tau is None:
+            return RailResult(True, _ev(
+                "relevance", True,
+                f"gate disabled for {lang} (AUC "
+                f"{(cfg.get('auc_by_lang') or {}).get(lang, '?')} below floor); "
+                f"top={top_score:.3f}", top_score))
     tau = tau if tau is not None else cfg["tau"]
     relaxed = ""
     if tau is not None and code_switched:

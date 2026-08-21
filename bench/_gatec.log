@@ -1,0 +1,23 @@
+The tokenizer you are loading from 'artifacts\e5-small-onnx' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+  eng_Latn: 49,611 passages, self_retrieval=0.995
+  hin_Deva: 49,556 passages, self_retrieval=1.000
+  tam_Taml: 49,235 passages, self_retrieval=1.000
+  index build 40.9s  tau=None
+  224 benchmark queries
+  warmup 11ms
+  rep 1/3 done
+  rep 2/3 done
+  rep 3/3 done
+
+CORE_RAG_LOOP_MS (warm)      p50=9.9  p70=10.5  p90=11.5  p95=11.9  p100=14.9
+CORE_RAG_LOOP_MS (cold)      p50=13.9  p70=14.6  p90=16.2  p95=16.7  p100=17.2
+
+stage                p50      p70      p90      p95     p100
+  dense             9.23     9.79    10.75    11.16    14.11
+  fuse              0.33     0.34     0.36     0.36     0.75
+  normalize         0.07     0.08     0.10     0.11     0.26
+  sparse            8.85     9.62    10.69    11.13    14.15
+
+over budget: 0/667  degraded: 0  refused: 108
+VERDICT: p100 14.9ms vs budget 200ms -> PASS
+wrote bench\results.json

@@ -54,29 +54,41 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--shards", type=Path, default=Path("data/shards"))
     ap.add_argument("--slice", type=Path, default=Path("data/slice"))
-    ap.add_argument("--shard-idx", type=int, default=0,
-                    help="any shard works: Eng_Query/English_passages are "
-                         "identical across all 14, they are parallel")
+    ap.add_argument("--lang", default="eng_Latn",
+                    help="build negatives in this language")
     ap.add_argument("--n", type=int, default=2000)
     ap.add_argument("--seed", type=int, default=99)
-    ap.add_argument("--out", type=Path, default=Path("bench/negatives.jsonl"))
+    ap.add_argument("--out", type=Path, default=None,
+                    help="default: bench/negatives_<lang>.jsonl")
     a = ap.parse_args()
+    if a.out is None:
+        a.out = Path(f"bench/negatives_{a.lang}.jsonl")
 
-    shard = a.shards / "default" / "validation" / f"{a.shard_idx:04d}.parquet"
+    # For English any shard works (English columns are identical across the 14
+    # parallel shards). For an Indic language we need THAT language's shard,
+    # because the translated query/passage columns are language-specific.
+    SHARD_OF = {"asm_Beng": 0, "ben_Beng": 1, "guj_Gujr": 2, "hin_Deva": 3,
+                "kan_Knda": 4, "mal_Mlym": 5, "mar_Deva": 6, "npi_Deva": 7,
+                "ory_Orya": 8, "pan_Guru": 9, "san_Deva": 10, "tam_Taml": 11,
+                "tel_Telu": 12, "urd_Arab": 13, "eng_Latn": 0}
+    idx = SHARD_OF[a.lang]
+    qcol = "Eng_Query" if a.lang == "eng_Latn" else "query"
+    pcol = "English_passages" if a.lang == "eng_Latn" else "Translated_passages"
+    acol = "Eng_Answer" if a.lang == "eng_Latn" else "Answer"
+    shard = a.shards / "default" / "validation" / f"{idx:04d}.parquet"
     if not shard.exists():
         raise SystemExit(f"missing shard {shard} - run src.ingest.fetch_shards")
 
-    corpus = pd.read_parquet(a.slice / "eng_Latn" / "corpus.parquet")
+    corpus = pd.read_parquet(a.slice / a.lang / "corpus.parquet")
     indexed = set(corpus.passage_id)
     # passage_id is a content hash in build_slice, but hash the text too so this
     # does not silently depend on that
     indexed_hashes = {chash(t) for t in corpus.text}
-    used_qids = set(pd.read_parquet(a.slice / "eng_Latn" / "queries.parquet").query_id)
+    used_qids = set(pd.read_parquet(a.slice / a.lang / "queries.parquet").query_id)
     print(f"indexed corpus: {len(corpus):,} passages, {len(used_qids):,} queries used")
 
     pf = pq.ParquetFile(shard)
-    t = pf.read(columns=["query_id", "Eng_Query", "Eng_Answer", "query_type",
-                         "passages"])
+    t = pf.read(columns=["query_id", qcol, acol, "query_type", "passages"])
     df = t.to_pandas()
     print(f"shard: {len(df):,} rows")
 
@@ -92,24 +104,24 @@ def main() -> int:
         checked += 1
         p = r["passages"]
         sel = list(p["is_selected"])
-        eng = list(p["English_passages"])
+        eng = list(p[pcol])
         gold = [eng[i] for i, s in enumerate(sel) if s]
         if not gold:
             continue                       # need a real gold to verify absence
-        ans = str(r["Eng_Answer"] or "").strip().lower()
+        ans = str(r[acol] or "").strip().lower()
         if ans == NO_ANSWER:
             continue                       # that is the OTHER guardrail's job
         # the whole point: keep only queries whose answer is genuinely absent
         if any(chash(g) in indexed_hashes for g in gold):
             rejected += 1
             continue
-        q = norm(str(r["Eng_Query"]))
+        q = norm(str(r[qcol]))
         if len(q) < 8:
             continue
         out.append({
             "id": f"oob:{int(r['query_id'])}",
             "query": q,
-            "lang": "eng_Latn",
+            "lang": a.lang,
             "query_type": r.get("query_type"),
             "category": "out_of_corpus",
             "n_gold_absent": len(gold),

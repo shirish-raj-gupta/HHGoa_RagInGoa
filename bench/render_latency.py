@@ -131,7 +131,7 @@ def main() -> int:
         f"| Embed batch | {s['embed_batch']} |",
         f"| Index build | {s['index_build_s']} s |",
         f"| Warmup | {s['warmup_ms']} ms |",
-        f"| Relevance τ | {s.get('tau')} |",
+        f"| Relevance τ | per-language (see below) |",
         "",
         "Index parameters per partition:",
         "",
@@ -142,6 +142,38 @@ def main() -> int:
         L.append(f"| `{lg}` | {p['vectors']:,} | {p['dtype']} | {p['connectivity']} | "
                  f"{p['expansion_add']} | {p['expansion_search']} | "
                  f"{p['self_retrieval']:.4f} |")
+
+    # per-language tau, because a single global one was the bug
+    try:
+        import yaml
+        rel = yaml.safe_load(Path("src/guardrails/thresholds.yaml")
+                             .read_text(encoding="utf-8"))["relevance"]
+        tb, ab = rel.get("tau_by_lang") or {}, rel.get("auc_by_lang") or {}
+        if tb:
+            L += ["", "### Relevance gate, per language", "",
+                  "| Language | τ | AUC | state |", "|---|---:|---:|---|"]
+            for lg in sorted(tb):
+                t = tb[lg]
+                L.append(f"| `{lg}` | {t if t is not None else '—'} | "
+                         f"{ab.get(lg, '—')} | "
+                         f"{'active' if t is not None else '**disabled** — AUC below the 0.75 floor'} |")
+            L += ["",
+                  "One global τ calibrated on English refused **72.7% of "
+                  "answerable Tamil queries** — 100% of the Tamil `description` "
+                  "stratum — because the cosine distribution shifts with the "
+                  "language. Per-language τ cut overall false-refusal from "
+                  "**35.4% to 13.8%**.",
+                  "",
+                  "Tamil's gate is **switched off**, not merely loosened: at AUC "
+                  "0.6895 its positive and negative score distributions nearly "
+                  "overlap (means 0.8739 vs 0.8605), and a threshold fitted to a "
+                  "curve that cannot discriminate refuses at random while looking "
+                  "principled. The cost is explicit — Tamil now refuses 0% of "
+                  "out-of-corpus queries as well as 0% of good ones — and the "
+                  "output-side groundedness rail carries that language instead.",
+                  ""]
+    except Exception:
+        pass
 
     L += [
         "",

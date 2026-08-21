@@ -186,7 +186,7 @@ class CoreLoop:
         else:
             rel = ir.check_relevance(
                 rs.relevance_score, self.tau,
-                code_switched=ir.is_code_switched(nq.text))
+                code_switched=ir.is_code_switched(nq.text), lang=nq.lang)
         guard(rel.event)
         if not rel.passed:
             trace.core_rag_loop_ms = (time.perf_counter_ns() - t_core0) / 1e6
