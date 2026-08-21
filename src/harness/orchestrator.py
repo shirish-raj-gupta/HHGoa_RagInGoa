@@ -24,7 +24,7 @@ from .budget import Budget, BudgetExceeded
 from .contracts import (ErrorKind, GuardrailEvent, NormalizedQuery, RefusalReason,
                         RetrievalSet, RetrievedChunk, StageTiming, Trace,
                         new_request_id)
-from .stage import Stage, gather_stages
+from .stage import NO_RETRY, Stage, gather_stages
 
 
 @dataclass
@@ -69,9 +69,21 @@ class CoreLoop:
 
     async def _dense(self, nq: NormalizedQuery, *, budget: Budget,
                      params: dict, **_) -> list:
+        """
+        BOTH the embedding and the search run off the event loop.
+
+        The search used to be a plain synchronous call here. At 49k vectors it
+        took 1-2ms and nothing showed; at 953k it takes 50-155ms, and while it
+        runs the event loop is blocked - so `asyncio.wait_for` in Stage.run can
+        never fire its timeout, and the "concurrent" sparse arm cannot be
+        joined. The deadline mechanism was inert at exactly the scale that
+        needs it. Measured: dense 155.7ms against an 80ms stage timeout that
+        never triggered.
+        """
         qv = await asyncio.to_thread(self.embed.encode_queries, [nq.text])
-        return self.dense.search(qv[0], nq.lang, k=params["k"],
-                                 expansion_search=params["ef_search"])
+        return await asyncio.to_thread(
+            self.dense.search, qv[0], nq.lang, params["k"],
+            expansion_search=params["ef_search"])
 
     async def _sparse(self, nq: NormalizedQuery, *, budget: Budget,
                       params: dict, **_) -> list:
@@ -124,8 +136,10 @@ class CoreLoop:
 
         stages = []
         if params["mode"] == "hybrid":
-            stages.append(Stage("dense", self._dense, timeout_ms=80, optional=True))
-        stages.append(Stage("sparse", self._sparse, timeout_ms=60, optional=True))
+            stages.append(Stage("dense", self._dense, timeout_ms=80,
+                                retry=NO_RETRY, optional=True))
+        stages.append(Stage("sparse", self._sparse, timeout_ms=60,
+                            retry=NO_RETRY, optional=True))
 
         got = await gather_stages(nq, stages, budget=budget, trace=trace,
                                   params=params)

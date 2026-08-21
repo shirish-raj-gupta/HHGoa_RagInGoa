@@ -1,0 +1,4190 @@
+{
+ "summary": {
+  "budget_ms": 200.0,
+  "hardware": {
+   "platform": "Windows-11-10.0.26200-SP0",
+   "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+   "python": "3.13.1",
+   "cpu_count": 24,
+   "cpu_physical": 16,
+   "ram_gb": 16.9
+  },
+  "threads": 8,
+  "embed_batch": 64,
+  "index_params": {
+   "asm_Beng": {
+    "vectors": 953311,
+    "dtype": "ScalarKind.F16",
+    "connectivity": 16,
+    "expansion_add": 128,
+    "expansion_search": 64,
+    "self_retrieval": 0.99
+   }
+  },
+  "source": "prebuilt_index",
+  "total_vectors": 953311,
+  "index_build_s": 4.6,
+  "warmup_ms": 43.0,
+  "tau": null,
+  "n_queries": 120,
+  "n_records": 240,
+  "CORE_RAG_LOOP_MS": {
+   "warm": {
+    "p50": 60.223,
+    "p70": 69.902,
+    "p90": 78.993,
+    "p95": 81.882,
+    "p100": 108.547,
+    "mean": 60.107,
+    "n": 230
+   },
+   "cold": {
+    "p50": 60.771,
+    "p70": 70.06,
+    "p90": 82.718,
+    "p95": 83.447,
+    "p100": 84.176,
+    "mean": 62.606,
+    "n": 10
+   }
+  },
+  "per_stage_warm": {
+   "dense": {
+    "p50": 30.294,
+    "p70": 34.547,
+    "p90": 45.863,
+    "p95": 54.083,
+    "p100": 103.304,
+    "mean": 32.992,
+    "n": 230
+   },
+   "fuse": {
+    "p50": 0.933,
+    "p70": 0.952,
+    "p90": 0.979,
+    "p95": 0.993,
+    "p100": 1.171,
+    "mean": 0.925,
+    "n": 230
+   },
+   "normalize": {
+    "p50": 0.127,
+    "p70": 0.142,
+    "p90": 0.17,
+    "p95": 0.187,
+    "p100": 1.539,
+    "mean": 0.142,
+    "n": 230
+   },
+   "sparse": {
+    "p50": 56.99,
+    "p70": 64.527,
+    "p90": 71.832,
+    "p95": 74.035,
+    "p100": 77.629,
+    "mean": 55.531,
+    "n": 230
+   }
+  },
+  "per_language_warm": {
+   "asm_Beng": {
+    "p50": 60.223,
+    "p70": 69.902,
+    "p90": 78.993,
+    "p95": 81.882,
+    "p100": 108.547,
+    "mean": 60.107,
+    "n": 230
+   }
+  },
+  "over_budget_warm": 0,
+  "degraded_warm": 0,
+  "refused_warm": 189,
+  "STT_MS": null,
+  "TTFT_MS": null,
+  "E2E_MS": null,
+  "note": "STT_MS/TTFT_MS/E2E_MS require live API keys; run with --with-generation and a network path to populate them."
+ },
+ "records": [
+  {
+   "id": "asm_Beng:numeric:307504",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "cold",
+   "core_rag_loop_ms": 84.1761,
+   "wall_ms": 84.581,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.234,
+    "dense": 71.061,
+    "sparse": 61.961,
+    "fuse": 1.057
+   }
+  },
+  {
+   "id": "asm_Beng:description:872856",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "cold",
+   "core_rag_loop_ms": 62.229,
+   "wall_ms": 62.321,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.14,
+    "dense": 31.692,
+    "sparse": 59.552,
+    "fuse": 0.986
+   }
+  },
+  {
+   "id": "asm_Beng:location:1000786",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "cold",
+   "core_rag_loop_ms": 72.7901,
+   "wall_ms": 72.879,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.144,
+    "dense": 29.766,
+    "sparse": 68.057,
+    "fuse": 0.954
+   }
+  },
+  {
+   "id": "asm_Beng:location:1085309",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "cold",
+   "core_rag_loop_ms": 68.8905,
+   "wall_ms": 68.981,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.132,
+    "dense": 31.505,
+    "sparse": 63.744,
+    "fuse": 0.908
+   }
+  },
+  {
+   "id": "asm_Beng:short:568408",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "cold",
+   "core_rag_loop_ms": 41.9869,
+   "wall_ms": 42.077,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.104,
+    "dense": 27.403,
+    "sparse": 39.457,
+    "fuse": 0.927
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:1101652",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "cold",
+   "core_rag_loop_ms": 50.0626,
+   "wall_ms": 50.148,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.124,
+    "dense": 25.354,
+    "sparse": 47.415,
+    "fuse": 1.01
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:165548",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "cold",
+   "core_rag_loop_ms": 59.3134,
+   "wall_ms": 59.401,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.138,
+    "dense": 26.549,
+    "sparse": 56.697,
+    "fuse": 0.983
+   }
+  },
+  {
+   "id": "asm_Beng:location:970140",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "cold",
+   "core_rag_loop_ms": 54.9288,
+   "wall_ms": 55.034,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.109,
+    "dense": 20.244,
+    "sparse": 52.384,
+    "fuse": 1.003
+   }
+  },
+  {
+   "id": "asm_Beng:description:852456",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "cold",
+   "core_rag_loop_ms": 49.122,
+   "wall_ms": 49.207,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.129,
+    "dense": 33.945,
+    "sparse": 46.591,
+    "fuse": 0.962
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:548680",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "cold",
+   "core_rag_loop_ms": 82.5564,
+   "wall_ms": 82.651,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.212,
+    "dense": 35.593,
+    "sparse": 75.062,
+    "fuse": 0.952
+   }
+  },
+  {
+   "id": "asm_Beng:description:1082730",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 36.2518,
+   "wall_ms": 36.342,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.141,
+    "dense": 24.959,
+    "sparse": 33.602,
+    "fuse": 0.96
+   }
+  },
+  {
+   "id": "asm_Beng:short:448975",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 36.6079,
+   "wall_ms": 36.691,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.09,
+    "dense": 24.98,
+    "sparse": 34.216,
+    "fuse": 0.928
+   }
+  },
+  {
+   "id": "asm_Beng:long:994071",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 79.3392,
+   "wall_ms": 79.421,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.26,
+    "dense": 29.21,
+    "sparse": 75.742,
+    "fuse": 0.952
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:377858",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 52.1675,
+   "wall_ms": 52.258,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.097,
+    "dense": 32.932,
+    "sparse": 47.907,
+    "fuse": 0.959
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:726171",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 55.5318,
+   "wall_ms": 55.627,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.116,
+    "dense": 31.669,
+    "sparse": 51.402,
+    "fuse": 0.974
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:110514",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 43.5598,
+   "wall_ms": 43.647,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.125,
+    "dense": 29.361,
+    "sparse": 41.03,
+    "fuse": 0.928
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:493773",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 72.932,
+   "wall_ms": 73.012,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.146,
+    "dense": 29.454,
+    "sparse": 68.992,
+    "fuse": 0.87
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:505107",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 49.3824,
+   "wall_ms": 49.462,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.128,
+    "dense": 27.574,
+    "sparse": 46.975,
+    "fuse": 0.905
+   }
+  },
+  {
+   "id": "asm_Beng:long:297830",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 66.1023,
+   "wall_ms": 66.189,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.165,
+    "dense": 30.371,
+    "sparse": 62.185,
+    "fuse": 0.961
+   }
+  },
+  {
+   "id": "asm_Beng:location:8197",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 57.148,
+   "wall_ms": 57.238,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.104,
+    "dense": 39.038,
+    "sparse": 54.653,
+    "fuse": 0.957
+   }
+  },
+  {
+   "id": "asm_Beng:short:1088360",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 46.6589,
+   "wall_ms": 46.747,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.112,
+    "dense": 34.578,
+    "sparse": 44.099,
+    "fuse": 0.932
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:94497",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 43.8778,
+   "wall_ms": 43.969,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.123,
+    "dense": 25.84,
+    "sparse": 41.407,
+    "fuse": 0.939
+   }
+  },
+  {
+   "id": "asm_Beng:location:808954",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 52.5754,
+   "wall_ms": 52.661,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.138,
+    "dense": 29.795,
+    "sparse": 50.095,
+    "fuse": 0.965
+   }
+  },
+  {
+   "id": "asm_Beng:short:1101585",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 40.1725,
+   "wall_ms": 40.255,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.109,
+    "dense": 24.919,
+    "sparse": 37.726,
+    "fuse": 0.978
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:1034270",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 56.0052,
+   "wall_ms": 56.087,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.11,
+    "dense": 27.997,
+    "sparse": 53.441,
+    "fuse": 0.948
+   }
+  },
+  {
+   "id": "asm_Beng:description:561734",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 37.2101,
+   "wall_ms": 37.292,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.099,
+    "dense": 24.852,
+    "sparse": 34.918,
+    "fuse": 0.889
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:558102",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 48.1232,
+   "wall_ms": 48.207,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.113,
+    "dense": 32.536,
+    "sparse": 45.707,
+    "fuse": 0.961
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:396178",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 68.8792,
+   "wall_ms": 68.968,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.17,
+    "dense": 31.294,
+    "sparse": 64.969,
+    "fuse": 0.917
+   }
+  },
+  {
+   "id": "asm_Beng:location:979165",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 48.6843,
+   "wall_ms": 48.777,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.121,
+    "dense": 27.764,
+    "sparse": 46.083,
+    "fuse": 0.96
+   }
+  },
+  {
+   "id": "asm_Beng:description:1050275",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 42.9232,
+   "wall_ms": 43.02,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.086,
+    "dense": 24.153,
+    "sparse": 40.418,
+    "fuse": 0.961
+   }
+  },
+  {
+   "id": "asm_Beng:long:1083340",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 70.1457,
+   "wall_ms": 70.237,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.181,
+    "dense": 45.81,
+    "sparse": 62.448,
+    "fuse": 0.932
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:75668",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 81.8625,
+   "wall_ms": 81.938,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.124,
+    "sparse": 73.684,
+    "dense": 81.338,
+    "fuse": 0.012
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:985484",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 73.9531,
+   "wall_ms": 74.038,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.158,
+    "dense": 65.564,
+    "sparse": 65.557,
+    "fuse": 0.929
+   }
+  },
+  {
+   "id": "asm_Beng:short:1071605",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 46.5085,
+   "wall_ms": 46.594,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.089,
+    "dense": 26.306,
+    "sparse": 44.077,
+    "fuse": 0.961
+   }
+  },
+  {
+   "id": "asm_Beng:location:1085708",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 41.2026,
+   "wall_ms": 41.285,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.129,
+    "dense": 24.563,
+    "sparse": 38.774,
+    "fuse": 0.914
+   }
+  },
+  {
+   "id": "asm_Beng:short:788719",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 46.2818,
+   "wall_ms": 46.364,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.099,
+    "dense": 23.775,
+    "sparse": 43.948,
+    "fuse": 0.945
+   }
+  },
+  {
+   "id": "asm_Beng:description:1058371",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 32.9289,
+   "wall_ms": 33.012,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.092,
+    "dense": 24.204,
+    "sparse": 30.366,
+    "fuse": 0.957
+   }
+  },
+  {
+   "id": "asm_Beng:description:1083923",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 44.3329,
+   "wall_ms": 44.414,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.097,
+    "dense": 19.842,
+    "sparse": 42.005,
+    "fuse": 0.967
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:1094742",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 55.5449,
+   "wall_ms": 55.628,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.103,
+    "dense": 26.84,
+    "sparse": 53.069,
+    "fuse": 0.934
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:17206",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 53.6474,
+   "wall_ms": 53.731,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.126,
+    "dense": 31.308,
+    "sparse": 51.2,
+    "fuse": 0.945
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:263012",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 59.5803,
+   "wall_ms": 59.664,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.105,
+    "dense": 21.053,
+    "sparse": 57.034,
+    "fuse": 1.014
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:711765",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 51.2353,
+   "wall_ms": 51.318,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.128,
+    "dense": 37.682,
+    "sparse": 48.678,
+    "fuse": 0.966
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:1088262",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 49.2512,
+   "wall_ms": 49.338,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.127,
+    "dense": 32.305,
+    "sparse": 46.678,
+    "fuse": 0.975
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:895503",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 59.6474,
+   "wall_ms": 59.741,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.124,
+    "dense": 28.618,
+    "sparse": 56.946,
+    "fuse": 1.009
+   }
+  },
+  {
+   "id": "asm_Beng:location:965710",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 34.9833,
+   "wall_ms": 35.073,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.094,
+    "sparse": 32.363,
+    "dense": 32.513,
+    "fuse": 1.012
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:841052",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 69.2961,
+   "wall_ms": 69.397,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.133,
+    "dense": 36.8,
+    "sparse": 64.521,
+    "fuse": 0.961
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:880307",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 55.5939,
+   "wall_ms": 55.684,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.144,
+    "dense": 33.428,
+    "sparse": 52.864,
+    "fuse": 0.996
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1047858",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 57.4996,
+   "wall_ms": 57.584,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.11,
+    "dense": 24.951,
+    "sparse": 55.079,
+    "fuse": 0.93
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:948996",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 75.9294,
+   "wall_ms": 76.02,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.154,
+    "dense": 42.381,
+    "sparse": 64.812,
+    "fuse": 0.935
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:189327",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 70.9968,
+   "wall_ms": 71.085,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.134,
+    "dense": 35.319,
+    "sparse": 65.968,
+    "fuse": 0.954
+   }
+  },
+  {
+   "id": "asm_Beng:short:1091688",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 49.0775,
+   "wall_ms": 49.161,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.113,
+    "dense": 23.568,
+    "sparse": 46.622,
+    "fuse": 0.974
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:734170",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 76.6629,
+   "wall_ms": 76.768,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.137,
+    "dense": 24.819,
+    "sparse": 71.837,
+    "fuse": 0.984
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:1091977",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 58.8896,
+   "wall_ms": 58.98,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.127,
+    "dense": 29.23,
+    "sparse": 56.391,
+    "fuse": 0.939
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:506823",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 35.3941,
+   "wall_ms": 35.48,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.109,
+    "dense": 24.068,
+    "sparse": 32.964,
+    "fuse": 0.955
+   }
+  },
+  {
+   "id": "asm_Beng:long:929117",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 75.0941,
+   "wall_ms": 75.185,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.138,
+    "dense": 25.125,
+    "sparse": 70.323,
+    "fuse": 0.914
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:1033169",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 70.6749,
+   "wall_ms": 70.762,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.146,
+    "dense": 26.483,
+    "sparse": 67.558,
+    "fuse": 0.898
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1086354",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 65.748,
+   "wall_ms": 65.831,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.14,
+    "dense": 27.292,
+    "sparse": 62.352,
+    "fuse": 0.933
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:174647",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 43.9656,
+   "wall_ms": 44.049,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.109,
+    "dense": 24.515,
+    "sparse": 41.651,
+    "fuse": 0.942
+   }
+  },
+  {
+   "id": "asm_Beng:description:861041",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 44.4684,
+   "wall_ms": 44.55,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.113,
+    "dense": 24.792,
+    "sparse": 41.949,
+    "fuse": 0.91
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:980803",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 70.2553,
+   "wall_ms": 70.34,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.126,
+    "dense": 36.524,
+    "sparse": 67.274,
+    "fuse": 0.91
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:473450",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 56.5804,
+   "wall_ms": 56.67,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.126,
+    "sparse": 54.002,
+    "dense": 54.144,
+    "fuse": 0.967
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:693521",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 40.1626,
+   "wall_ms": 40.247,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.108,
+    "dense": 37.889,
+    "sparse": 37.861,
+    "fuse": 0.946
+   }
+  },
+  {
+   "id": "asm_Beng:location:996087",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 65.7553,
+   "wall_ms": 65.839,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.116,
+    "dense": 31.635,
+    "sparse": 62.516,
+    "fuse": 0.908
+   }
+  },
+  {
+   "id": "asm_Beng:description:658574",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 72.1481,
+   "wall_ms": 72.24,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.157,
+    "dense": 18.166,
+    "sparse": 68.337,
+    "fuse": 0.952
+   }
+  },
+  {
+   "id": "asm_Beng:long:1045136",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 77.3841,
+   "wall_ms": 77.474,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.191,
+    "dense": 32.374,
+    "sparse": 73.701,
+    "fuse": 0.99
+   }
+  },
+  {
+   "id": "asm_Beng:short:1049909",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 71.3365,
+   "wall_ms": 71.426,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.106,
+    "dense": 54.286,
+    "sparse": 67.363,
+    "fuse": 0.917
+   }
+  },
+  {
+   "id": "asm_Beng:short:717777",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 51.9608,
+   "wall_ms": 52.046,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.104,
+    "dense": 39.605,
+    "sparse": 49.578,
+    "fuse": 0.928
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:276220",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 72.6072,
+   "wall_ms": 72.694,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.134,
+    "dense": 26.38,
+    "sparse": 68.789,
+    "fuse": 0.917
+   }
+  },
+  {
+   "id": "asm_Beng:long:1098693",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 73.1735,
+   "wall_ms": 73.264,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.187,
+    "dense": 42.384,
+    "sparse": 65.516,
+    "fuse": 0.938
+   }
+  },
+  {
+   "id": "asm_Beng:long:295758",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 91.4561,
+   "wall_ms": 91.558,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.155,
+    "sparse": 66.492,
+    "dense": 75.446,
+    "fuse": 0.928
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:1065121",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 75.6486,
+   "wall_ms": 75.742,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.15,
+    "dense": 30.768,
+    "sparse": 71.746,
+    "fuse": 0.962
+   }
+  },
+  {
+   "id": "asm_Beng:description:445637",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 68.9765,
+   "wall_ms": 69.066,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.155,
+    "dense": 55.084,
+    "sparse": 64.908,
+    "fuse": 0.896
+   }
+  },
+  {
+   "id": "asm_Beng:long:1063659",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 82.5997,
+   "wall_ms": 82.688,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.178,
+    "dense": 44.281,
+    "sparse": 77.422,
+    "fuse": 0.932
+   }
+  },
+  {
+   "id": "asm_Beng:long:911323",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 69.7935,
+   "wall_ms": 69.889,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.191,
+    "dense": 30.404,
+    "sparse": 64.381,
+    "fuse": 0.959
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:674573",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 74.0219,
+   "wall_ms": 74.121,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.107,
+    "dense": 53.133,
+    "sparse": 68.08,
+    "fuse": 0.859
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:439037",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 45.181,
+   "wall_ms": 45.263,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.134,
+    "dense": 27.188,
+    "sparse": 42.655,
+    "fuse": 0.97
+   }
+  },
+  {
+   "id": "asm_Beng:long:1039137",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 66.4757,
+   "wall_ms": 66.561,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.17,
+    "dense": 33.488,
+    "sparse": 61.515,
+    "fuse": 0.985
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:1101691",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 54.9128,
+   "wall_ms": 54.996,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.129,
+    "dense": 43.066,
+    "sparse": 52.434,
+    "fuse": 0.89
+   }
+  },
+  {
+   "id": "asm_Beng:long:157149",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 74.625,
+   "wall_ms": 74.72,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.154,
+    "dense": 58.386,
+    "sparse": 68.521,
+    "fuse": 0.919
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:1002475",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 71.7038,
+   "wall_ms": 71.799,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.148,
+    "dense": 36.416,
+    "sparse": 65.319,
+    "fuse": 0.999
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:1085092",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 81.8984,
+   "wall_ms": 81.995,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.151,
+    "dense": 24.082,
+    "sparse": 72.85,
+    "fuse": 0.942
+   }
+  },
+  {
+   "id": "asm_Beng:long:195826",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 77.5349,
+   "wall_ms": 77.635,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.167,
+    "dense": 43.606,
+    "sparse": 71.832,
+    "fuse": 0.911
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1079220",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 71.3894,
+   "wall_ms": 71.496,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.153,
+    "dense": 30.859,
+    "sparse": 66.763,
+    "fuse": 1.001
+   }
+  },
+  {
+   "id": "asm_Beng:long:1018505",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 80.0359,
+   "wall_ms": 80.155,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.186,
+    "dense": 26.522,
+    "sparse": 74.309,
+    "fuse": 0.905
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:337671",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 81.055,
+   "wall_ms": 81.17,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.173,
+    "dense": 40.409,
+    "sparse": 75.443,
+    "fuse": 0.93
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1087004",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 62.128,
+   "wall_ms": 62.217,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.139,
+    "dense": 20.54,
+    "sparse": 59.603,
+    "fuse": 0.947
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:647909",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 49.4508,
+   "wall_ms": 49.537,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.105,
+    "dense": 21.077,
+    "sparse": 46.905,
+    "fuse": 0.989
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:121473",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 49.7357,
+   "wall_ms": 49.822,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.132,
+    "dense": 24.773,
+    "sparse": 47.221,
+    "fuse": 0.986
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1030803",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 65.436,
+   "wall_ms": 65.525,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.114,
+    "dense": 47.721,
+    "sparse": 60.966,
+    "fuse": 0.927
+   }
+  },
+  {
+   "id": "asm_Beng:short:1090718",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 32.0696,
+   "wall_ms": 32.156,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.11,
+    "dense": 29.711,
+    "sparse": 29.676,
+    "fuse": 0.946
+   }
+  },
+  {
+   "id": "asm_Beng:short:129756",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 35.652,
+   "wall_ms": 35.736,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.088,
+    "dense": 27.34,
+    "sparse": 33.355,
+    "fuse": 0.927
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:495254",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 49.514,
+   "wall_ms": 49.601,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.142,
+    "dense": 21.02,
+    "sparse": 46.955,
+    "fuse": 0.932
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:367193",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 45.2011,
+   "wall_ms": 45.285,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.123,
+    "dense": 34.222,
+    "sparse": 42.651,
+    "fuse": 0.978
+   }
+  },
+  {
+   "id": "asm_Beng:location:1085351",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 65.2709,
+   "wall_ms": 65.358,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.149,
+    "dense": 30.058,
+    "sparse": 61.57,
+    "fuse": 0.917
+   }
+  },
+  {
+   "id": "asm_Beng:short:745764",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 51.5706,
+   "wall_ms": 51.662,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.118,
+    "dense": 32.909,
+    "sparse": 49.044,
+    "fuse": 0.964
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:816215",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 59.6902,
+   "wall_ms": 59.775,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.134,
+    "dense": 23.258,
+    "sparse": 57.211,
+    "fuse": 1.001
+   }
+  },
+  {
+   "id": "asm_Beng:short:478790",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 42.9943,
+   "wall_ms": 43.091,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.083,
+    "dense": 25.234,
+    "sparse": 40.742,
+    "fuse": 0.91
+   }
+  },
+  {
+   "id": "asm_Beng:location:997492",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 52.2651,
+   "wall_ms": 52.352,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.111,
+    "dense": 25.704,
+    "sparse": 49.754,
+    "fuse": 0.953
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:185225",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 42.232,
+   "wall_ms": 42.312,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.108,
+    "dense": 25.548,
+    "sparse": 39.831,
+    "fuse": 0.949
+   }
+  },
+  {
+   "id": "asm_Beng:description:24979",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 54.7273,
+   "wall_ms": 54.823,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.104,
+    "dense": 19.776,
+    "sparse": 52.347,
+    "fuse": 0.93
+   }
+  },
+  {
+   "id": "asm_Beng:long:248585",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 77.6376,
+   "wall_ms": 77.726,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.148,
+    "dense": 23.939,
+    "sparse": 72.788,
+    "fuse": 0.918
+   }
+  },
+  {
+   "id": "asm_Beng:location:1085706",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 51.3571,
+   "wall_ms": 51.446,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.123,
+    "dense": 28.187,
+    "sparse": 48.921,
+    "fuse": 0.932
+   }
+  },
+  {
+   "id": "asm_Beng:short:746569",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 45.8148,
+   "wall_ms": 45.9,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.095,
+    "dense": 19.868,
+    "sparse": 43.319,
+    "fuse": 0.967
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1018893",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 69.7599,
+   "wall_ms": 69.851,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.154,
+    "dense": 21.645,
+    "sparse": 66.181,
+    "fuse": 0.918
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:359880",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 44.8583,
+   "wall_ms": 44.946,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.109,
+    "dense": 25.293,
+    "sparse": 42.431,
+    "fuse": 0.933
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1016616",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 69.0617,
+   "wall_ms": 69.149,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.165,
+    "dense": 27.687,
+    "sparse": 64.263,
+    "fuse": 0.906
+   }
+  },
+  {
+   "id": "asm_Beng:location:993481",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 46.6206,
+   "wall_ms": 46.71,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.099,
+    "dense": 32.557,
+    "sparse": 44.07,
+    "fuse": 0.945
+   }
+  },
+  {
+   "id": "asm_Beng:description:743153",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 52.7759,
+   "wall_ms": 52.862,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.109,
+    "dense": 29.43,
+    "sparse": 50.293,
+    "fuse": 0.962
+   }
+  },
+  {
+   "id": "asm_Beng:location:1080780",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 71.4916,
+   "wall_ms": 71.577,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.13,
+    "dense": 33.387,
+    "sparse": 67.837,
+    "fuse": 0.889
+   }
+  },
+  {
+   "id": "asm_Beng:description:625762",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 54.7367,
+   "wall_ms": 54.822,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.103,
+    "dense": 31.851,
+    "sparse": 52.316,
+    "fuse": 0.929
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:662041",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 70.0047,
+   "wall_ms": 70.093,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.152,
+    "dense": 26.92,
+    "sparse": 65.432,
+    "fuse": 0.924
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:959034",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 65.6506,
+   "wall_ms": 65.744,
+   "refused": true,
+   "refusal_reason": "off_topic",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.114,
+    "dense": 27.083,
+    "sparse": 60.316,
+    "fuse": 0.965
+   }
+  },
+  {
+   "id": "asm_Beng:long:927603",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 58.5099,
+   "wall_ms": 58.596,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.162,
+    "dense": 21.102,
+    "sparse": 55.953,
+    "fuse": 0.982
+   }
+  },
+  {
+   "id": "asm_Beng:short:786531",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 33.6993,
+   "wall_ms": 33.782,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.1,
+    "dense": 23.483,
+    "sparse": 31.271,
+    "fuse": 0.98
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:1091474",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 46.9631,
+   "wall_ms": 47.052,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.115,
+    "dense": 23.13,
+    "sparse": 44.442,
+    "fuse": 0.957
+   }
+  },
+  {
+   "id": "asm_Beng:description:911402",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 108.5473,
+   "wall_ms": 108.638,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 1.539,
+    "sparse": 64.441,
+    "dense": 103.304,
+    "fuse": 0.026
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:987183",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 80.5042,
+   "wall_ms": 80.617,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.171,
+    "dense": 47.416,
+    "sparse": 71.629,
+    "fuse": 0.979
+   }
+  },
+  {
+   "id": "asm_Beng:location:841726",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 74.7718,
+   "wall_ms": 74.864,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.12,
+    "dense": 34.856,
+    "sparse": 63.588,
+    "fuse": 0.941
+   }
+  },
+  {
+   "id": "asm_Beng:description:413760",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 74.8979,
+   "wall_ms": 74.99,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.123,
+    "dense": 37.966,
+    "sparse": 68.195,
+    "fuse": 0.931
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:888260",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 82.1479,
+   "wall_ms": 82.251,
+   "refused": true,
+   "refusal_reason": "off_topic",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.156,
+    "dense": 51.706,
+    "sparse": 70.592,
+    "fuse": 0.903
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:307504",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 78.1081,
+   "wall_ms": 78.209,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.215,
+    "dense": 38.624,
+    "sparse": 66.582,
+    "fuse": 0.892
+   }
+  },
+  {
+   "id": "asm_Beng:description:872856",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 74.2549,
+   "wall_ms": 74.35,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.127,
+    "dense": 33.656,
+    "sparse": 63.956,
+    "fuse": 0.845
+   }
+  },
+  {
+   "id": "asm_Beng:location:1000786",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 88.5183,
+   "wall_ms": 88.613,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.146,
+    "dense": 52.057,
+    "sparse": 72.083,
+    "fuse": 0.959
+   }
+  },
+  {
+   "id": "asm_Beng:location:1085309",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 82.8666,
+   "wall_ms": 82.952,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.131,
+    "dense": 34.416,
+    "sparse": 77.629,
+    "fuse": 0.872
+   }
+  },
+  {
+   "id": "asm_Beng:short:568408",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 46.8463,
+   "wall_ms": 46.936,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.095,
+    "dense": 21.197,
+    "sparse": 43.15,
+    "fuse": 0.94
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:1101652",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 68.4695,
+   "wall_ms": 68.56,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.128,
+    "dense": 46.337,
+    "sparse": 61.669,
+    "fuse": 0.86
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:165548",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 69.8577,
+   "wall_ms": 69.948,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.136,
+    "dense": 60.981,
+    "sparse": 60.946,
+    "fuse": 0.895
+   }
+  },
+  {
+   "id": "asm_Beng:location:970140",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 79.5716,
+   "wall_ms": 79.664,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.116,
+    "dense": 32.529,
+    "sparse": 71.404,
+    "fuse": 0.904
+   }
+  },
+  {
+   "id": "asm_Beng:description:852456",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 67.463,
+   "wall_ms": 67.557,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.126,
+    "dense": 34.534,
+    "sparse": 61.216,
+    "fuse": 0.88
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:548680",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 84.462,
+   "wall_ms": 84.555,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.199,
+    "dense": 44.034,
+    "sparse": 64.347,
+    "fuse": 0.951
+   }
+  },
+  {
+   "id": "asm_Beng:description:1082730",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 63.1424,
+   "wall_ms": 63.233,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.12,
+    "dense": 37.043,
+    "sparse": 57.911,
+    "fuse": 0.947
+   }
+  },
+  {
+   "id": "asm_Beng:short:448975",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 43.3328,
+   "wall_ms": 43.419,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.094,
+    "dense": 35.523,
+    "sparse": 39.253,
+    "fuse": 1.029
+   }
+  },
+  {
+   "id": "asm_Beng:long:994071",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 88.9586,
+   "wall_ms": 89.044,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.26,
+    "dense": 37.933,
+    "sparse": 76.387,
+    "fuse": 0.917
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:377858",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 74.9002,
+   "wall_ms": 74.999,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.098,
+    "dense": 44.687,
+    "sparse": 61.106,
+    "fuse": 0.969
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:726171",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 80.4728,
+   "wall_ms": 80.569,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.121,
+    "dense": 54.792,
+    "sparse": 68.598,
+    "fuse": 0.933
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:110514",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 52.2481,
+   "wall_ms": 52.34,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.124,
+    "dense": 31.681,
+    "sparse": 46.265,
+    "fuse": 0.955
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:493773",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 78.9544,
+   "wall_ms": 79.049,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.151,
+    "dense": 26.371,
+    "sparse": 73.138,
+    "fuse": 0.943
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:505107",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 69.5604,
+   "wall_ms": 69.652,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.14,
+    "dense": 36.154,
+    "sparse": 61.62,
+    "fuse": 0.887
+   }
+  },
+  {
+   "id": "asm_Beng:long:297830",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 72.0179,
+   "wall_ms": 72.112,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.166,
+    "dense": 49.901,
+    "sparse": 64.744,
+    "fuse": 0.905
+   }
+  },
+  {
+   "id": "asm_Beng:location:8197",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 67.4954,
+   "wall_ms": 67.588,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.127,
+    "dense": 41.43,
+    "sparse": 61.255,
+    "fuse": 0.907
+   }
+  },
+  {
+   "id": "asm_Beng:short:1088360",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 46.4357,
+   "wall_ms": 46.528,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.106,
+    "dense": 28.6,
+    "sparse": 42.656,
+    "fuse": 0.963
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:94497",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 61.762,
+   "wall_ms": 61.851,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.127,
+    "dense": 36.079,
+    "sparse": 56.515,
+    "fuse": 0.915
+   }
+  },
+  {
+   "id": "asm_Beng:location:808954",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 69.15,
+   "wall_ms": 69.235,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.128,
+    "dense": 30.557,
+    "sparse": 65.475,
+    "fuse": 0.895
+   }
+  },
+  {
+   "id": "asm_Beng:short:1101585",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 56.5464,
+   "wall_ms": 56.631,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.109,
+    "dense": 49.116,
+    "sparse": 52.614,
+    "fuse": 0.911
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:1034270",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 68.8602,
+   "wall_ms": 68.945,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.112,
+    "dense": 54.008,
+    "sparse": 64.587,
+    "fuse": 0.894
+   }
+  },
+  {
+   "id": "asm_Beng:description:561734",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 60.0796,
+   "wall_ms": 60.167,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.098,
+    "dense": 33.227,
+    "sparse": 54.44,
+    "fuse": 0.92
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:558102",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 68.8859,
+   "wall_ms": 68.975,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.12,
+    "dense": 39.721,
+    "sparse": 60.633,
+    "fuse": 0.878
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:396178",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 76.0583,
+   "wall_ms": 76.154,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.167,
+    "dense": 31.804,
+    "sparse": 65.618,
+    "fuse": 0.91
+   }
+  },
+  {
+   "id": "asm_Beng:location:979165",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 62.1558,
+   "wall_ms": 62.247,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.126,
+    "dense": 33.717,
+    "sparse": 56.231,
+    "fuse": 0.971
+   }
+  },
+  {
+   "id": "asm_Beng:description:1050275",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 52.8734,
+   "wall_ms": 52.961,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.084,
+    "dense": 29.164,
+    "sparse": 47.797,
+    "fuse": 0.94
+   }
+  },
+  {
+   "id": "asm_Beng:long:1083340",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 73.8187,
+   "wall_ms": 73.907,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.179,
+    "dense": 55.09,
+    "sparse": 63.329,
+    "fuse": 0.947
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:75668",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 92.2083,
+   "wall_ms": 92.306,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.122,
+    "dense": 50.436,
+    "sparse": 67.597,
+    "fuse": 0.921
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:985484",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 71.5432,
+   "wall_ms": 71.636,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.144,
+    "dense": 31.562,
+    "sparse": 68.425,
+    "fuse": 0.908
+   }
+  },
+  {
+   "id": "asm_Beng:short:1071605",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 39.6942,
+   "wall_ms": 39.779,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.087,
+    "dense": 30.217,
+    "sparse": 37.343,
+    "fuse": 0.922
+   }
+  },
+  {
+   "id": "asm_Beng:location:1085708",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 35.5016,
+   "wall_ms": 35.585,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.115,
+    "sparse": 33.019,
+    "dense": 33.154,
+    "fuse": 0.9
+   }
+  },
+  {
+   "id": "asm_Beng:short:788719",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 41.6241,
+   "wall_ms": 41.712,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.1,
+    "dense": 24.286,
+    "sparse": 39.293,
+    "fuse": 0.906
+   }
+  },
+  {
+   "id": "asm_Beng:description:1058371",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 33.055,
+   "wall_ms": 33.139,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.096,
+    "dense": 24.133,
+    "sparse": 30.642,
+    "fuse": 0.944
+   }
+  },
+  {
+   "id": "asm_Beng:description:1083923",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 43.4013,
+   "wall_ms": 43.482,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.109,
+    "dense": 25.661,
+    "sparse": 41.144,
+    "fuse": 0.915
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:1094742",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 45.5451,
+   "wall_ms": 45.634,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.103,
+    "dense": 30.991,
+    "sparse": 43.041,
+    "fuse": 0.928
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:17206",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 55.0386,
+   "wall_ms": 55.126,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.13,
+    "dense": 26.318,
+    "sparse": 52.505,
+    "fuse": 0.965
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:263012",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 57.7949,
+   "wall_ms": 57.878,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.108,
+    "dense": 25.894,
+    "sparse": 55.26,
+    "fuse": 0.917
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:711765",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 45.919,
+   "wall_ms": 46.0,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.126,
+    "dense": 30.43,
+    "sparse": 43.428,
+    "fuse": 0.954
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:1088262",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 53.609,
+   "wall_ms": 53.691,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.108,
+    "dense": 28.121,
+    "sparse": 51.156,
+    "fuse": 0.935
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:895503",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 55.6259,
+   "wall_ms": 55.711,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.135,
+    "dense": 24.061,
+    "sparse": 53.034,
+    "fuse": 0.985
+   }
+  },
+  {
+   "id": "asm_Beng:location:965710",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 33.7826,
+   "wall_ms": 33.867,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.091,
+    "dense": 24.623,
+    "sparse": 31.434,
+    "fuse": 0.946
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:841052",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 67.0684,
+   "wall_ms": 67.153,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.125,
+    "dense": 26.024,
+    "sparse": 64.542,
+    "fuse": 0.895
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:880307",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 54.2869,
+   "wall_ms": 54.368,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.139,
+    "dense": 26.211,
+    "sparse": 51.77,
+    "fuse": 0.947
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1047858",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 54.5832,
+   "wall_ms": 54.669,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.104,
+    "dense": 26.062,
+    "sparse": 52.067,
+    "fuse": 0.953
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:948996",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 72.9495,
+   "wall_ms": 73.037,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.155,
+    "dense": 19.683,
+    "sparse": 69.564,
+    "fuse": 0.898
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:189327",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 66.3379,
+   "wall_ms": 66.422,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.127,
+    "dense": 45.335,
+    "sparse": 63.697,
+    "fuse": 0.913
+   }
+  },
+  {
+   "id": "asm_Beng:short:1091688",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 44.0328,
+   "wall_ms": 44.117,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.115,
+    "dense": 33.715,
+    "sparse": 41.637,
+    "fuse": 0.929
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:734170",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 75.612,
+   "wall_ms": 75.697,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.139,
+    "dense": 21.857,
+    "sparse": 72.107,
+    "fuse": 0.895
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:1091977",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 46.7244,
+   "wall_ms": 46.811,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.107,
+    "dense": 36.825,
+    "sparse": 44.258,
+    "fuse": 0.951
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:506823",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 37.2514,
+   "wall_ms": 37.333,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.109,
+    "sparse": 30.588,
+    "dense": 34.976,
+    "fuse": 0.901
+   }
+  },
+  {
+   "id": "asm_Beng:long:929117",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 70.3813,
+   "wall_ms": 70.459,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.139,
+    "dense": 23.179,
+    "sparse": 67.923,
+    "fuse": 0.884
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:1033169",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 63.6296,
+   "wall_ms": 63.71,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.134,
+    "dense": 25.366,
+    "sparse": 60.271,
+    "fuse": 0.936
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1086354",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 69.693,
+   "wall_ms": 69.776,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.128,
+    "dense": 35.696,
+    "sparse": 67.247,
+    "fuse": 0.876
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:174647",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 48.3987,
+   "wall_ms": 48.483,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.105,
+    "dense": 31.776,
+    "sparse": 46.11,
+    "fuse": 0.931
+   }
+  },
+  {
+   "id": "asm_Beng:description:861041",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 50.7938,
+   "wall_ms": 50.876,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.109,
+    "dense": 29.576,
+    "sparse": 48.358,
+    "fuse": 0.909
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:980803",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 64.6622,
+   "wall_ms": 64.748,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.131,
+    "dense": 28.574,
+    "sparse": 61.972,
+    "fuse": 0.985
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:473450",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 60.3671,
+   "wall_ms": 60.455,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.144,
+    "dense": 38.959,
+    "sparse": 57.854,
+    "fuse": 0.92
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:693521",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 33.8561,
+   "wall_ms": 33.938,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.101,
+    "dense": 23.299,
+    "sparse": 31.516,
+    "fuse": 0.931
+   }
+  },
+  {
+   "id": "asm_Beng:location:996087",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 62.5674,
+   "wall_ms": 62.662,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.113,
+    "dense": 24.667,
+    "sparse": 60.151,
+    "fuse": 0.913
+   }
+  },
+  {
+   "id": "asm_Beng:description:658574",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 71.0142,
+   "wall_ms": 71.095,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.152,
+    "dense": 38.043,
+    "sparse": 68.561,
+    "fuse": 0.946
+   }
+  },
+  {
+   "id": "asm_Beng:long:1045136",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 67.8513,
+   "wall_ms": 67.932,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.19,
+    "dense": 32.089,
+    "sparse": 63.751,
+    "fuse": 0.969
+   }
+  },
+  {
+   "id": "asm_Beng:short:1049909",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 54.6057,
+   "wall_ms": 54.691,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.096,
+    "dense": 24.312,
+    "sparse": 51.126,
+    "fuse": 0.91
+   }
+  },
+  {
+   "id": "asm_Beng:short:717777",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 45.7027,
+   "wall_ms": 45.789,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.098,
+    "dense": 33.209,
+    "sparse": 43.226,
+    "fuse": 0.963
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:276220",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 68.5638,
+   "wall_ms": 68.669,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.137,
+    "dense": 27.432,
+    "sparse": 65.85,
+    "fuse": 0.945
+   }
+  },
+  {
+   "id": "asm_Beng:long:1098693",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 79.9672,
+   "wall_ms": 80.053,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.18,
+    "dense": 44.463,
+    "sparse": 75.983,
+    "fuse": 0.938
+   }
+  },
+  {
+   "id": "asm_Beng:long:295758",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 79.4835,
+   "wall_ms": 79.574,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.16,
+    "dense": 36.621,
+    "sparse": 74.9,
+    "fuse": 0.929
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:1065121",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 76.3649,
+   "wall_ms": 76.456,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.143,
+    "dense": 48.117,
+    "sparse": 72.495,
+    "fuse": 0.918
+   }
+  },
+  {
+   "id": "asm_Beng:description:445637",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 61.0122,
+   "wall_ms": 61.094,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.146,
+    "dense": 32.389,
+    "sparse": 58.411,
+    "fuse": 1.018
+   }
+  },
+  {
+   "id": "asm_Beng:long:1063659",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 73.1949,
+   "wall_ms": 73.275,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.175,
+    "dense": 34.998,
+    "sparse": 70.726,
+    "fuse": 0.899
+   }
+  },
+  {
+   "id": "asm_Beng:long:911323",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 68.1231,
+   "wall_ms": 68.208,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.189,
+    "dense": 29.029,
+    "sparse": 64.149,
+    "fuse": 0.932
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:674573",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 44.5624,
+   "wall_ms": 44.654,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.101,
+    "dense": 19.981,
+    "sparse": 39.071,
+    "fuse": 0.98
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:439037",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 41.2738,
+   "wall_ms": 41.356,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.132,
+    "dense": 23.119,
+    "sparse": 38.732,
+    "fuse": 0.921
+   }
+  },
+  {
+   "id": "asm_Beng:long:1039137",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 68.9895,
+   "wall_ms": 69.072,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.171,
+    "dense": 34.075,
+    "sparse": 66.254,
+    "fuse": 1.012
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:1101691",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 50.6001,
+   "wall_ms": 50.685,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.131,
+    "dense": 27.652,
+    "sparse": 48.01,
+    "fuse": 0.94
+   }
+  },
+  {
+   "id": "asm_Beng:long:157149",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 73.1093,
+   "wall_ms": 73.192,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.203,
+    "dense": 25.113,
+    "sparse": 70.478,
+    "fuse": 0.884
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:1002475",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 66.4854,
+   "wall_ms": 66.573,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.142,
+    "dense": 30.004,
+    "sparse": 63.861,
+    "fuse": 0.936
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:1085092",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 77.203,
+   "wall_ms": 77.293,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.161,
+    "dense": 24.247,
+    "sparse": 72.832,
+    "fuse": 0.904
+   }
+  },
+  {
+   "id": "asm_Beng:long:195826",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 74.5527,
+   "wall_ms": 74.641,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.168,
+    "dense": 31.489,
+    "sparse": 71.4,
+    "fuse": 0.902
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1079220",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 80.2833,
+   "wall_ms": 80.372,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.142,
+    "dense": 40.672,
+    "sparse": 74.551,
+    "fuse": 0.937
+   }
+  },
+  {
+   "id": "asm_Beng:long:1018505",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 78.9342,
+   "wall_ms": 79.031,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.184,
+    "dense": 32.504,
+    "sparse": 74.631,
+    "fuse": 0.893
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:337671",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 79.4769,
+   "wall_ms": 79.564,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.178,
+    "dense": 34.355,
+    "sparse": 76.174,
+    "fuse": 0.923
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1087004",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 59.2188,
+   "wall_ms": 59.315,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.133,
+    "dense": 29.021,
+    "sparse": 55.062,
+    "fuse": 0.99
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:647909",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 44.6893,
+   "wall_ms": 44.773,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.107,
+    "dense": 26.164,
+    "sparse": 42.258,
+    "fuse": 0.956
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:121473",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 43.856,
+   "wall_ms": 43.942,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.124,
+    "sparse": 39.898,
+    "dense": 41.543,
+    "fuse": 0.907
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1030803",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 60.7408,
+   "wall_ms": 60.827,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.123,
+    "dense": 25.378,
+    "sparse": 58.304,
+    "fuse": 0.943
+   }
+  },
+  {
+   "id": "asm_Beng:short:1090718",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 32.2386,
+   "wall_ms": 32.323,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.109,
+    "sparse": 28.843,
+    "dense": 29.973,
+    "fuse": 0.931
+   }
+  },
+  {
+   "id": "asm_Beng:short:129756",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 31.0294,
+   "wall_ms": 31.135,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.079,
+    "dense": 24.357,
+    "sparse": 28.77,
+    "fuse": 0.931
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:495254",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 47.6198,
+   "wall_ms": 47.703,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.138,
+    "dense": 24.477,
+    "sparse": 45.158,
+    "fuse": 0.933
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:367193",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 37.7297,
+   "wall_ms": 37.81,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.123,
+    "dense": 29.939,
+    "sparse": 35.305,
+    "fuse": 0.937
+   }
+  },
+  {
+   "id": "asm_Beng:location:1085351",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 65.808,
+   "wall_ms": 65.887,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.142,
+    "dense": 23.778,
+    "sparse": 63.315,
+    "fuse": 0.891
+   }
+  },
+  {
+   "id": "asm_Beng:short:745764",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 49.4172,
+   "wall_ms": 49.499,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 0.107,
+    "dense": 20.333,
+    "sparse": 47.039,
+    "fuse": 0.927
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:816215",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 57.3779,
+   "wall_ms": 57.461,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.127,
+    "dense": 37.732,
+    "sparse": 54.886,
+    "fuse": 0.938
+   }
+  },
+  {
+   "id": "asm_Beng:short:478790",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 41.7119,
+   "wall_ms": 41.797,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.081,
+    "dense": 22.211,
+    "sparse": 39.378,
+    "fuse": 0.908
+   }
+  },
+  {
+   "id": "asm_Beng:location:997492",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 59.2926,
+   "wall_ms": 59.381,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.111,
+    "dense": 26.223,
+    "sparse": 56.823,
+    "fuse": 0.913
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:185225",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 43.6787,
+   "wall_ms": 43.761,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.11,
+    "dense": 31.453,
+    "sparse": 41.239,
+    "fuse": 0.952
+   }
+  },
+  {
+   "id": "asm_Beng:description:24979",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 49.991,
+   "wall_ms": 50.075,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.115,
+    "dense": 43.979,
+    "sparse": 47.527,
+    "fuse": 0.97
+   }
+  },
+  {
+   "id": "asm_Beng:long:248585",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 66.9152,
+   "wall_ms": 67.01,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.158,
+    "dense": 40.438,
+    "sparse": 62.12,
+    "fuse": 0.903
+   }
+  },
+  {
+   "id": "asm_Beng:location:1085706",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 47.6799,
+   "wall_ms": 47.771,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.111,
+    "dense": 27.126,
+    "sparse": 45.123,
+    "fuse": 1.002
+   }
+  },
+  {
+   "id": "asm_Beng:short:746569",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 40.3633,
+   "wall_ms": 40.45,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.116,
+    "dense": 23.318,
+    "sparse": 37.81,
+    "fuse": 0.95
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1018893",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 65.2549,
+   "wall_ms": 65.344,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.156,
+    "dense": 34.612,
+    "sparse": 61.194,
+    "fuse": 0.954
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:359880",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 43.4429,
+   "wall_ms": 43.526,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.11,
+    "dense": 31.266,
+    "sparse": 41.01,
+    "fuse": 0.928
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:1016616",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 64.4603,
+   "wall_ms": 64.546,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.166,
+    "dense": 29.197,
+    "sparse": 60.185,
+    "fuse": 0.943
+   }
+  },
+  {
+   "id": "asm_Beng:location:993481",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 46.0977,
+   "wall_ms": 46.181,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.096,
+    "dense": 33.127,
+    "sparse": 43.663,
+    "fuse": 0.943
+   }
+  },
+  {
+   "id": "asm_Beng:description:743153",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 49.9889,
+   "wall_ms": 50.072,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.122,
+    "dense": 27.456,
+    "sparse": 47.514,
+    "fuse": 0.967
+   }
+  },
+  {
+   "id": "asm_Beng:location:1080780",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 64.0654,
+   "wall_ms": 64.151,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.131,
+    "dense": 29.985,
+    "sparse": 61.522,
+    "fuse": 0.889
+   }
+  },
+  {
+   "id": "asm_Beng:description:625762",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 50.2827,
+   "wall_ms": 50.365,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.105,
+    "dense": 20.475,
+    "sparse": 47.889,
+    "fuse": 0.922
+   }
+  },
+  {
+   "id": "asm_Beng:unanswerable:662041",
+   "lang": "asm_Beng",
+   "query_type": "unanswerable",
+   "phase": "warm",
+   "core_rag_loop_ms": 71.7923,
+   "wall_ms": 71.885,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.148,
+    "dense": 35.58,
+    "sparse": 64.109,
+    "fuse": 0.905
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:959034",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 63.1601,
+   "wall_ms": 63.245,
+   "refused": true,
+   "refusal_reason": "off_topic",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.116,
+    "dense": 30.004,
+    "sparse": 60.601,
+    "fuse": 0.901
+   }
+  },
+  {
+   "id": "asm_Beng:long:927603",
+   "lang": "asm_Beng",
+   "query_type": "long",
+   "phase": "warm",
+   "core_rag_loop_ms": 53.1084,
+   "wall_ms": 53.188,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.15,
+    "dense": 28.873,
+    "sparse": 50.617,
+    "fuse": 0.931
+   }
+  },
+  {
+   "id": "asm_Beng:short:786531",
+   "lang": "asm_Beng",
+   "query_type": "short",
+   "phase": "warm",
+   "core_rag_loop_ms": 30.8933,
+   "wall_ms": 30.975,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.096,
+    "sparse": 28.477,
+    "dense": 28.611,
+    "fuse": 0.899
+   }
+  },
+  {
+   "id": "asm_Beng:numeric:1091474",
+   "lang": "asm_Beng",
+   "query_type": "numeric",
+   "phase": "warm",
+   "core_rag_loop_ms": 44.5221,
+   "wall_ms": 44.603,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.112,
+    "dense": 29.842,
+    "sparse": 42.156,
+    "fuse": 0.912
+   }
+  },
+  {
+   "id": "asm_Beng:description:911402",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 94.9518,
+   "wall_ms": 95.037,
+   "refused": false,
+   "refusal_reason": null,
+   "degradations": [],
+   "stages": {
+    "normalize": 1.484,
+    "sparse": 75.921,
+    "dense": 90.134,
+    "fuse": 0.013
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:987183",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 68.0334,
+   "wall_ms": 68.122,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.136,
+    "dense": 39.058,
+    "sparse": 63.587,
+    "fuse": 0.918
+   }
+  },
+  {
+   "id": "asm_Beng:location:841726",
+   "lang": "asm_Beng",
+   "query_type": "location",
+   "phase": "warm",
+   "core_rag_loop_ms": 78.5711,
+   "wall_ms": 78.674,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.138,
+    "dense": 23.802,
+    "sparse": 72.33,
+    "fuse": 1.171
+   }
+  },
+  {
+   "id": "asm_Beng:description:413760",
+   "lang": "asm_Beng",
+   "query_type": "description",
+   "phase": "warm",
+   "core_rag_loop_ms": 87.1036,
+   "wall_ms": 87.19,
+   "refused": true,
+   "refusal_reason": "not_in_retrieved_set",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.12,
+    "dense": 43.683,
+    "sparse": 70.423,
+    "fuse": 0.884
+   }
+  },
+  {
+   "id": "asm_Beng:entity_heavy:888260",
+   "lang": "asm_Beng",
+   "query_type": "entity_heavy",
+   "phase": "warm",
+   "core_rag_loop_ms": 71.5436,
+   "wall_ms": 71.643,
+   "refused": true,
+   "refusal_reason": "off_topic",
+   "degradations": [],
+   "stages": {
+    "normalize": 0.145,
+    "dense": 30.378,
+    "sparse": 61.905,
+    "fuse": 0.923
+   }
+  }
+ ]
+}

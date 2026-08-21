@@ -42,9 +42,10 @@ import numpy as np
 import pandas as pd
 
 from src.harness.orchestrator import CoreLoop
-from src.index.dense import DenseIndex
+from src.index.dense import DenseIndex, DensePartition
 from src.index.embedder import OnnxEmbedder
-from src.index.sparse import SparseIndex
+from src.index.sparse import SparseIndex, SparsePartition
+from src.index.textstore import TextStore
 
 ONNX_DIR = Path("artifacts/e5-small-onnx")
 PCTS = (50, 70, 90, 95, 100)
@@ -79,6 +80,12 @@ def hardware() -> dict:
 async def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--slice", type=Path, default=Path("data/slice"))
+    ap.add_argument("--index-dir", type=Path, default=None,
+                    help="measure the PREBUILT production index instead of "
+                         "rebuilding from the slice. The two are different "
+                         "scales (~50k vs ~950k vectors per partition) and the "
+                         "latency differs by an order of magnitude, so which "
+                         "one a number came from is recorded in the output.")
     ap.add_argument("--langs", default="eng_Latn,hin_Deva,tam_Taml")
     ap.add_argument("--queries", type=Path, default=Path("bench/queries.jsonl"))
     ap.add_argument("--threads", type=int, default=8)
@@ -98,7 +105,45 @@ async def main() -> int:
                          threads=a.threads, warm=False)
     dense, sparse, texts = DenseIndex(), SparseIndex(), {}
     index_params = {}
-    for lang in langs:
+    text_lookup = None
+    if a.index_dir:
+        stores = {}
+        for lang in langs:
+            vec = a.index_dir / f"{lang}.usearch"
+            if not vec.exists():
+                print(f"  skip {lang}: no prebuilt partition")
+                continue
+            part = DensePartition.load(vec, view=True)
+            dense.partitions[lang] = part
+            bm = a.index_dir / f"{lang}.bm25"
+            if bm.exists():
+                sparse.partitions[lang] = SparsePartition.load(bm)
+            db = a.index_dir / f"{lang}.texts.db"
+            if db.exists():
+                stores[lang] = TextStore(db)
+            sr = part.self_retrieval_rate(200)
+            index_params[lang] = {
+                "vectors": len(part.chunk_ids), "dtype": str(part.index.dtype),
+                "connectivity": part.index.connectivity,
+                "expansion_add": part.index.expansion_add,
+                "expansion_search": part.expansion_search,
+                "self_retrieval": round(sr, 4),
+            }
+            print(f"  {lang}: {len(part.chunk_ids):,} vectors (prebuilt), "
+                  f"self_retrieval={sr:.3f}")
+            if sr < 0.95:
+                raise SystemExit(f"index for {lang} is broken (sr={sr:.3f})")
+
+        def text_lookup(pids: list[str]) -> dict:
+            out: dict = {}
+            for st in stores.values():
+                missing = [p for p in pids if p not in out]
+                if not missing:
+                    break
+                out.update(st.get(missing))
+            return out
+
+    for lang in (langs if not a.index_dir else []):
         d = a.slice / lang
         if not (d / "corpus.parquet").exists():
             print(f"  skip {lang}: no corpus")
@@ -137,7 +182,8 @@ async def main() -> int:
     # global threshold refused 72.7% of answerable Tamil queries in the first
     # Gate C run, so passing one here would re-introduce exactly that bug.
     tau = None
-    loop = CoreLoop(embed, dense, sparse, tau=tau, chunk_texts=texts)
+    loop = CoreLoop(embed, dense, sparse, tau=tau, chunk_texts=texts,
+                    text_lookup=text_lookup)
     build_ms = (time.perf_counter_ns() - t_boot) / 1e6
     print(f"  index build {build_ms/1000:.1f}s  tau={tau}")
 
@@ -188,6 +234,8 @@ async def main() -> int:
         "threads": a.threads,
         "embed_batch": 64,
         "index_params": index_params,
+        "source": "prebuilt_index" if a.index_dir else "slice_rebuild",
+        "total_vectors": sum(v["vectors"] for v in index_params.values()),
         "index_build_s": round(build_ms / 1000, 1),
         "warmup_ms": round(warm_ms, 1),
         "tau": tau,

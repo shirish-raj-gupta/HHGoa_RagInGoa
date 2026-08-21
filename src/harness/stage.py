@@ -33,6 +33,17 @@ class CircuitOpen(Exception):
 
 @dataclass
 class RetryPolicy:
+    """
+    Retries are for TRANSIENT failures - a dropped connection, a 503, a flaky
+    socket. They are wrong for local computation that is merely slow: a BM25
+    search that takes 200ms will take 200ms again, and retrying it just burns
+    budget twice over.
+
+    Measured: the sparse stage has a 60ms timeout, and with the default two
+    retries plus backoff its recorded p100 was 210.65ms - it timed out, slept,
+    timed out, slept, timed out. Local stages now use NO_RETRY (below); the
+    network stages (Sarvam, the generator) keep real retries.
+    """
     max_retries: int = 2
     base_ms: float = 20.0
     max_ms: float = 200.0
@@ -73,6 +84,10 @@ class CircuitBreaker:
             if self._fails >= self.threshold and self._opened_at is None:
                 self._opened_at = time.time()
                 log.warning("circuit_open dependency=%s fails=%d", self.name, self._fails)
+
+
+#: For in-process compute. Retrying a slow local call cannot help.
+NO_RETRY = RetryPolicy(max_retries=0)
 
 
 @dataclass
