@@ -61,8 +61,25 @@ def repetition_ratio(text: str, k: int = 8) -> float:
     return 1.0 - (len(c) / len(grams))
 
 
-def is_degenerate(text: str, max_chars: int = 1500) -> bool:
-    """Report section 6: 0.18% of Indic passages are MT repetition loops."""
+LETTER = re.compile(r"[^\W\d_]", re.UNICODE)
+
+
+def is_degenerate(text: str, max_chars: int = 1500, min_letters: int = 8) -> bool:
+    """
+    Report section 6: 0.18% of Indic passages are MT repetition loops.
+
+    Also drops passages with almost no LETTERS. A passage of "..." or
+    "--------------" or "৩.৩৩৩৩৩৩৩৩..." cannot answer anything, and one was
+    observed being returned at rank 1 against a live index. Rare - measured
+    0.010% of Assamese passages - but disproportionately visible when it hits.
+
+    NOTE for anyone re-measuring this: count letters with `re`, not
+    `pandas.Series.str.count`. Pandas returns 0 for Indic text on this pattern,
+    which made a first pass report 97% of every Indic corpus as junk. The real
+    figure is 0.01%. Measuring the measurement was the fix.
+    """
+    if len(LETTER.findall(text)) < min_letters:
+        return True
     return len(text) > max_chars and repetition_ratio(text) > 0.35
 
 

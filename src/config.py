@@ -63,10 +63,10 @@ def describe(name: str) -> str:
 
 def status() -> dict[str, bool]:
     return {k: bool(get(k)) for k in
-            ("SARVAM_API_KEY", "ANTHROPIC_API_KEY", "HF_TOKEN")}
+            ("SARVAM_API_KEY", "GROQ_API_KEY", "HF_TOKEN")}
 
 
 if __name__ == "__main__":
     load_dotenv()
-    for k in ("SARVAM_API_KEY", "ANTHROPIC_API_KEY", "HF_TOKEN"):
+    for k in ("SARVAM_API_KEY", "GROQ_API_KEY", "HF_TOKEN"):
         print(" ", describe(k))

@@ -116,9 +116,26 @@ def _load(langs: list[str]) -> None:
         if db.exists():
             S.texts[lang] = TextStore(db)
 
+        # Page the mmap in before the readiness probe passes. Measured cold:
+        # the first live query took 412ms (dense 355ms, sparse 302ms) - BOTH
+        # arms blew their stage timeouts, nothing was retrieved, and the answer
+        # was correctly refused as ungrounded. By the third query it was 70ms.
+        # A Space that reports ready while its index is still on disk serves
+        # garbage to whoever arrives first.
+        t_warm = time.perf_counter_ns()
+        rng = np.random.default_rng(0)
+        probe = rng.normal(size=(24, part.dim)).astype(np.float32)
+        probe /= np.linalg.norm(probe, axis=1, keepdims=True)
+        for v in probe:
+            part.search(v, k=10)
+        if lang in sparse.partitions:
+            for w in ("the", "what is", "how many", "who"):
+                sparse.partitions[lang].search(w, k=10)
+        warm_ms = (time.perf_counter_ns() - t_warm) / 1e6
+
         sr = part.self_retrieval_rate(100)
-        log.info("loaded %s: %d vectors, self_retrieval=%.3f", lang,
-                 len(part.chunk_ids), sr)
+        log.info("loaded %s: %d vectors, self_retrieval=%.3f, warmed in %.0fms",
+                 lang, len(part.chunk_ids), sr, warm_ms)
         if sr < 0.95:
             raise RuntimeError(f"index for {lang} is broken (self_retrieval={sr:.3f})")
         S.corpus_langs.append(lang)
