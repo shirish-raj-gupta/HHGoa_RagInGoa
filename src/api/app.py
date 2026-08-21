@@ -319,7 +319,11 @@ async def ws(websocket: WebSocket):
             await q.put(None)
 
     task = asyncio.create_task(recv_loop())
-    stt = SarvamSTT(language_code=os.environ.get("RAG_STT_LANG", "unknown"))
+    # "auto" is Sarvam's wildcard. "unknown" is rejected outright with
+    # "Unsupported language_code", which killed the whole socket - and because
+    # the fallback only engages after the stream ends, the user saw an error
+    # rather than a degraded answer.
+    stt = SarvamSTT(language_code=os.environ.get("RAG_STT_LANG", "auto"))
     final_text, stt_ms, lang_code = "", None, None
     try:
         async for ev in stt.stream(audio_iter()):
@@ -348,7 +352,9 @@ async def ws(websocket: WebSocket):
                                        "reason": "sarvam produced no transcript"})
             ev = await WhisperFallback().transcribe(
                 bytes(captured), sample_rate=16000,
-                lang_hint=os.environ.get("RAG_STT_LANG") or None)
+                # Whisper wants an ISO-639-1 code or nothing; "auto" is a
+                # Sarvam-ism and would be rejected.
+                lang_hint=(lang_code.split("-")[0] if lang_code else None))
             if ev.kind == "final" and ev.text.strip():
                 final_text, stt_ms, provider = ev.text, ev.at_ms, "groq_whisper"
                 await websocket.send_json({"type": "final", "text": ev.text,

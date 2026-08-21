@@ -72,7 +72,7 @@ class SttEvent:
 
 
 class SarvamSTT:
-    def __init__(self, api_key: str | None = None, *, language_code: str = "unknown",
+    def __init__(self, api_key: str | None = None, *, language_code: str = "auto",
                  sample_rate: int = 16000, stream_type: str = "fast",
                  mode: str = "transcribe", endpointing: str = "vad",
                  breaker: CircuitBreaker | None = None):
@@ -328,7 +328,7 @@ class WhisperFallback:
                             at_ms=(time.perf_counter_ns() - t0) / 1e6)
 
 
-async def transcribe_with_fallback(pcm: bytes, *, language_code: str = "unknown",
+async def transcribe_with_fallback(pcm: bytes, *, language_code: str = "auto",
                                    sample_rate: int = 16000,
                                    stt: SarvamSTT | None = None
                                    ) -> tuple[SttEvent, str]:
