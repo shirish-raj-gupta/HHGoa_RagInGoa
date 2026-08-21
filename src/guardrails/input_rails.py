@@ -36,6 +36,18 @@ SCRIPT_TO_LANG = {
 AMBIGUOUS_SCRIPTS = {"DEVANAGARI": ("hin_Deva", "mar_Deva", "npi_Deva", "san_Deva"),
                      "BENGALI": ("ben_Beng", "asm_Beng")}
 
+# Assamese and Bengali share a script but not an alphabet: Assamese writes
+# ro as ৰ (U+09F0) and wo as ৱ (U+09F1), where Bengali uses র and ব. Those two
+# characters are frequent enough in ordinary Assamese text to identify it.
+# Without this, every Assamese query was routed to the Bengali partition -
+# observed live against the asm_Beng index, which is exactly the kind of
+# silent mis-routing that costs recall without raising anything.
+ASSAMESE_ONLY = "ৰৱ"
+
+
+def disambiguate_bengali(text: str) -> str:
+    return "asm_Beng" if any(c in text for c in ASSAMESE_ONLY) else "ben_Beng"
+
 # Scripts that are definitely not in this corpus. Without these, CJK and
 # Cyrillic fell through to the eng_Latn default and were answered instead of
 # refused - caught by the red-team set (unsupported_language scored 0/2).
@@ -232,6 +244,9 @@ def identify_language(text: str, stt_lang: str | None = None) -> tuple[str, floa
         cands = AMBIGUOUS_SCRIPTS[script]
         if stt_lang and SARVAM_TO_FLORES.get(stt_lang) in cands:
             return SARVAM_TO_FLORES[stt_lang], 0.9
+        if script == "BENGALI":
+            lg = disambiguate_bengali(text)
+            return lg, 0.85 if lg == "asm_Beng" else 0.6
         return cands[0], 0.5                      # most likely of the group
     lang = SCRIPT_TO_LANG.get(script)
     if lang:

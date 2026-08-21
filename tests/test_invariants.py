@@ -300,3 +300,33 @@ def test_gate_on_cosine_scale_behaves(monkeypatch):
     assert not ir.check_relevance(0.60).passed        # clearly off-topic
     # and the RRF-scale value that caused the bug must NOT be silently accepted
     assert not ir.check_relevance(0.0333).passed
+
+
+def test_assamese_is_not_routed_to_bengali():
+    """
+    The bug: Assamese and Bengali share a script, and the ambiguous-script
+    table returned ben_Beng first, so every Assamese query was routed to the
+    Bengali partition. Observed live against the real asm_Beng index - silent
+    mis-routing that costs recall without raising anything.
+
+    Assamese writes ro as ৰ and wo as ৱ; Bengali uses র and ব.
+    """
+    assert ir.identify_language("কৰ্পোৰেচন কি?")[0] == "asm_Beng"
+    assert ir.identify_language("কর্পোরেশন কী?")[0] == "ben_Beng"
+
+
+def test_stt_language_still_wins_over_script_heuristics():
+    """A transcript's own language code is better evidence than our guess."""
+    assert ir.identify_language("কর্পোরেশন কী?", stt_lang="as-IN")[0] == "asm_Beng"
+
+
+def test_local_compute_stages_do_not_retry():
+    """
+    The bug: RetryPolicy defaults to 2 retries, so a slow BM25 timed out at
+    60ms, backed off, retried, and recorded p100 210.65ms for a stage with a
+    60ms timeout. Retries are for transient failures; a local search that
+    takes 200ms will take 200ms again.
+    """
+    from src.harness.stage import NO_RETRY, RetryPolicy
+    assert NO_RETRY.max_retries == 0
+    assert RetryPolicy().max_retries > 0, "network stages still retry"
