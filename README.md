@@ -117,31 +117,76 @@ The 14 shards are *parallel* — same queries, same passages, only the language 
 
 ---
 
-## Engineering notes — three bugs worth reading
+## Engineering notes — the bugs worth reading
 
 Each of these was silent, plausible-looking, and would have invalidated a published number.
 
-**1. The vector index was broken and still returned sensible-looking results.**
-`usearch` `ScalarKind.I8` expects int8-range values, not L2-normalized floats, and does not scale them. Self-retrieval — searching for a vector in an index that *contains* it — was the tell:
+**1. The deadline mechanism was inert at the scale that needed it.**
+`_dense` awaited the embedding in a thread, then called the HNSW search *synchronously* — blocking the event loop. At 49k vectors that was 1–2 ms and invisible. At 953k it is 50–155 ms, and while the loop is blocked `asyncio.wait_for` cannot fire its timeout and the "concurrent" sparse arm cannot be joined. Measured: **dense 155.7 ms against an 80 ms stage timeout that never triggered.**
 
-| dtype | ef_search=64 | ef_search=256 |
-|---|---:|---:|
-| F32 | 99.0% | 100.0% |
-| F16 | 100.0% | 99.5% |
-| I8 | **9.0%** | **1.0%** |
+| | p50 | p95 | p100 |
+|---|---:|---:|---:|
+| before | 54.7 | 154.2 | 181.4 ms |
+| after | 29.1 | 41.3 | 52.6 ms |
 
-It produced a complete ablation table with one inexplicable row. A `self_retrieval_rate` guard now fails the build instead.
+**2. Retries were burning the budget.**
+`RetryPolicy` defaults to 2 retries. A slow BM25 timed out at 60 ms, backed off, retried, timed out again — **p100 210.65 ms recorded for a stage with a 60 ms timeout.** Retries are for *transient* failures; a local search that takes 200 ms will take 200 ms again. Local compute now uses `NO_RETRY`; network stages keep real retries. Production p100 **214 ms FAIL → 108 ms PASS**.
 
-**2. The ablation was measuring HNSW luck, not chunking.**
-Even on F16, real e5 embeddings cluster far more tightly than the random vectors a sanity check uses, and the default graph parameters scored 0.84 self-retrieval — dragging one arm to R@5 0.316. The ablation now runs on **exact** brute-force search, so a difference in the table is a difference in chunking. HNSW is tuned separately against exact as ground truth.
+**3. The relevance gate was fed the wrong score — in production, not just the eval.**
+τ is calibrated on dense cosine (~0.89). The orchestrator passed the **RRF fused score** (~0.033). Nothing could ever clear the threshold; the red-team run reported a **100% false-refusal rate**. It only surfaced because the suite has benign controls — a block-rate-only report would have shown a perfect 1.000 and shipped.
 
-**3. `fuse` cost 260–420 ms of a 200 ms budget.**
-MMR was fetching candidate vectors by *re-embedding the passage text*, one forward pass per candidate, on the critical path. The vectors were already in the index.
+**4. One global τ refused 72.7% of answerable Tamil queries.**
+100% of the Tamil `description` stratum. Tamil retrieves weaker, so its cosine distribution sits lower. Per-language τ cut overall false-refusal **35.4% → 13.8%**, and Tamil's gate is now *switched off* (AUC 0.6895, below the floor) rather than pretending to discriminate.
 
-| | fuse | core_rag_loop |
-|---|---:|---:|
-| before | 260–422 ms | 282–432 ms — over budget |
-| after | 0.2–0.6 ms | 6.4–10.6 ms |
+**5. The vector index was broken and still returned sensible-looking results.**
+`usearch` `ScalarKind.I8` with L2-normalized floats: self-retrieval collapsed and a whole ablation table came out plausible with one inexplicable row. A `self_retrieval_rate` guard now fails the build.
+
+> **And the correction that matters most.** I later claimed I8 was broken *as a dtype*, citing 0.085 self-retrieval. That was measured on **random** vectors and does not transfer: real e5 embeddings are anisotropic, and I8 scores 0.990 on them. I8 is not broken — it costs ~5 points of recall. A synthetic sanity check produced a confident false positive, and the code comment now says so. Separately, I diagnosed three bugs from **curl output that Git Bash had mangled**; the server was correct throughout. Both are recorded in the commit log rather than quietly dropped.
+
+**6. `fuse` cost 260–420 ms of a 200 ms budget.**
+MMR fetched candidate vectors by *re-embedding passage text*, one forward pass each, on the critical path. The vectors were already in the index. → 0.2–0.6 ms.
+
+**7. Cold mmap served garbage to the first user.**
+An 873 MB memory-mapped index is still on disk at boot. The first live query took 412 ms, **both** retrieval arms blew their timeouts, nothing was retrieved, and the answer was correctly refused as ungrounded. Boot now pages the graph in before the readiness probe passes: **412 ms → 10.1 ms**.
+
+## The harness
+
+Requirement #5 asks for structure around the model, so the structure is the deliverable.
+
+- **Typed contracts end to end** — Pydantic v2 at every boundary: `AudioChunk → Transcript → NormalizedQuery → RetrievalSet → DraftAnswer → VerifiedAnswer`. No dicts cross a stage line. This is what caught the relevance-score bug: `top_score` (RRF) and `relevance_score` (cosine) are different fields because they are different scales.
+- **`Stage`** with `name`, `timeout_ms`, `retry`, `fallback`, `breaker`, `optional`. The orchestrator composes; stages know nothing about each other.
+- **Async DAG** — dense ∥ sparse, joined at fusion. Both run off the event loop, which is what makes the timeouts real (see below).
+- **Deadline propagation** — a `Budget` threads through every stage carrying `remaining_ms`.
+- **Retries** with exponential backoff and jitter on *network* dependencies only, plus a per-dependency circuit breaker.
+- **Tool-calling generator** with a declared surface: `search_corpus`, `expand_query`, `cite`, `refuse`, `ask_clarification`. The model chooses; the harness executes.
+- **Structured output + repair**, capped at one attempt. An unbounded repair loop is a latency bomb.
+- **Observability** — JSON-lines logs, a `request_id` on every record, and `/trace/{request_id}` returning the full stage timeline. The UI reads that endpoint.
+
+### Deadline degradation, measured
+
+Every stage reads the remaining budget and downgrades rather than overrunning. Measured on the 953k-vector production partition:
+
+| budget | p100 | degraded | what it did |
+|---:|---:|---|---|
+| 200 ms | 46.3 ms | 0/25 | nothing — no pressure |
+| 50 ms | 45.0 ms | 25/25 | `ef_search→16`, `k→10`, skip MMR |
+| 25 ms | 40.6 ms | 25/25 | `sparse_only` — drop the dense arm |
+| 10 ms | 0.4 ms | 25/25 | `budget_exhausted` → refuse |
+
+Every degradation is a structured event and appears in the trace.
+
+### Error taxonomy
+
+| Kind | Cause | What the user gets |
+|---|---|---|
+| `UpstreamError` | Sarvam or the generator failed or timed out | retry with backoff; on an open breaker, the **fallback transcriber**; otherwise a plain "the service did not respond" |
+| `BudgetExceeded` | the deadline ran out before retrieval could finish | refusal explaining the request was too slow, with the degradation trail in the trace |
+| `GuardrailBlocked` | injection, unsafe content, or an unsupported language | a refusal that **names the category** — never a generic error |
+| `ValidationError` | the generator returned JSON that failed the `Answer` schema | one repair attempt with the validation error fed back, then a safe refusal |
+| `NoRelevantContext` | relevance gate below τ, or nothing retrieved | *"nothing in the corpus covers this"* + how to rephrase |
+
+Refusal reasons carried to the UI: `off_topic`, `unsafe`, `prompt_injection`, `low_confidence_transcript`, `empty_audio`, `unsupported_language`, `ungrounded`, `not_in_retrieved_set`, `pii_detected`. Each has its own designed copy — a refusal rendered as an error toast wastes the best evidence for requirement #6.
+
 
 ---
 
