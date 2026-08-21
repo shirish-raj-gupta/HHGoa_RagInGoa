@@ -330,3 +330,59 @@ def test_local_compute_stages_do_not_retry():
     from src.harness.stage import NO_RETRY, RetryPolicy
     assert NO_RETRY.max_retries == 0
     assert RetryPolicy().max_retries > 0, "network stages still retry"
+
+
+# ------------------------------------------------------------- STT fallback
+def test_sarvam_gets_bcp47_not_flores():
+    """
+    The bug: transcribe_with_fallback passed FLORES codes ("hin_Deva") to
+    Sarvam, which speaks BCP-47 ("hi-IN"). Sarvam answered "Unsupported
+    language_code" and every request silently demoted to the fallback
+    transcriber - a working fallback masking a broken primary, which is the
+    worst version of this bug because nothing looks wrong.
+    """
+    from src.api.sarvam import FLORES_TO_SARVAM, SARVAM_TO_FLORES
+    assert FLORES_TO_SARVAM["hin_Deva"] == "hi-IN"
+    assert FLORES_TO_SARVAM["tam_Taml"] == "ta-IN"
+    assert SARVAM_TO_FLORES["hi-IN"] == "hin_Deva"
+    # the mapping must be total over the corpus languages
+    corpus = ["eng_Latn", "asm_Beng", "ben_Beng", "guj_Gujr", "hin_Deva",
+              "kan_Knda", "mal_Mlym", "mar_Deva", "npi_Deva", "ory_Orya",
+              "pan_Guru", "san_Deva", "tam_Taml", "tel_Telu", "urd_Arab"]
+    assert all(c in FLORES_TO_SARVAM for c in corpus)
+
+
+def test_whisper_fallback_uses_large_v3_not_turbo():
+    """
+    Measured on the same Hindi utterance: whisper-large-v3-turbo returned
+    "نگم کیا ہے؟" - right words, URDU script - while large-v3 returned
+    "निगम क्या है?" in Devanagari. Script drives language ID, which drives
+    which partition is searched, so a wrong-script transcript routes the whole
+    query to the wrong corpus. Turbo is ~100ms faster and unusable here.
+    """
+    from src.api.sarvam import WHISPER_MODEL
+    assert WHISPER_MODEL == "whisper-large-v3"
+    assert "turbo" not in WHISPER_MODEL
+
+
+def test_pcm_to_wav_roundtrips():
+    """The WS path speaks raw PCM; Whisper needs a container."""
+    import io
+    import wave
+    from src.api.sarvam import pcm16_to_wav
+    pcm = (np.sin(np.arange(16000) * 0.05) * 8000).astype(np.int16).tobytes()
+    w = wave.open(io.BytesIO(pcm16_to_wav(pcm, 16000)), "rb")
+    assert w.getnchannels() == 1 and w.getsampwidth() == 2
+    assert w.getframerate() == 16000
+    assert w.readframes(w.getnframes()) == pcm
+
+
+def test_circuit_breaker_opens_and_recovers():
+    from src.harness.stage import CircuitBreaker
+    b = CircuitBreaker("t", threshold=3, cooldown_s=60.0)
+    assert not b.is_open
+    for _ in range(3):
+        b.record(False)
+    assert b.is_open, "must open after N consecutive failures"
+    b.record(True)
+    assert not b.is_open, "a success must close it"

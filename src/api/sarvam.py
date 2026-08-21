@@ -252,3 +252,119 @@ class SpeculativeRetriever:
 
     def reset(self) -> None:
         self._fired_on = None
+
+
+# ------------------------------------------------------- fallback transcriber
+WHISPER_URL = "https://api.groq.com/openai/v1/audio/transcriptions"
+# whisper-large-v3, NOT the turbo variant. Measured on the same Hindi
+# utterance: turbo returned "نگم کیا ہے؟" - correct words, URDU SCRIPT - while
+# large-v3 returned "निगम क्या है?" in Devanagari. Script drives language
+# identification, which drives which index partition is searched, so a
+# wrong-script transcript silently routes the whole query to the wrong corpus.
+# Turbo is ~100ms faster and unusable for this pipeline.
+WHISPER_MODEL = "whisper-large-v3"
+
+
+def pcm16_to_wav(pcm: bytes, sample_rate: int = 16000) -> bytes:
+    """Whisper wants a container; the WS path speaks raw PCM."""
+    import io
+    import wave
+    buf = io.BytesIO()
+    w = wave.open(buf, "wb")
+    w.setnchannels(1)
+    w.setsampwidth(2)
+    w.setframerate(sample_rate)
+    w.writeframes(pcm)
+    w.close()
+    return buf.getvalue()
+
+
+class WhisperFallback:
+    """
+    Batch STT, used only when Sarvam's circuit breaker is open.
+
+    Sarvam stays primary: it is the vendor the task specifies, and it streams,
+    which is what makes speculative retrieval possible at all. This path is
+    strictly the degraded one - it cannot emit partials, so the UI shows no
+    live transcript and speculation is skipped. Losing a feature is the right
+    trade against losing the request.
+
+    Post-audio latency is comparable: Sarvam's final landed ~806ms after the
+    audio ended (2,886ms wall on 2.08s of speech); Whisper returns in ~770ms
+    on the whole file.
+    """
+
+    def __init__(self, api_key: str | None = None, model: str = WHISPER_MODEL):
+        self.api_key = api_key or cfg_get("GROQ_API_KEY")
+        self.model = model
+
+    async def transcribe(self, pcm: bytes, *, sample_rate: int = 16000,
+                         lang_hint: str | None = None) -> SttEvent:
+        if not self.api_key:
+            return SttEvent("error", text="GROQ_API_KEY is not set")
+        import httpx
+        data = {"model": self.model, "response_format": "json"}
+        if lang_hint:
+            # Whisper wants ISO-639-1; Sarvam codes are BCP-47 like "hi-IN"
+            data["language"] = lang_hint.split("-")[0]
+        t0 = time.perf_counter_ns()
+        try:
+            async with httpx.AsyncClient(timeout=60) as c:
+                r = await c.post(
+                    WHISPER_URL,
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    files={"file": ("audio.wav", pcm16_to_wav(pcm, sample_rate),
+                                    "audio/wav")},
+                    data=data)
+            ms = (time.perf_counter_ns() - t0) / 1e6
+            if r.status_code != 200:
+                return SttEvent("error", text=f"whisper {r.status_code}: "
+                                              f"{r.text[:160]}", at_ms=ms)
+            return SttEvent("final", (r.json().get("text") or "").strip(),
+                            lang_code=lang_hint, at_ms=ms,
+                            raw={"provider": "groq_whisper", "model": self.model})
+        except Exception as e:
+            return SttEvent("error", text=f"whisper unreachable: {e}",
+                            at_ms=(time.perf_counter_ns() - t0) / 1e6)
+
+
+async def transcribe_with_fallback(pcm: bytes, *, language_code: str = "unknown",
+                                   sample_rate: int = 16000,
+                                   stt: SarvamSTT | None = None
+                                   ) -> tuple[SttEvent, str]:
+    """
+    Sarvam first; Whisper only if Sarvam's breaker is open or it errors.
+
+    Returns (event, provider) so the trace records WHICH transcriber answered -
+    a fallback that is invisible in the trace is indistinguishable from the
+    primary working.
+    """
+    # Sarvam speaks BCP-47 ("hi-IN"); the rest of this codebase speaks
+    # FLORES-200 ("hin_Deva"). Passing FLORES straight through got
+    # "Unsupported language_code 'hin_Deva'" and silently demoted every request
+    # to the fallback transcriber - a working fallback masking a broken primary
+    # is the worst version of this bug, because nothing looks wrong.
+    sarvam_code = FLORES_TO_SARVAM.get(language_code, language_code)
+    stt = stt or SarvamSTT(language_code=sarvam_code, sample_rate=sample_rate)
+
+    if not stt.breaker.is_open:
+        async def one_shot():
+            step = int(sample_rate * 0.04) * 2
+            for i in range(0, len(pcm), step):
+                yield pcm[i:i + step]
+
+        final: SttEvent | None = None
+        err: SttEvent | None = None
+        async for ev in stt.stream(one_shot()):
+            if ev.kind == "final":
+                final = ev
+            elif ev.kind == "error":
+                err = ev
+        if final and final.text.strip():
+            return final, "sarvam"
+        log.warning("sarvam produced no transcript (%s); falling back",
+                    err.text[:120] if err else "no final")
+
+    ev = await WhisperFallback().transcribe(pcm, sample_rate=sample_rate,
+                                            lang_hint=sarvam_code)
+    return ev, "groq_whisper"
