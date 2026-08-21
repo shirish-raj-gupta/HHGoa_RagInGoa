@@ -24,6 +24,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -199,6 +200,23 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="RAG in Goa", lifespan=lifespan)
+
+# The frontend is served from a Hugging Face Static Space while the backend
+# runs elsewhere (locally, behind a tunnel), so requests are cross-origin.
+# RAG_ALLOW_ORIGINS is a comma-separated allowlist; it defaults to the Space
+# rather than "*" so a stray page cannot drive someone else's API keys.
+_origins = [o.strip() for o in os.environ.get(
+    "RAG_ALLOW_ORIGINS",
+    "https://srg101-raginggoa.static.hf.space,"
+    "https://huggingface.co,"
+    "http://localhost:7860,http://127.0.0.1:7860").split(",") if o.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+)
 
 
 class QueryIn(BaseModel):

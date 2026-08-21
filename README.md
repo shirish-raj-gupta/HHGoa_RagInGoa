@@ -1,5 +1,7 @@
 # RAG in Goa
 
+**Live:** [huggingface.co/spaces/srg101/raginggoa](https://huggingface.co/spaces/srg101/raginggoa) — frontend only. The retrieval backend is ~15 GB across 15 language partitions and runs separately behind a tunnel, because this account's tier returns `402` for both Docker and ZeroGPU Spaces. If the backend is down the page says so, deliberately. See [`docs/deployment.md`](docs/deployment.md).
+
 Voice-to-grounded-answer RAG over [`ai4bharat/MSMARCO-XI`](https://huggingface.co/datasets/ai4bharat/MSMARCO-XI) — English plus 14 Indic languages.
 **HH Goa 2026 · Task #02** · `#RAGInGoa`
 

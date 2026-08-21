@@ -4,6 +4,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..700&family=JetBrains+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<script src="config.js"></script>
 <link rel="stylesheet" href="/static/tokens.css">
 
 <style>
@@ -222,6 +224,20 @@
 </div>
 
 <script>
+// Where the backend lives. Same-origin when the API serves this page itself;
+// on the Hugging Face Static Space the backend is elsewhere, so the URL comes
+// from ?api=... (persisted) or window.RAG_API set by config.js.
+const API = (() => {
+  const q = new URLSearchParams(location.search).get('api');
+  if (q) { try { localStorage.setItem('rag_api', q.replace(/\/$/, '')); } catch (e) {} }
+  const stored = (() => { try { return localStorage.getItem('rag_api'); } catch (e) { return null; } })();
+  const base = q || window.RAG_API || stored || '';
+  return base.replace(/\/$/, '');
+})();
+const WS_BASE = API
+  ? API.replace(/^http/, 'ws')
+  : (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+
 const STAGE_COLORS = {
   stt: '#3b4a7a', normalize: '#4b5c93', dense: '#FF9E3D', sparse: '#c9793a',
   fuse: '#7a6bd8', guard: '#2FBF8F', generate: '#2b8f6f'
@@ -380,7 +396,7 @@ $('typedForm').onsubmit = async e => {
   $('ask').disabled = true; setStatus('thinking', 'busy');
   $('partial').textContent = text; $('partial').classList.add('final');
   try {
-    const r = await fetch('/query', {
+    const r = await fetch(API + '/query', {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ text })
     });
@@ -424,7 +440,7 @@ async function startMic() {
   analyser = audioCtx.createAnalyser(); analyser.fftSize = 512; src.connect(analyser);
   drawing = true; drawWave();
 
-  ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws');
+  ws = new WebSocket(WS_BASE + '/ws');
   ws.binaryType = 'arraybuffer';
   let streamed = '';
   ws.onmessage = ev => {
@@ -487,9 +503,26 @@ mic.addEventListener('keyup', e => {
   if (e.key === ' ' || e.key === 'Enter') release(e);
 });
 
-fetch('/health').then(r => r.json()).then(h => {
+fetch(API + '/health').then(r => r.json()).then(h => {
   BUDGET = h.budget_ms || 200;
   $('budgetNum').textContent = `— / ${BUDGET} ms budget`;
   setStatus(h.ready ? 'ready' : 'warming', h.ready ? 'on' : 'busy');
-}).catch(() => setStatus('offline', ''));
+}).catch(() => {
+  setStatus('backend offline', '');
+  $('answerPanel').classList.add('refusal');
+  $('answerPanel').innerHTML =
+    '<div class="refusal-why">backend unreachable</div>' +
+    '<h3>the retrieval backend is not responding</h3>' +
+    '<p>this page is a static frontend. the index is 15GB across 15 languages ' +
+    'and runs on a separate machine, so the backend is not always up.</p>' +
+    '<p class="next">point it somewhere else by adding ' +
+    '<span class="mono">?api=https://your-backend</span> to this URL, or run it ' +
+    'locally &mdash; <span class="mono">docker compose up</span>, then ' +
+    '<span class="mono">?api=http://localhost:7860</span>.</p>' +
+    '<p class="next">everything measured here is reproducible offline: the ' +
+    'ablation, latency and guardrail reports are in the repo with the scripts ' +
+    'that produced them.</p>';
+  $('ask').disabled = true;
+  $('q').disabled = true;
+});
 </script>

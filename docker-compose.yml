@@ -1,0 +1,44 @@
+# Local backend for the Hugging Face Static Space frontend.
+#
+# The Space serves the UI; this serves the API. They are separate because a
+# free HF account cannot host compute (Docker and ZeroGPU Spaces both return
+# 402), and because the index is ~15GB across 15 language partitions, which
+# does not belong on a Space's ephemeral storage anyway.
+#
+#   docker compose up --build
+#   -> API on http://localhost:7860
+#   -> open the Space with ?api=http://localhost:7860
+#
+# For a shareable link, put a tunnel in front (see scripts/tunnel.md).
+services:
+  api:
+    build: .
+    ports:
+      - "7860:7860"
+    environment:
+      # Which partitions to load. All 15 is ~15GB on disk; the vectors are
+      # memory-mapped, so resident memory tracks the hot set rather than the
+      # total. Trim this list if the machine is tight.
+      RAG_LANGS: "${RAG_LANGS:-eng_Latn,hin_Deva,tam_Taml}"
+      RAG_INDEX: /home/user/app/artifacts/index
+      RAG_ARTIFACTS: /home/user/app/artifacts
+      RAG_THREADS: "${RAG_THREADS:-8}"
+      RAG_BUDGET_MS: "200"
+      RAG_STT_LANG: "auto"
+      # The Static Space origin must be allowed or the browser blocks every
+      # call. Add a tunnel hostname here when you have one.
+      RAG_ALLOW_ORIGINS: "${RAG_ALLOW_ORIGINS:-https://srg101-raginggoa.static.hf.space,http://localhost:7860}"
+      SARVAM_API_KEY: "${SARVAM_API_KEY}"
+      GROQ_API_KEY: "${GROQ_API_KEY}"
+    volumes:
+      # The index is mounted, never baked into the image - it is 15GB and
+      # rebuilding the image on every code change would be unusable.
+      - ./artifacts:/home/user/app/artifacts:ro
+    # Boot pages the mmap in before readiness passes; a cold index served the
+    # first user a 412ms query with both retrieval arms timing out.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,json,sys;d=json.load(urllib.request.urlopen('http://localhost:7860/health'));sys.exit(0 if d.get('ready') else 1)"]
+      interval: 30s
+      timeout: 10s
+      start_period: 900s
+      retries: 3
