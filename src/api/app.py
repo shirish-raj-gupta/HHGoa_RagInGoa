@@ -37,7 +37,8 @@ from ..index.dense import DenseIndex, DensePartition
 from ..index.embedder import OnnxEmbedder, E5Tokenizer
 from ..index.sparse import SparseIndex, SparsePartition
 from ..index.textstore import TextStore
-from .sarvam import SarvamSTT, SpeculativeRetriever
+from .sarvam import (FLORES_TO_SARVAM, SarvamSTT, SpeculativeRetriever,
+                     WhisperFallback)
 
 log = logging.getLogger("api")
 logging.basicConfig(
@@ -298,11 +299,17 @@ async def ws(websocket: WebSocket):
         while (chunk := await q.get()) is not None:
             yield chunk
 
+    # Buffered so the fallback transcriber has something to send. Whisper is
+    # batch: if Sarvam yields no transcript we need the whole utterance, not a
+    # stream we already consumed.
+    captured = bytearray()
+
     async def recv_loop():
         try:
             while True:
                 msg = await websocket.receive()
                 if msg.get("bytes") is not None:
+                    captured.extend(msg["bytes"])
                     await q.put(msg["bytes"])
                 elif msg.get("text"):
                     if json.loads(msg["text"]).get("event") == "end":
@@ -331,6 +338,27 @@ async def ws(websocket: WebSocket):
             elif ev.kind == "error":
                 await websocket.send_json({"type": "error", "message": ev.text})
 
+        # Degraded path: Sarvam gave nothing usable (breaker open, upstream
+        # error, or silence it could not resolve). Whisper cannot stream, so
+        # the live transcript and speculation are both skipped - which the UI
+        # is told explicitly rather than left to guess.
+        provider = "sarvam"
+        if not final_text.strip() and captured:
+            await websocket.send_json({"type": "stt_fallback",
+                                       "reason": "sarvam produced no transcript"})
+            ev = await WhisperFallback().transcribe(
+                bytes(captured), sample_rate=16000,
+                lang_hint=os.environ.get("RAG_STT_LANG") or None)
+            if ev.kind == "final" and ev.text.strip():
+                final_text, stt_ms, provider = ev.text, ev.at_ms, "groq_whisper"
+                await websocket.send_json({"type": "final", "text": ev.text,
+                                           "stt_ms": ev.at_ms,
+                                           "provider": provider})
+            else:
+                await websocket.send_json({"type": "error",
+                                           "message": "no transcript from either "
+                                                      "transcriber"})
+
         if final_text.strip():
             refresh, ratio = spec.needs_refresh(final_text)
             await websocket.send_json({"type": "speculation_result",
@@ -341,6 +369,9 @@ async def ws(websocket: WebSocket):
                 await websocket.send_json({"type": "token", "text": t})
 
             out = await _answer(final_text, lang_code, BUDGET_MS, stt_ms, on_token)
+            out["stt_provider"] = provider
+            if out.get("trace") is not None:
+                out["trace"]["stt_provider"] = provider
             await websocket.send_json({"type": "done", **out})
     except WebSocketDisconnect:
         pass

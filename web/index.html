@@ -348,6 +348,8 @@ function renderRails(trace) {
   if (trace.ttft_ms) rows.push(['TTFT_MS', trace.ttft_ms.toFixed(0)]);
   if (trace.e2e_ms) rows.push(['E2E_MS', trace.e2e_ms.toFixed(0)]);
   (trace.degradations || []).forEach(d => rows.push(['degraded', d]));
+  if (trace.stt_provider && trace.stt_provider !== 'sarvam')
+    rows.push(['stt provider', trace.stt_provider + ' (fallback)']);
   if (trace.request_id) rows.push(['request_id', trace.request_id]);
   $('traceTable').innerHTML = rows.map(([k, v]) =>
     `<tr><td>${k}</td><td class="num">${v}</td></tr>`).join('');
@@ -430,6 +432,13 @@ async function startMic() {
     if (m.type === 'partial') { $('partial').textContent = m.text; $('partial').classList.remove('final'); }
     else if (m.type === 'final') { $('partial').textContent = m.text; $('partial').classList.add('final'); }
     else if (m.type === 'speculative') setStatus('retrieving early', 'busy');
+    else if (m.type === 'stt_fallback') {
+      // The degraded transcriber is batch, so there are no partials and no
+      // speculation. Say so rather than letting the transcript just stop.
+      setStatus('stt degraded', 'busy');
+      $('partial').textContent = 'primary transcriber unavailable — retrying on the fallback';
+      $('partial').classList.remove('final');
+    }
     else if (m.type === 'token') { streamed += m.text; }
     else if (m.type === 'done') { paint(m); setStatus('ready', 'on'); }
     else if (m.type === 'error') { setStatus('error', ''); }
