@@ -24,12 +24,29 @@ T8  answer complete + citations verified → E2E_MS
 
 **The headline claim is `CORE_RAG_LOOP_MS` p100 < 200 ms.** `STT_MS`, `TTFT_MS` and `E2E_MS` are published in the same table, at the same prominence, because hiding them would be the dodge.
 
-> **Gate C in progress.** The full ≥200-query benchmark has not been run yet, so no latency table is published here. Nothing goes in this section until `bench/run.py` produces it. An early integration run on a 3,000-passage index measured the core loop at 6.4–10.6 ms, but that is not the benchmark and is not a claim.
+### The numbers
+
+Full report: [`docs/latency-report.md`](docs/latency-report.md) · data: [`bench/results.json`](bench/results.json)
+224 stratified queries × 3 reps = 667 warm measurements, Intel i7-14650HX, 8 ONNX threads, index F16 M=16 ef_add=256.
+
+| | p50 | p70 | p90 | p95 | **p100** |
+|---|---:|---:|---:|---:|---:|
+| **`CORE_RAG_LOOP_MS`** warm | 9.9 | 10.5 | 11.5 | 11.9 | **14.9** |
+| `CORE_RAG_LOOP_MS` cold | 13.9 | 14.6 | 16.2 | 16.7 | 17.2 |
+| `STT_MS` (Sarvam, live) | — | — | — | — | 2,748–2,886 |
+| `TTFT_MS` (Groq) | — | — | — | — | ~1,100 |
+| `E2E_MS` | — | — | — | — | ~4,000 |
+
+**p100 = 14.9 ms against a 200 ms budget.** 0 of 667 queries went over budget; 0 needed degradation. Cold runs are reported rather than discarded.
+
+Per stage (warm p50): `dense` 9.2 ms ∥ `sparse` 8.9 ms (concurrent), `fuse` 0.33 ms, `normalize` 0.07 ms.
+
+And the honest half of the contract: **STT alone is ~2.8 s and generation ~1.1 s.** End-to-end is ~4 s, dominated entirely by two vendor round trips. The `< 200 ms` claim is about the part this repo controls, which is why the boundary is drawn where it is.
 
 We also go after end-to-end anyway:
 
 - **Streaming STT** over Sarvam's realtime WebSocket, not batch upload-and-wait
-- **Speculative retrieval** — retrieval fires on a partial transcript mid-utterance and refreshes only if the final transcript diverges past an edit-distance threshold, hiding the core loop inside the time the user is still speaking
+- **Speculative retrieval** — retrieval fires on a partial transcript mid-utterance and refreshes only if the final transcript diverges past an edit-distance threshold. Verified live against Sarvam (partials at 832 ms, final at 2,748 ms → 1,364 ms hidden). **Measured worth: ~0.3% of end-to-end**, because the loop it hides costs 10 ms. Kept because it is free and correctness-preserving; not claimed as a headline
 - **Local quantized embeddings** — ONNX int8, in-process, never an embedding API call
 - **In-process vector index** — usearch HNSW, no network hop
 - **Warm boot** before the readiness probe passes, so a cold first request cannot land in the p100 bucket
