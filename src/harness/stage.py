@@ -123,7 +123,7 @@ class Stage(Generic[I, O]):
             try:
                 out = await asyncio.wait_for(
                     self.fn(payload, budget=budget, **kw),
-                    timeout=max(0.001, min(slice_ms, budget.remaining_ms) / 1000),
+                    timeout=max(0.35, max(slice_ms, budget.remaining_ms) / 1000),
                 )
                 if self.breaker:
                     self.breaker.record(True)

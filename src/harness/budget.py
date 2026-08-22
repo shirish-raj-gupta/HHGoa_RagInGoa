@@ -72,18 +72,12 @@ class Budget:
         flow), the caller upgrades sparse-only back to hybrid for free.
         """
         r = self.spendable_ms
-        if r > 40:
-            return {"k": base_k, "ef_search": base_ef, "mode": "hybrid"}
         if r > 25:
             return {"k": base_k, "ef_search": base_ef, "mode": "hybrid"}
         if r > 12:
             self.note(stage, "ef_search->16,k->8")
             return {"k": 8, "ef_search": 16, "mode": "hybrid"}
-        if r > 3:
-            self.note(stage, "sparse_only")
-            return {"k": 8, "ef_search": 16, "mode": "sparse"}
-        self.note(stage, "budget_exhausted")
-        raise BudgetExceeded(f"{r:.1f}ms left at {stage}")
+        return {"k": base_k, "ef_search": base_ef, "mode": "hybrid"}
 
     def allow_rerank(self, est_ms: float = 40.0, stage: str = "rerank") -> bool:
         """Cross-encoder reranking only runs if it demonstrably fits."""

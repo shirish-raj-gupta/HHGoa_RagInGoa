@@ -179,9 +179,13 @@ def _load(langs: list[str]) -> None:
         S.embedder.encode_queries(["warmup", "what is definition", "explain the process"])
     except Exception:
         pass
-    prefault_ms = (time.perf_counter_ns() - t_prefault) / 1e6
-    log.info("page cache prefault complete in %.0fms: %d index files read into RAM",
-             prefault_ms, len(langs) * 2)
+    # Warm full core loop end-to-end so thread pools, fusion, and text lookups are primed
+    try:
+        import asyncio
+        for wq in ("what is a corporation?", "who was the president", "meaning of life"):
+            asyncio.run(S.core.run(wq, budget_ms=200.0))
+    except Exception as e:
+        log.warning("core loop warmup note: %s", e)
 
 
 def _lookup_texts(passage_ids: list[str]) -> dict[str, str]:
