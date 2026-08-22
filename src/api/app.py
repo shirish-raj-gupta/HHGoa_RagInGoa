@@ -105,7 +105,11 @@ def _load(langs: list[str]) -> None:
         if not vec.exists():
             log.warning("no prebuilt partition for %s, skipping", lang)
             continue
-        part = DensePartition.load(vec, view=True)
+        try:
+            part = DensePartition.load(vec, view=True)
+        except RuntimeError:
+            log.warning("mmap failed for %s, loading into RAM instead", lang)
+            part = DensePartition.load(vec, view=False)
         dense.partitions[lang] = part
 
         bm = INDEX_DIR / f"{lang}.bm25"
@@ -142,14 +146,19 @@ def _load(langs: list[str]) -> None:
             raise RuntimeError(f"index for {lang} is broken (self_retrieval={sr:.3f})")
         S.corpus_langs.append(lang)
 
-    tau = None
-    tj = Path("bench/tau_calibration.json")
-    if tj.exists():
-        tau = json.loads(tj.read_text(encoding="utf-8"))["chosen"]["tau"]
-    S.core = CoreLoop(S.embedder, dense, sparse, tau=tau,
+    S.core = CoreLoop(S.embedder, dense, sparse, tau=None,
                       text_lookup=_lookup_texts)
-    S.generator = Generator(model=os.environ.get("RAG_MODEL", DEFAULT_MODEL))
+    S.generator = Generator(model=os.environ.get("RAG_MODEL", "openai/gpt-oss-20b"), use_tools=False)
     S.n_chunks = sum(len(p.chunk_ids) for p in dense.partitions.values())
+
+    # Warm up ONNX embedder session and pipeline so the first live query is sub-100ms
+    try:
+        q_vecs = S.embedder.encode_queries(["what is corporation?", "परिभाषा परिधान", "இது தீப்பற்றக்கூடியது"])
+        for lg in S.corpus_langs:
+            if lg in dense.partitions:
+                dense.partitions[lg].search(q_vecs[0], k=10)
+    except Exception as e:
+        log.warning("embedder warmup note: %s", e)
 
 
 def _lookup_texts(passage_ids: list[str]) -> dict[str, str]:
@@ -258,7 +267,8 @@ async def _answer(text: str, lang_hint: str | None, budget_ms: float,
         }
         remember(trace, {"answer": ans, "query": text})
         return {"request_id": trace.request_id, "answer": ans,
-                "retrieved": [], "trace": json.loads(trace.model_dump_json())}
+                "retrieved": [json.loads(c.model_dump_json()) for c in res.retrieval.chunks],
+                "trace": json.loads(trace.model_dump_json())}
 
     t_gen = time.perf_counter_ns()
     draft = None

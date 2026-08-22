@@ -209,8 +209,9 @@ def main() -> int:
     fails = [f for v in by_cat.values() for f in v["failures"]]
     print(f"\nFAILURES ({len(fails)}) - published, not hidden:")
     for f in fails:
+        q_safe = f['query'].encode('ascii', 'replace').decode('ascii')
         print(f"  {f['id']:12s} expected {f['expected']:6s} got {f['got']:6s} "
-              f"top={f['top_score']}  {f['query'][:56]}")
+              f"top={f['top_score']}  {q_safe[:56]}")
     print(f"\nwrote {a.out}")
     return 0
 

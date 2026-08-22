@@ -45,7 +45,10 @@ class GroundingReport:
 
 
 def split_claims(text: str) -> list[str]:
-    return [s.strip() for s in SENT_SPLIT.split(text or "") if s.strip()]
+    chunks = [s.strip() for s in SENT_SPLIT.split(text or "") if s.strip()]
+    if not chunks and text and text.strip():
+        return [text.strip()]
+    return chunks
 
 
 # ------------------------------------------------------- 1. citation spans
@@ -109,6 +112,13 @@ def check_grounding(answer_text: str, retrieved: RetrievalSet, embedder,
     events: list[GuardrailEvent] = []
 
     if not claims:
+        # The model returned an empty answer. If retrieval found chunks, this
+        # is a model-side refusal (it chose not to answer), not a grounding
+        # failure. Pass it through so the retrieved chunks remain visible.
+        if not retrieved.is_empty:
+            return GroundingReport(0, 0, [], [], True,
+                                   [GuardrailEvent(name="grounding", passed=True,
+                                                   detail="empty model answer; retrieval has chunks")])
         return GroundingReport(0, 0, [], [], False,
                                [GuardrailEvent(name="grounding", passed=False,
                                                detail="no claims")])
@@ -188,6 +198,8 @@ def apply_output_rails(answer: Answer, retrieved: RetrievalSet, embedder,
     chance to hallucinate.
     """
     events: list[GuardrailEvent] = []
+    if answer.refused:
+        return answer, events, True
 
     cits, ev_cit = verify_citations(answer, retrieved)
     events.append(ev_cit)

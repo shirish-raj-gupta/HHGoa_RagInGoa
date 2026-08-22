@@ -1,70 +1,295 @@
-/* HH Goa 2026 - pre-dawn Goa. Less noise. More signal.
-   Colour carries state; nothing is coloured for decoration. */
+/* ==========================================================================
+   HH GOA 2026 — AWARD-WINNING PRO UI/UX (#RAGInGoa)
+   Theme: Hacker House Goa · 2:47 PM Studio · Deep Goa Forest & Solar Gold
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,600;0,700;0,800;0,900;1,800&family=Imbue:opsz,wght@10..100,200..900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Victor+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 :root {
-  --hh-night:  #0B0E1A;   /* pre-dawn indigo - page base            */
-  --hh-deep:   #141A2E;   /* surface, cards, panels                 */
-  --hh-sand:   #EDE3D2;   /* primary text                           */
-  --hh-sun:    #FF9E3D;   /* sunrise amber - the single accent      */
-  --hh-coral:  #FF5F52;   /* horizon coral - over-budget, refusals  */
-  --hh-palm:   #2FBF8F;   /* palm green - grounded, verified, pass  */
+  /* Ultra-Deep Forest Backgrounds */
+  --goa-bg-page:        #05180D;
+  --goa-bg-dark:        #072414;
+  --goa-bg-surface:     rgba(10, 29, 19, 0.85);
+  --goa-bg-card:        rgba(13, 61, 34, 0.68);
+  --goa-bg-card-hover:  rgba(20, 90, 50, 0.82);
+  --goa-bg-elevated:    #145A32;
+  --goa-bg-glass:       rgba(7, 36, 20, 0.75);
 
-  --line:      #232B45;
-  --muted:     #8A93AD;
-  --dim:       #5A6484;
+  /* Primary Brand Greens */
+  --goa-green:          #1A6B3C;
+  --goa-green-rgb:      26, 107, 60;
+  --goa-green-deep:     #0D3D22;
+  --goa-green-deep-rgb: 13, 61, 34;
 
-  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --body: "Public Sans", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          Roboto, sans-serif;
-  --display: Archivo, "Arial Narrow", var(--body);
+  /* Radiant Solar Gold & Amber Accents */
+  --goa-gold:           #E8C840;
+  --goa-gold-rgb:       232, 200, 64;
+  --goa-gold-dim:       #C4A832;
+  --goa-gold-warm:      #FFF2C2;
+  --goa-amber:          #FF7A00;
+  --goa-amber-rgb:      255, 122, 0;
 
-  --r: 10px;
-  --pad: clamp(14px, 2.2vw, 22px);
+  /* Goa Hot Pink & Laser Coral */
+  --goa-pink:           #FF2D78;
+  --goa-pink-rgb:       255, 45, 120;
+  --goa-coral:          #FF5F52;
+
+  /* Quantum Emerald & Electric Cyan */
+  --goa-emerald:        #34D399;
+  --goa-emerald-rgb:    52, 211, 153;
+  --goa-cyan:           #00F0FF;
+  --goa-cyan-rgb:       0, 240, 255;
+  --goa-violet:         #A855F7;
+
+  /* Typography Palette */
+  --goa-sand:           #F5F0E1;
+  --goa-sand-rgb:       245, 240, 225;
+  --goa-cream:          #EDE3D2;
+  --goa-cream-dark:     #D8CEB8;
+  --goa-muted:          #9CB3A4;
+  --goa-dim:            #567563;
+  --goa-white:          #FFFFFF;
+
+  /* Typography Stacks */
+  --font-serif:         'Imbue', Georgia, serif;
+  --font-display:       'Anybody', 'Space Grotesk', sans-serif;
+  --font-hero:          'Space Grotesk', sans-serif;
+  --font-body:          'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-code:          'Victor Mono', 'JetBrains Mono', monospace;
+  --font-mono:          'JetBrains Mono', monospace;
+
+  /* Borders & Dividers */
+  --border-subtle:      rgba(245, 240, 225, 0.09);
+  --border-gold:        rgba(232, 200, 64, 0.35);
+  --border-gold-glow:   rgba(232, 200, 64, 0.7);
+  --border-green:       rgba(26, 107, 60, 0.5);
+  --border-emerald:     rgba(52, 211, 153, 0.4);
+  --border-pink:        rgba(255, 45, 120, 0.4);
+
+  /* Shadows & Illuminations */
+  --shadow-gold-sm:     0 0 16px rgba(232, 200, 64, 0.22);
+  --shadow-gold-md:     0 0 35px rgba(232, 200, 64, 0.38);
+  --shadow-gold-lg:     0 0 65px rgba(232, 200, 64, 0.28);
+  --shadow-emerald-sm:  0 0 16px rgba(52, 211, 153, 0.28);
+  --shadow-pink:        0 4px 20px rgba(255, 45, 120, 0.4);
+  --shadow-card:        0 14px 40px -6px rgba(0, 0, 0, 0.65);
+  --shadow-glow:        0 0 30px rgba(232, 200, 64, 0.15);
+
+  --radius-xs:          4px;
+  --radius-sm:          8px;
+  --radius-md:          14px;
+  --radius-lg:          22px;
+  --radius-pill:        9999px;
+  --pad-container:      clamp(16px, 3.2vw, 36px);
 }
 
-* { box-sizing: border-box; }
+/* Base Styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--hh-night);
-  color: var(--hh-sand);
-  font-family: var(--body);
-  font-size: 15px;
-  line-height: 1.55;
+  min-height: 100vh;
+  background-color: var(--goa-bg-page);
+  color: var(--goa-sand);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  position: relative;
 }
 
-/* Monospace is earned here - this app is mostly telemetry. */
-.mono, .num, code, pre, .pid, .stage-name { font-family: var(--mono); }
-.num { font-variant-numeric: tabular-nums; }
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(5, 24, 13, 0.8);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(232, 200, 64, 0.35);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--goa-gold);
+}
 
-/* lowercase eyebrows, no exclamation marks */
+/* Official HH Goa selection highlight */
+::selection {
+  background-color: var(--goa-pink);
+  color: #FFFFFF;
+}
+
+/* Interactive Particle Canvas (Behind content) */
+#particleCanvas {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* Background Atmosphere: Goa Canopy + Golden Sunbeam Vignette */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    radial-gradient(circle at 50% -12%, rgba(var(--goa-gold-rgb), 0.18) 0%, transparent 60%),
+    radial-gradient(circle at 8% 45%, rgba(var(--goa-green-rgb), 0.45) 0%, transparent 65%),
+    radial-gradient(circle at 92% 75%, rgba(var(--goa-pink-rgb), 0.14) 0%, transparent 55%),
+    linear-gradient(to right, rgba(245, 240, 225, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(245, 240, 225, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Subtle CRT Grain / Scanline Texture */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.14) 0px,
+    rgba(0, 0, 0, 0.14) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  opacity: 0.35;
+  z-index: 1;
+}
+
+.mono, .num, code, pre, .pid {
+  font-family: var(--font-code);
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Editorial Serif Headline */
+.serif-headline {
+  font-family: var(--font-serif);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 0.94;
+  text-transform: uppercase;
+}
+
+/* High-Impact Eyebrow */
 .eyebrow {
-  font-family: var(--display);
-  font-weight: 700;
-  font-stretch: expanded;
-  letter-spacing: .16em;
-  text-transform: lowercase;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
   font-size: 11px;
-  color: var(--muted);
+  color: var(--goa-gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.eyebrow::before {
+  content: '✦';
+  color: var(--goa-gold);
+  font-size: 10px;
 }
 
+/* Gold Corner Pixel Bracket Accents */
+.gold-corner {
+  position: relative;
+}
+.gold-corner::after {
+  content: '';
+  position: absolute;
+  top: -1px; right: -1px;
+  width: 10px; height: 10px;
+  border-top: 2px solid var(--goa-gold);
+  border-right: 2px solid var(--goa-gold);
+  pointer-events: none;
+}
+
+/* Cyber Bracket Badges */
+.bracket-tag {
+  font-family: var(--font-code);
+  font-size: 11px;
+  color: var(--goa-gold);
+  background: rgba(232, 200, 64, 0.1);
+  border: 1px solid rgba(232, 200, 64, 0.35);
+  border-radius: var(--radius-xs);
+  padding: 3px 9px;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hashtag-badge {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 12px;
+  color: #05180D;
+  background: linear-gradient(135deg, var(--goa-gold), #FFF2C2);
+  border-radius: var(--radius-pill);
+  padding: 5px 15px;
+  letter-spacing: 0.06em;
+  box-shadow: var(--shadow-gold-sm);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.hashtag-badge:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: var(--shadow-gold-md);
+  filter: brightness(1.12);
+}
+
+/* Glassmorphism Panel */
 .panel {
-  background: var(--hh-deep);
-  border: 1px solid var(--line);
-  border-radius: var(--r);
-  padding: var(--pad);
+  background: var(--goa-bg-card);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--pad-container);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 
-.pass { color: var(--hh-palm); }
-.fail { color: var(--hh-coral); }
-.live { color: var(--hh-sun); }
+.panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232, 200, 64, 0.35), transparent);
+  pointer-events: none;
+}
 
-/* Visible keyboard focus everywhere - unannounced quality floor. */
+.panel:hover {
+  border-color: rgba(232, 200, 64, 0.4);
+}
+
+/* State Status Colors */
+.pass { color: var(--goa-gold); text-shadow: 0 0 10px rgba(232, 200, 64, 0.5); }
+.fail { color: var(--goa-pink); text-shadow: 0 0 10px rgba(255, 45, 120, 0.5); }
+.live { color: var(--goa-gold); text-shadow: 0 0 10px rgba(232, 200, 64, 0.5); }
+
+/* Accessible Focus States */
 :focus-visible {
-  outline: 2px solid var(--hh-sun);
+  outline: 2px solid var(--goa-gold);
   outline-offset: 3px;
+  box-shadow: 0 0 14px rgba(232, 200, 64, 0.6);
   border-radius: 4px;
 }
 
@@ -78,11 +303,23 @@ html, body {
   border: 0;
 }
 
-/* The sunline still FILLS with reduced motion - it just stops animating. */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .001ms !important;
-  }
+/* Keyframe Animations */
+@keyframes pulseGold {
+  0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 10px var(--goa-gold)); }
+  50% { opacity: 0.75; transform: scale(0.97); filter: drop-shadow(0 0 3px var(--goa-gold)); }
+}
+
+@keyframes ringRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes waveBar {
+  0%, 100% { height: 6px; }
+  50% { height: 26px; }
+}
+
+@keyframes shimmerLight {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
 }

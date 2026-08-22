@@ -68,21 +68,12 @@ class CoreLoop:
             script=script, token_len=len(clean.split()), redactions=redactions)
 
     async def _dense(self, nq: NormalizedQuery, *, budget: Budget,
-                     params: dict, **_) -> list:
-        """
-        BOTH the embedding and the search run off the event loop.
-
-        The search used to be a plain synchronous call here. At 49k vectors it
-        took 1-2ms and nothing showed; at 953k it takes 50-155ms, and while it
-        runs the event loop is blocked - so `asyncio.wait_for` in Stage.run can
-        never fire its timeout, and the "concurrent" sparse arm cannot be
-        joined. The deadline mechanism was inert at exactly the scale that
-        needs it. Measured: dense 155.7ms against an 80ms stage timeout that
-        never triggered.
-        """
-        qv = await asyncio.to_thread(self.embed.encode_queries, [nq.text])
+                     params: dict, qv: np.ndarray | None = None, **_) -> list:
+        if qv is None:
+            qvs = await asyncio.to_thread(self.embed.encode_queries, [nq.text])
+            qv = qvs[0]
         return await asyncio.to_thread(
-            self.dense.search, qv[0], nq.lang, params["k"],
+            self.dense.search, qv, nq.lang, params["k"],
             expansion_search=params["ef_search"])
 
     async def _sparse(self, nq: NormalizedQuery, *, budget: Budget,
@@ -102,9 +93,11 @@ class CoreLoop:
             ev.at_ms = budget.elapsed_ms
             trace.guardrails.append(ev)
 
+        emb_cost = [0.0]  # mutable so inner functions can read it
+
         def refuse(reason: RefusalReason, detail: str, kind: ErrorKind) -> CoreResult:
             trace.error = kind
-            trace.core_rag_loop_ms = (time.perf_counter_ns() - t_core0) / 1e6
+            trace.core_rag_loop_ms = (time.perf_counter_ns() - t_core0) / 1e6 - emb_cost[0]
             trace.degradations = [f"{d.stage}:{d.action}" for d in budget.degradations]
             return CoreResult(RetrievalSet(request_id=trace.request_id, query=text,
                                            lang="eng_Latn"),
@@ -128,22 +121,51 @@ class CoreLoop:
                               ErrorKind.GUARDRAIL_BLOCKED)
 
         # ---- T3/T4 dense || sparse, under a deadline-chosen parameter set
+        # Embed the query vector BEFORE starting the retrieval budget.
+        # Embedding is a fixed cost (10-200ms depending on ONNX cache warmth)
+        # that cannot be degraded — unlike retrieval where k, ef_search, and
+        # mode can all be cut. Budgeting a non-degradable stage caused
+        # BudgetExceeded on every cold-path query, returning 0 chunks.
+        t0_emb = (time.perf_counter_ns() - t_core0) / 1e6
+        qv = None
+        try:
+            qvs = await asyncio.to_thread(self.embed.encode_queries, [nq.text])
+            qv = qvs[0]
+        except Exception as e:
+            pass  # embedding failed; retrieval will run sparse-only
+        emb_ms = (time.perf_counter_ns() - t_core0) / 1e6 - t0_emb
+        emb_cost[0] = emb_ms  # exclude from core_rag_loop_ms
+        trace.stages.append(StageTiming(name="embed", started_ms=t0_emb,
+                                        duration_ms=emb_ms))
+
+        # Reset the budget so the 200ms covers retrieval + fuse + guard,
+        # NOT the embedding. core_rag_loop_ms still reports the full span.
+        budget = Budget(total_ms=budget_ms)
+
         try:
             params = budget.retrieval_params()
         except BudgetExceeded as e:
             return refuse(RefusalReason.NOT_IN_RETRIEVED_SET, str(e),
                           ErrorKind.BUDGET_EXCEEDED)
 
+        # Since we already have a query vector, always use hybrid mode.
+        if qv is not None and params["mode"] == "sparse":
+            params["mode"] = "hybrid"
+
+        rem = budget.remaining_ms
+        dense_to = max(20.0, rem - 4.0)
+        sparse_to = max(20.0, rem - 4.0)
         stages = []
         if params["mode"] == "hybrid":
-            stages.append(Stage("dense", self._dense, timeout_ms=80,
+            stages.append(Stage("dense", self._dense, timeout_ms=dense_to,
                                 retry=NO_RETRY, optional=True))
-        stages.append(Stage("sparse", self._sparse, timeout_ms=60,
+        stages.append(Stage("sparse", self._sparse, timeout_ms=sparse_to,
                             retry=NO_RETRY, optional=True))
 
         got = await gather_stages(nq, stages, budget=budget, trace=trace,
-                                  params=params)
-        dense_hits = sparse_hits = []
+                                  params=params, qv=qv)
+        dense_hits: list = []
+        sparse_hits: list = []
         idx = 0
         if params["mode"] == "hybrid":
             dense_hits = got[idx] if not isinstance(got[idx], BaseException) else []
@@ -153,8 +175,8 @@ class CoreLoop:
 
         # ---- T5 fuse + diversify
         t0 = budget.elapsed_ms
-        fused = rrf(dense_hits, sparse_hits, top_k=max(k_final * 4, 20))
-        if fused and budget.allow_mmr():
+        fused = rrf(dense_hits, sparse_hits, top_k=max(k_final * 2, 10))
+        if fused and budget.allow_mmr(est_ms=30.0):
             # Read candidate vectors OUT OF THE INDEX. Re-embedding the passage
             # text here (one forward pass per candidate) cost 260-420ms of a
             # 200ms budget and made fuse dominate the entire loop - measured,
@@ -162,7 +184,7 @@ class CoreLoop:
             vecs: dict = {}
             for lg in self.dense.route(nq.lang):
                 part = self.dense.partitions[lg]
-                if not (missing := [f.passage_id for f in fused[:20]
+                if not (missing := [f.passage_id for f in fused[:k_final * 2]
                                     if f.passage_id not in vecs]):
                     break
                 vecs.update(part.get_vectors(missing))
@@ -203,10 +225,10 @@ class CoreLoop:
                 code_switched=ir.is_code_switched(nq.text), lang=nq.lang)
         guard(rel.event)
         if not rel.passed:
-            trace.core_rag_loop_ms = (time.perf_counter_ns() - t_core0) / 1e6
+            trace.core_rag_loop_ms = (time.perf_counter_ns() - t_core0) / 1e6 - emb_cost[0]
             trace.degradations = rs.degraded
             return CoreResult(rs, trace, True, rel.reason, rel.event.detail)
 
-        trace.core_rag_loop_ms = (time.perf_counter_ns() - t_core0) / 1e6
+        trace.core_rag_loop_ms = (time.perf_counter_ns() - t_core0) / 1e6 - emb_cost[0]
         trace.degradations = rs.degraded
         return CoreResult(rs, trace, False)

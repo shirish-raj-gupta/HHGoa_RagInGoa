@@ -242,8 +242,10 @@ def identify_language(text: str, stt_lang: str | None = None) -> tuple[str, floa
                 return best, min(0.9, 0.5 + 0.1 * hits)
     if script in AMBIGUOUS_SCRIPTS:
         cands = AMBIGUOUS_SCRIPTS[script]
-        if stt_lang and SARVAM_TO_FLORES.get(stt_lang) in cands:
-            return SARVAM_TO_FLORES[stt_lang], 0.9
+        if stt_lang:
+            flores = SARVAM_TO_FLORES.get(stt_lang, stt_lang)
+            if flores in cands:
+                return flores, 0.9
         if script == "BENGALI":
             lg = disambiguate_bengali(text)
             return lg, 0.85 if lg == "asm_Beng" else 0.6
@@ -251,8 +253,10 @@ def identify_language(text: str, stt_lang: str | None = None) -> tuple[str, floa
     lang = SCRIPT_TO_LANG.get(script)
     if lang:
         return lang, 0.95
-    if stt_lang and stt_lang in SARVAM_TO_FLORES:
-        return SARVAM_TO_FLORES[stt_lang], 0.7
+    if stt_lang:
+        flores = SARVAM_TO_FLORES.get(stt_lang, stt_lang)
+        if flores in THRESHOLDS["language"]["supported"]:
+            return flores, 0.9
     return "eng_Latn", 0.3
 
 

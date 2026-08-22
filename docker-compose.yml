@@ -15,6 +15,11 @@ services:
     build: .
     ports:
       - "7860:7860"
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - IPC_LOCK
+      - SYS_RESOURCE
     environment:
       # Which partitions to load. All 15 is ~15GB on disk; the vectors are
       # memory-mapped, so resident memory tracks the hot set rather than the
@@ -30,10 +35,11 @@ services:
       RAG_ALLOW_ORIGINS: "${RAG_ALLOW_ORIGINS:-https://srg101-raginggoa.static.hf.space,http://localhost:7860}"
       SARVAM_API_KEY: "${SARVAM_API_KEY}"
       GROQ_API_KEY: "${GROQ_API_KEY}"
+      HF_TOKEN: "${HF_TOKEN}"
     volumes:
       # The index is mounted, never baked into the image - it is 15GB and
       # rebuilding the image on every code change would be unusable.
-      - ./artifacts:/home/user/app/artifacts:ro
+      - ./artifacts:/home/user/app/artifacts
     # Boot pages the mmap in before readiness passes; a cold index served the
     # first user a 412ms query with both retrieval arms timing out.
     healthcheck:

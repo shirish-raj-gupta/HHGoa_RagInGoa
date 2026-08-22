@@ -1,232 +1,998 @@
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RAG in Goa</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..700&family=JetBrains+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tokens.css">
-<script src="config.js"></script>
-<link rel="stylesheet" href="/static/tokens.css">
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1A6B3C">
+  <title>HH GOA 2026 — #RAGInGoa Voice-Enabled RAG Engine</title>
+  <meta name="description" content="Speak a question, get a grounded answer in sub-200ms across 15 languages. #RAGInGoa · Task #02 Hacker House Goa 2026. Less Noise. More Signal.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,600;0,700;0,800;0,900;1,800&family=Imbue:opsz,wght@10..100,200..900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Victor+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <script src="config.js"></script>
 
-<style>
-  .wrap { max-width: 1120px; margin: 0 auto; padding: var(--pad); }
+  <style>
+    /* ==========================================================================
+       PRO-GRADE STYLING & COMPONENT ARCHITECTURE
+       ========================================================================== */
+    .app-wrap {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: var(--pad-container);
+      position: relative;
+      z-index: 2;
+    }
 
-  header {
-    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
-    padding-bottom: 14px; border-bottom: 1px solid var(--line);
-  }
-  h1 {
-    font-family: var(--display); font-weight: 700; font-stretch: expanded;
-    font-size: clamp(20px, 3.4vw, 30px); letter-spacing: .04em;
-    text-transform: uppercase; margin: 0;
-  }
-  .tag { color: var(--dim); font-family: var(--mono); font-size: 12px; }
-  .status { margin-left: auto; font-family: var(--mono); font-size: 12px; }
-  .dot {
-    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-    background: var(--dim); margin-right: 6px; vertical-align: middle;
-  }
-  .dot.on { background: var(--hh-palm); }
-  .dot.busy { background: var(--hh-sun); animation: pulse 1.1s infinite; }
-  @keyframes pulse { 50% { opacity: .25; } }
+    /* ---------------- Navigation Bar ---------------- */
+    .hh-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 24px;
+    }
 
-  /* ---------------- capture ---------------- */
-  .capture { text-align: center; padding: 26px 0 18px; }
-  .mic {
-    width: 74px; height: 74px; border-radius: 50%;
-    border: 1px solid var(--line); background: var(--hh-deep);
-    color: var(--hh-sand); font-size: 26px; cursor: pointer;
-    transition: transform .12s, border-color .12s, box-shadow .12s;
-  }
-  .mic:hover { border-color: var(--hh-sun); }
-  .mic[aria-pressed="true"] {
-    border-color: var(--hh-sun); color: var(--hh-sun);
-    box-shadow: 0 0 0 6px rgba(255,158,61,.10); transform: scale(1.04);
-  }
-  .hint { color: var(--muted); font-size: 12px; margin-top: 10px; }
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
 
-  #wave { width: min(100%, 460px); height: 40px; display: block; margin: 14px auto 0; }
+    .hh-logo-title {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: clamp(22px, 3vw, 28px);
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: var(--goa-sand);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-  .partial {
-    font-family: var(--mono); font-size: 14px; min-height: 1.5em;
-    color: var(--hh-sun); margin-top: 8px; word-break: break-word;
-  }
-  .partial.final { color: var(--hh-sand); }
+    .hh-logo-title span.goa-text {
+      color: var(--goa-gold);
+      text-shadow: 0 0 16px rgba(232, 200, 64, 0.6);
+    }
 
-  .typed { display: flex; gap: 8px; max-width: 620px; margin: 16px auto 0; }
-  .typed input {
-    flex: 1; background: var(--hh-deep); border: 1px solid var(--line);
-    color: var(--hh-sand); border-radius: var(--r);
-    padding: 11px 13px; font-family: var(--mono); font-size: 13px;
-  }
-  .typed button {
-    background: var(--hh-sun); color: #17120a; border: 0;
-    border-radius: var(--r); padding: 0 18px; font-weight: 600; cursor: pointer;
-  }
-  .typed button:disabled { opacity: .45; cursor: not-allowed; }
+    .hh-meta-badges {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
 
-  /* ---------------- the sunline ---------------- */
-  .sunline { margin-top: 20px; }
-  .sunline-head {
-    display: flex; align-items: baseline; gap: 10px;
-    margin-bottom: 9px; flex-wrap: wrap;
-  }
-  .budget-num { margin-left: auto; font-family: var(--mono); font-size: 13px; }
-  .track {
-    position: relative; height: 30px; border-radius: 6px;
-    background: #0d1224; border: 1px solid var(--line); overflow: hidden;
-  }
-  /* the horizon the sun rises against */
-  .horizon {
-    position: absolute; left: 0; right: 0; top: 50%; height: 1px;
-    background: var(--line);
-  }
-  .seg {
-    position: absolute; top: 0; bottom: 0;
-    transition: width .18s linear, left .18s linear;
-  }
-  .sun {
-    position: absolute; top: 50%; width: 16px; height: 16px;
-    border-radius: 50%; background: var(--hh-sun);
-    box-shadow: 0 0 16px 3px rgba(255,158,61,.45);
-    transform: translate(-50%, -50%);
-    transition: left .18s linear, background .18s, box-shadow .18s;
-  }
-  .track.over .sun {
-    background: var(--hh-coral); box-shadow: 0 0 16px 3px rgba(255,95,82,.45);
-    /* blown budget tips the sun BELOW the horizon line */
-    top: 76%;
-  }
-  .track.over { border-color: var(--hh-coral); }
-  .legend {
-    display: flex; gap: 14px; flex-wrap: wrap;
-    margin-top: 9px; font-family: var(--mono); font-size: 11.5px; color: var(--muted);
-  }
-  .legend b { color: var(--hh-sand); font-weight: 500; }
-  .swatch {
-    display: inline-block; width: 8px; height: 8px; border-radius: 2px;
-    margin-right: 5px; vertical-align: middle;
-  }
+    .meta-pill {
+      font-family: var(--font-code);
+      font-size: 11px;
+      color: var(--goa-muted);
+      background: rgba(245, 240, 225, 0.04);
+      border: 1px solid var(--border-subtle);
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+    }
 
-  /* ---------------- results ---------------- */
-  .cols { display: grid; grid-template-columns: 1.15fr .85fr; gap: 14px; margin-top: 16px; }
-  @media (max-width: 820px) { .cols { grid-template-columns: 1fr; } }
+    .hud-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-code);
+      font-size: 12px;
+      background: rgba(10, 29, 19, 0.9);
+      border: 1px solid var(--border-gold);
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
 
-  .answer { font-size: 15.5px; white-space: pre-wrap; word-break: break-word; }
-  .cite {
-    font-family: var(--mono); font-size: 11px; color: var(--hh-palm);
-    border: 1px solid var(--hh-palm); border-radius: 4px;
-    padding: 0 4px; margin: 0 2px; cursor: pointer; background: none;
-  }
+    .status-beacon {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--goa-dim);
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+    .status-beacon.on {
+      background: var(--goa-gold);
+      box-shadow: var(--shadow-gold-sm);
+    }
+    .status-beacon.busy {
+      background: var(--goa-amber);
+      box-shadow: 0 0 12px var(--goa-amber);
+      animation: pulseGold 0.9s infinite alternate;
+    }
+    .status-beacon.error {
+      background: var(--goa-pink);
+      box-shadow: 0 0 12px var(--goa-pink);
+    }
 
-  .card {
-    border: 1px solid var(--line); border-radius: 8px;
-    padding: 11px 12px; margin-bottom: 9px; background: #0f1425;
-  }
-  .card.hl { border-color: var(--hh-sun); }
-  .card-top {
-    display: flex; gap: 8px; align-items: center;
-    font-family: var(--mono); font-size: 11px; color: var(--muted);
-    margin-bottom: 6px; flex-wrap: wrap;
-  }
-  .pid { color: var(--hh-sun); }
-  .card-body { font-size: 13px; color: #c9d0e2; max-height: 5.4em; overflow: hidden; }
-  .card.open .card-body { max-height: none; }
-  mark { background: rgba(255,158,61,.22); color: var(--hh-sand); border-radius: 2px; }
+    /* ---------------- Editorial Hero Banner ---------------- */
+    .hero-banner {
+      padding: 38px 24px 30px;
+      margin-bottom: 24px;
+      background: radial-gradient(circle at 50% 15%, rgba(var(--goa-green-deep-rgb), 0.95) 0%, rgba(7, 36, 20, 0.92) 80%);
+      border: 1px solid var(--border-gold);
+      text-align: center;
+      position: relative;
+      box-shadow: var(--shadow-gold-sm), inset 0 0 40px rgba(232, 200, 64, 0.05);
+    }
 
-  /* ---------------- refusal: as designed as success ---------------- */
-  .refusal { border-color: var(--hh-coral); }
-  .refusal-why {
-    font-family: var(--mono); font-size: 11px; color: var(--hh-coral);
-    letter-spacing: .1em; text-transform: lowercase; margin-bottom: 8px;
-  }
-  .refusal h3 { margin: 0 0 8px; font-size: 17px; font-weight: 600; }
-  .refusal p { margin: 0 0 6px; color: #c9d0e2; }
-  .refusal .next { color: var(--muted); font-size: 13px; }
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 15%; right: 15%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--goa-gold), var(--goa-green), transparent);
+    }
 
-  /* ---------------- guardrail log ---------------- */
-  .rails { margin-top: 14px; }
-  .rail-row {
-    display: flex; gap: 10px; align-items: baseline;
-    font-family: var(--mono); font-size: 12px;
-    padding: 3px 0; border-bottom: 1px dashed var(--line);
-  }
-  .rail-row:last-child { border-bottom: 0; }
-  .rail-name { min-width: 130px; }
-  .rail-detail { color: var(--muted); word-break: break-word; }
-  .rail-at { margin-left: auto; color: var(--dim); }
+    .hero-top-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
 
-  table.trace { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
-  table.trace td { padding: 2px 6px 2px 0; }
-  table.trace td:last-child { text-align: right; color: var(--muted); }
-  .scroll-x { overflow-x: auto; }
-  footer { margin: 26px 0 10px; color: var(--dim); font-family: var(--mono); font-size: 11px; }
-</style>
+    .hero-headline {
+      font-size: clamp(40px, 6.8vw, 84px);
+      margin: 4px 0 12px;
+      color: var(--goa-sand);
+      letter-spacing: 0.02em;
+    }
 
-<div class="wrap">
-  <header>
-    <h1>RAG in Goa</h1>
-    <span class="tag">hh goa 2026 · task #02</span>
-    <span class="status" id="status"><span class="dot" id="dot"></span><span id="statusText">connecting</span></span>
+    .hero-headline span.gradient-word {
+      background: linear-gradient(135deg, var(--goa-sand) 25%, var(--goa-gold) 65%, var(--goa-amber) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subhead {
+      font-family: var(--font-body);
+      font-size: clamp(14px, 1.8vw, 17px);
+      color: var(--goa-cream-dark);
+      max-width: 740px;
+      margin: 0 auto 22px;
+      line-height: 1.55;
+    }
+
+    /* ---------------- Voice Studio Section ---------------- */
+    .voice-studio {
+      margin: 20px auto 0;
+      max-width: 780px;
+    }
+
+    .mic-button-cluster {
+      position: relative;
+      display: inline-block;
+      margin: 8px 0 10px;
+    }
+
+    .mic-orbit-ring {
+      position: absolute;
+      top: -14px; left: -14px; right: -14px; bottom: -14px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(232, 200, 64, 0.4);
+      animation: ringRotate 18s linear infinite;
+      pointer-events: none;
+    }
+
+    .mic-trigger {
+      width: 98px;
+      height: 98px;
+      border-radius: 50%;
+      border: 2px solid rgba(232, 200, 64, 0.6);
+      background: linear-gradient(145deg, #145A32, #0A1D13);
+      color: var(--goa-sand);
+      font-size: 36px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7), inset 0 0 16px rgba(232, 200, 64, 0.25);
+      transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .mic-trigger:hover {
+      transform: scale(1.06);
+      border-color: var(--goa-gold);
+      box-shadow: var(--shadow-gold-md), inset 0 0 20px rgba(232, 200, 64, 0.4);
+    }
+
+    .mic-trigger[aria-pressed="true"] {
+      transform: scale(1.12);
+      border-color: var(--goa-pink);
+      background: linear-gradient(145deg, #3D0D22, #18050D);
+      box-shadow: var(--shadow-pink), inset 0 0 25px rgba(var(--goa-pink-rgb), 0.5);
+      color: var(--goa-pink);
+    }
+
+    .mic-caption {
+      font-family: var(--font-code);
+      color: var(--goa-muted);
+      font-size: 12px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Dual-Mode Waveform Canvas */
+    #wave {
+      width: 100%;
+      max-width: 580px;
+      height: 52px;
+      display: block;
+      margin: 14px auto 0;
+      border-radius: var(--radius-sm);
+      background: rgba(5, 24, 13, 0.65);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Streaming Partial Transcript */
+    .partial-transcript {
+      font-family: var(--font-code);
+      font-size: 15px;
+      min-height: 1.6em;
+      color: var(--goa-gold);
+      margin: 14px auto;
+      word-break: break-word;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      background: rgba(5, 24, 13, 0.45);
+      border: 1px solid rgba(232, 200, 64, 0.25);
+      text-shadow: 0 0 8px rgba(232, 200, 64, 0.35);
+    }
+    .partial-transcript.final {
+      color: var(--goa-sand);
+      border-color: var(--border-subtle);
+      text-shadow: none;
+    }
+
+    /* Query Input Form */
+    .query-form {
+      display: flex;
+      gap: 10px;
+      margin: 18px 0 0;
+    }
+
+    .query-input {
+      flex: 1;
+      background: rgba(5, 24, 13, 0.85);
+      border: 1px solid var(--border-gold);
+      color: var(--goa-sand);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      font-family: var(--font-code);
+      font-size: 14.5px;
+      outline: none;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+      transition: all 0.2s ease;
+    }
+
+    .query-input:focus {
+      border-color: var(--goa-gold);
+      box-shadow: 0 0 20px rgba(232, 200, 64, 0.35), inset 0 2px 6px rgba(0, 0, 0, 0.6);
+    }
+
+    .submit-button {
+      background: linear-gradient(135deg, var(--goa-gold), #C4A832);
+      color: #05180D;
+      border: 0;
+      border-radius: var(--radius-md);
+      padding: 0 28px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-gold-sm);
+      transition: all 0.2s ease;
+    }
+
+    .submit-button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.15);
+      box-shadow: var(--shadow-gold-md);
+    }
+
+    .submit-button:disabled {
+      opacity: 0.4;
+      transform: none;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* Prompt Chips Filter Tabs */
+    .chips-deck {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .prompt-chip {
+      background: rgba(245, 240, 225, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--goa-sand);
+      border-radius: var(--radius-pill);
+      padding: 5px 12px;
+      font-family: var(--font-code);
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .prompt-chip:hover {
+      background: rgba(232, 200, 64, 0.15);
+      border-color: var(--goa-gold);
+      color: var(--goa-white);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(232, 200, 64, 0.25);
+    }
+
+    .chip-lang-tag {
+      font-size: 9.5px;
+      color: var(--goa-gold);
+      background: rgba(232, 200, 64, 0.2);
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-weight: 700;
+    }
+
+    /* Target Language Selector */
+    .language-toolbar {
+      margin-top: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .lang-dropdown {
+      background: rgba(5, 24, 13, 0.85);
+      border: 1px solid var(--border-subtle);
+      color: var(--goa-sand);
+      border-radius: var(--radius-sm);
+      padding: 7px 14px;
+      font-family: var(--font-code);
+      font-size: 12.5px;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .lang-dropdown:hover, .lang-dropdown:focus {
+      border-color: var(--goa-gold);
+      box-shadow: 0 0 10px rgba(232, 200, 64, 0.3);
+    }
+
+    .lang-dropdown option {
+      background: #0D3D22;
+      color: var(--goa-sand);
+    }
+
+    /* ---------------- The Sunline 2.0 (Telemetry Latency HUD) ---------------- */
+    .sunline-panel {
+      margin-bottom: 24px;
+      border: 1px solid var(--border-gold);
+    }
+
+    .sunline-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .budget-pill {
+      font-family: var(--font-code);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: var(--radius-xs);
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .track {
+      position: relative;
+      height: 42px;
+      border-radius: var(--radius-sm);
+      background: #05180D;
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .horizon-grid {
+      position: absolute;
+      top: 0; bottom: 0; left: 0; right: 0;
+      background-image: linear-gradient(to right, rgba(245, 240, 225, 0.04) 1px, transparent 1px);
+      background-size: 10% 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .horizon-center-line {
+      position: absolute;
+      left: 0; right: 0; top: 50%;
+      height: 1px;
+      background: rgba(245, 240, 225, 0.1);
+      z-index: 1;
+    }
+
+    .seg {
+      position: absolute;
+      top: 0; bottom: 0;
+      transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1), left 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 2;
+      opacity: 0.92;
+    }
+    .seg:hover {
+      opacity: 1;
+      filter: brightness(1.25);
+    }
+
+    /* Solar Tracker Orb */
+    .sun {
+      position: absolute;
+      top: 50%;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FFFFFF 20%, var(--goa-gold) 60%, var(--goa-amber) 100%);
+      box-shadow: 0 0 20px 6px rgba(232, 200, 64, 0.85), 0 0 45px 12px rgba(232, 200, 64, 0.45);
+      transform: translate(-50%, -50%);
+      transition: left 0.22s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, box-shadow 0.2s;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .track.over .sun {
+      background: radial-gradient(circle, #FFFFFF 20%, var(--goa-pink) 60%, #B71C1C 100%);
+      box-shadow: 0 0 20px 6px rgba(var(--goa-pink-rgb), 0.8), 0 0 45px 12px rgba(var(--goa-pink-rgb), 0.4);
+      top: 75%;
+    }
+    .track.over {
+      border-color: var(--goa-pink);
+    }
+
+    .legend-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      font-family: var(--font-code);
+      font-size: 11.5px;
+      color: var(--goa-muted);
+    }
+
+    .legend-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .swatch {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* ---------------- Results Grid ---------------- */
+    .results-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 22px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 880px) {
+      .results-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Answer Card */
+    .answer-panel {
+      min-height: 260px;
+      border: 1px solid var(--border-gold);
+    }
+
+    .card-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .card-action-bar {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .tool-btn {
+      background: rgba(245, 240, 225, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--goa-sand);
+      border-radius: var(--radius-xs);
+      padding: 3px 8px;
+      font-family: var(--font-code);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .tool-btn:hover {
+      background: var(--goa-gold);
+      color: #05180D;
+      border-color: var(--goa-gold);
+    }
+
+    .answer-content {
+      font-size: 15.5px;
+      line-height: 1.7;
+      color: var(--goa-sand);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .citation-tag {
+      font-family: var(--font-code);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--goa-gold);
+      border: 1px solid rgba(232, 200, 64, 0.6);
+      background: rgba(232, 200, 64, 0.15);
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin: 0 3px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-block;
+    }
+
+    .citation-tag:hover {
+      background: var(--goa-gold);
+      color: #05180D;
+      box-shadow: 0 0 12px rgba(232, 200, 64, 0.6);
+      transform: translateY(-1px);
+    }
+
+    /* Passage List */
+    .passages-deck {
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 4px;
+      margin-top: 12px;
+    }
+
+    .passage-item {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      background: rgba(5, 24, 13, 0.7);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .passage-item:hover {
+      border-color: var(--goa-gold);
+      background: rgba(13, 61, 34, 0.85);
+      transform: translateX(2px);
+    }
+
+    .passage-item.hl {
+      border-color: var(--goa-gold);
+      background: rgba(232, 200, 64, 0.14);
+      box-shadow: 0 0 16px rgba(232, 200, 64, 0.35);
+    }
+
+    .passage-header {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-family: var(--font-code);
+      font-size: 11px;
+      color: var(--goa-muted);
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .passage-pid {
+      color: var(--goa-gold);
+      font-weight: 700;
+    }
+
+    .passage-snippet {
+      font-size: 13px;
+      color: var(--goa-cream-dark);
+      line-height: 1.55;
+      max-height: 5.4em;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .passage-item.open .passage-snippet {
+      max-height: 800px;
+    }
+
+    mark {
+      background: rgba(232, 200, 64, 0.35);
+      color: #FFFFFF;
+      padding: 1px 4px;
+      border-radius: 2px;
+      box-shadow: 0 0 6px rgba(232, 200, 64, 0.5);
+    }
+
+    /* ---------------- Refusal Hologram ---------------- */
+    .refusal-state {
+      border-color: var(--goa-pink);
+      background: radial-gradient(circle at top left, rgba(var(--goa-pink-rgb), 0.12) 0%, rgba(13, 61, 34, 0.7) 100%);
+    }
+
+    .refusal-pill {
+      font-family: var(--font-code);
+      font-size: 11px;
+      color: var(--goa-pink);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .refusal-heading {
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--goa-sand);
+      margin: 0 0 10px;
+    }
+
+    .refusal-body {
+      color: var(--goa-cream-dark);
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    .refusal-hint {
+      color: var(--goa-muted);
+      font-size: 13px;
+      font-style: italic;
+    }
+
+    /* ---------------- Guardrail Terminal Matrix ---------------- */
+    .security-matrix {
+      border: 1px solid var(--border-subtle);
+    }
+
+    .guard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .guard-tile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-code);
+      font-size: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 12px;
+      border-radius: var(--radius-xs);
+    }
+
+    .guard-label {
+      font-weight: 700;
+      min-width: 140px;
+    }
+
+    .guard-detail {
+      color: var(--goa-muted);
+      word-break: break-word;
+      flex: 1;
+    }
+
+    .guard-time {
+      color: var(--goa-dim);
+      font-size: 11px;
+    }
+
+    /* Telemetry Table */
+    .telemetry-scroll {
+      margin-top: 14px;
+      overflow-x: auto;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 12px;
+    }
+
+    table.telemetry-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-code);
+      font-size: 12px;
+    }
+
+    table.telemetry-table td {
+      padding: 5px 8px 5px 0;
+      color: var(--goa-muted);
+    }
+
+    table.telemetry-table td:last-child {
+      text-align: right;
+      color: var(--goa-gold);
+      font-weight: 600;
+    }
+
+    /* Toast Notification */
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--goa-gold);
+      color: #05180D;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 12.5px;
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-gold-md);
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+    }
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Footer */
+    .hh-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 26px 0 14px;
+      border-top: 1px solid var(--border-subtle);
+      color: var(--goa-dim);
+      font-family: var(--font-code);
+      font-size: 11.5px;
+    }
+
+    .hh-footer a {
+      color: var(--goa-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .hh-footer a:hover {
+      color: var(--goa-gold);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Interactive Particle Canopy Canvas -->
+<canvas id="particleCanvas"></canvas>
+
+<!-- Toast Notification Element -->
+<div id="toast" class="toast-msg">Copied to clipboard ✓</div>
+
+<div class="app-wrap">
+  <!-- Brand Navigation -->
+  <header class="hh-nav">
+    <div class="brand-cluster">
+      <a href="https://hhgoa.com/" target="_blank" class="hh-logo-title">
+        HH<span class="goa-text">GOA</span> 2026
+      </a>
+      <div class="hh-meta-badges">
+        <a href="https://x.com/search?q=%23RAGInGoa" target="_blank" class="hashtag-badge">
+          #RAGInGoa
+        </a>
+        <span class="bracket-tag">TASK #02</span>
+        <span class="meta-pill">2:47 PM STUDIO</span>
+        <span class="meta-pill">GOA, INDIA · 28-31 OCT 2026</span>
+      </div>
+    </div>
+
+    <div class="hud-status-pill" id="statusBox">
+      <span class="status-beacon" id="dot"></span>
+      <span id="statusText">SYS.READY // 200MS_BUDGET</span>
+    </div>
   </header>
 
-  <section class="capture">
-    <button class="mic" id="mic" aria-pressed="false"
-            aria-describedby="micHint" title="hold to speak">◉</button>
-    <div class="hint" id="micHint">hold to speak · or type below</div>
-    <canvas id="wave" aria-hidden="true"></canvas>
+  <!-- Editorial Hero Section -->
+  <section class="panel hero-banner gold-corner">
+    <div class="hero-top-row">
+      <span class="eyebrow">HACKER HOUSE GOA · 247 BUILDERS</span>
+      <span class="bracket-tag">14.2M VECTORS · 15 INDIC LANGUAGES + ENGLISH</span>
+    </div>
 
-    <!-- screen readers get the transcript as it updates -->
-    <div class="partial" id="partial" role="status" aria-live="polite"></div>
+    <h1 class="serif-headline hero-headline">
+      VOICE RAG IN <span class="gradient-word">GOA</span>
+    </h1>
+    
+    <p class="hero-subhead">
+      Speak in 15 Indic languages or English. Retrieve across 14.2M passages in <strong>sub-200ms</strong>. Zero-trust guardrails. 100% grounded.
+    </p>
 
-    <form class="typed" id="typedForm">
-      <label class="sr-only" for="q">type a question instead</label>
-      <input id="q" placeholder="what is a corporation?" autocomplete="off">
-      <button type="submit" id="ask">ask</button>
-    </form>
+    <!-- Voice Capture Studio -->
+    <div class="voice-studio">
+      <div class="mic-button-cluster">
+        <div class="mic-orbit-ring"></div>
+        <button class="mic-trigger" id="mic" aria-pressed="false" title="Hold Space / Click to Speak" aria-label="Microphone Voice Search">
+          🎙
+        </button>
+      </div>
+      <div class="mic-caption" id="micHint">HOLD TO SPEAK · OR TYPE BELOW · PRESS SPACE / ENTER</div>
+
+      <!-- Oscilloscope & Multi-band Visualizer Canvas -->
+      <canvas id="wave" aria-hidden="true"></canvas>
+
+      <!-- Live Streaming Transcript -->
+      <div class="partial-transcript" id="partial" role="status" aria-live="polite"></div>
+
+      <!-- Query Input Form -->
+      <form class="query-form" id="typedForm">
+        <label class="sr-only" for="q">Ask a question</label>
+        <input id="q" class="query-input" placeholder="Ask anything in 15 languages (e.g. What is a corporation?)" autocomplete="off">
+        <button type="submit" class="submit-button" id="ask">
+          <span>RUN</span> ⚡
+        </button>
+      </form>
+
+      <!-- Quick Test Prompt Chips -->
+      <div class="chips-deck">
+        <button type="button" class="prompt-chip" data-q="what is a corporation?" data-lang="eng_Latn">
+          <span class="chip-lang-tag">ENG</span> What is a corporation?
+        </button>
+        <button type="button" class="prompt-chip" data-q="कॉर्पोरेशन क्या है?" data-lang="hin_Deva">
+          <span class="chip-lang-tag">HIN</span> कॉर्पोरेशन क्या है?
+        </button>
+        <button type="button" class="prompt-chip" data-q="ভংগিমাৰ অৰ্থ" data-lang="asm_Beng">
+          <span class="chip-lang-tag">ASM</span> ভংগিমাৰ অৰ্থ
+        </button>
+        <button type="button" class="prompt-chip" data-q="ஒரு நிறுவனம் என்றால் என்ன" data-lang="tam_Taml">
+          <span class="chip-lang-tag">TAM</span> ஒரு நிறுவனம் என்றால் என்ன
+        </button>
+        <button type="button" class="prompt-chip" data-q="corporation ka matlab kya hota hai" data-lang="hin_Deva">
+          <span class="chip-lang-tag">CS</span> corporation ka matlab kya hota hai
+        </button>
+        <button type="button" class="prompt-chip" data-q="exact population of Panaji on 3 March 2014" data-lang="eng_Latn">
+          <span class="chip-lang-tag">UNANS</span> Panaji exact population (Refusal)
+        </button>
+      </div>
+
+      <!-- Language Selector -->
+      <div class="language-toolbar">
+        <label for="langSelect" class="eyebrow">LANGUAGE TARGET:</label>
+        <select id="langSelect" class="lang-dropdown">
+          <option value="" selected>Auto-detect (15 Indic + English)</option>
+          <option value="eng_Latn">English (eng_Latn)</option>
+          <option value="hin_Deva">हिन्दी (Hindi)</option>
+          <option value="tam_Taml">தமிழ் (Tamil)</option>
+          <option value="ben_Beng">বাংলা (Bengali)</option>
+          <option value="mar_Deva">मराठी (Marathi)</option>
+          <option value="tel_Telu">తెలుగు (Telugu)</option>
+          <option value="guj_Gujr">ગુજરાતી (Gujarati)</option>
+          <option value="kan_Knda">ಕನ್ನಡ (Kannada)</option>
+          <option value="mal_Mlym">മലയാളം (Malayalam)</option>
+          <option value="pan_Guru">ਪੰਜਾਬੀ (Punjabi)</option>
+          <option value="ory_Orya">ଓଡ଼ିଆ (Odia)</option>
+          <option value="asm_Beng">অসমীয়া (Assamese)</option>
+          <option value="urd_Arab">اردو (Urdu)</option>
+          <option value="npi_Deva">नेपाली (Nepali)</option>
+          <option value="san_Deva">संस्कृतम् (Sanskrit)</option>
+        </select>
+      </div>
+    </div>
   </section>
 
-  <section class="sunline panel" aria-labelledby="sunlineLabel">
-    <div class="sunline-head">
-      <span class="eyebrow" id="sunlineLabel">the sunline</span>
-      <span class="budget-num num" id="budgetNum">— / 200 ms budget</span>
+  <!-- The Sunline (Telemetry Timeline) -->
+  <section class="panel sunline-panel gold-corner" aria-labelledby="sunlineLabel">
+    <div class="sunline-top">
+      <span class="eyebrow" id="sunlineLabel">THE SUNLINE TELEMETRY · STRICT 200MS BUDGET</span>
+      <span class="budget-pill num" id="budgetNum">— / 200 ms budget</span>
     </div>
     <div class="track" id="track">
-      <div class="horizon"></div>
+      <div class="horizon-grid"></div>
+      <div class="horizon-center-line"></div>
       <div class="sun" id="sun" style="left:0%"></div>
     </div>
-    <div class="legend" id="legend"></div>
+    <div class="legend-row" id="legend"></div>
   </section>
 
-  <div class="cols">
-    <section class="panel" id="answerPanel" aria-labelledby="answerLabel">
-      <span class="eyebrow" id="answerLabel">answer</span>
-      <div class="answer" id="answer" role="status" aria-live="polite"
-           style="margin-top:10px">ask something to begin.</div>
+  <!-- Results: Answer & Retrieval Grid -->
+  <div class="results-layout">
+    <!-- Neural Answer Panel -->
+    <section class="panel answer-panel gold-corner" id="answerPanel" aria-labelledby="answerLabel">
+      <div class="card-topbar">
+        <span class="eyebrow" id="answerLabel">NEURAL SYNTHESIS</span>
+        <div class="card-action-bar">
+          <button type="button" class="tool-btn" id="copyBtn" title="Copy answer">📋 COPY</button>
+          <button type="button" class="tool-btn" id="ttsBtn" title="Speak answer aloud">🔊 LISTEN</button>
+          <span class="bracket-tag" id="answerMeta">T6 GROUNDED</span>
+        </div>
+      </div>
+      <div class="answer-content" id="answer" role="status" aria-live="polite">
+        Ask a question or hold the microphone button to initiate the voice RAG pipeline.
+      </div>
     </section>
 
-    <section class="panel" aria-labelledby="retLabel">
-      <span class="eyebrow" id="retLabel">retrieved <span id="retCount"></span></span>
-      <div id="retrieved" style="margin-top:10px"></div>
+    <!-- Retrieved Passages Deck -->
+    <section class="panel gold-corner" aria-labelledby="retLabel">
+      <div class="card-topbar">
+        <span class="eyebrow" id="retLabel">RETRIEVED PASSAGES <span id="retCount" class="num"></span></span>
+        <span class="bracket-tag">FAISS + BM25 FUSED</span>
+      </div>
+      <div class="passages-deck" id="retrieved">
+        <div class="mic-caption" style="text-align:center; padding: 28px 0;">No query executed yet.</div>
+      </div>
     </section>
   </div>
 
-  <section class="panel rails" aria-labelledby="railLabel">
-    <span class="eyebrow" id="railLabel">guardrail log</span>
-    <div id="rails" style="margin-top:8px"></div>
-    <div class="scroll-x"><table class="trace" id="traceTable"></table></div>
+  <!-- Guardrail Security Matrix & Telemetry Terminal -->
+  <section class="panel security-matrix gold-corner" aria-labelledby="railLabel">
+    <div class="card-topbar">
+      <span class="eyebrow" id="railLabel">GUARDRAIL SECURITY MATRIX</span>
+      <span class="bracket-tag">ZERO-TRUST PIPELINE</span>
+    </div>
+    <div class="guard-grid" id="rails"></div>
+    <div class="telemetry-scroll">
+      <table class="telemetry-table" id="traceTable"></table>
+    </div>
   </section>
 
-  <footer>
-    core_rag_loop is T2–T6 · stt and generation are reported separately ·
-    every number here comes from /trace/<span class="mono">request_id</span>
+  <!-- Footer -->
+  <footer class="hh-footer">
+    <div>
+      <a href="https://hhgoa.com/" target="_blank"><strong>HH GOA 2026</strong></a> · TASK #02 · #RAGInGoa
+    </div>
+    <div>
+      CORE_RAG_LOOP IS T2–T6 (200MS BUDGET) · VERIFIED VIA <span class="mono">/trace/request_id</span>
+    </div>
   </footer>
 </div>
 
 <script>
-// Where the backend lives. Same-origin when the API serves this page itself;
-// on the Hugging Face Static Space the backend is elsewhere, so the URL comes
-// from ?api=... (persisted) or window.RAG_API set by config.js.
+/* ==========================================================================
+   HH GOA 2026 — JAVASCRIPT PIPELINE & CLIENT AUDIO ENGINE
+   ========================================================================== */
 const API = (() => {
   const q = new URLSearchParams(location.search).get('api');
   if (q) { try { localStorage.setItem('rag_api', q.replace(/\/$/, '')); } catch (e) {} }
@@ -239,13 +1005,98 @@ const WS_BASE = API
   : (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
 
 const STAGE_COLORS = {
-  stt: '#3b4a7a', normalize: '#4b5c93', dense: '#FF9E3D', sparse: '#c9793a',
-  fuse: '#7a6bd8', guard: '#2FBF8F', generate: '#2b8f6f'
+  stt: '#1A6B3C',
+  normalize: '#00F0FF',
+  embed: '#A855F7',
+  dense: '#E8C840',
+  sparse: '#FF7A00',
+  fuse: '#FFF2C2',
+  guard: '#FF2D78',
+  generate: '#2b8f6f'
 };
+
 const $ = id => document.getElementById(id);
 let BUDGET = 200;
+let lastAnswerText = '';
 
-/* ---------------- the sunline ---------------- */
+/* ---------------- Particle Background ---------------- */
+function initParticles() {
+  const c = $('particleCanvas');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  let w = c.width = window.innerWidth;
+  let h = c.height = window.innerHeight;
+  window.onresize = () => { w = c.width = window.innerWidth; h = c.height = window.innerHeight; };
+
+  const particles = Array.from({ length: 45 }, () => ({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    r: Math.random() * 2 + 1,
+    dx: (Math.random() - 0.5) * 0.4,
+    dy: (Math.random() - 0.5) * 0.4,
+    alpha: Math.random() * 0.5 + 0.2
+  }));
+
+  function animate() {
+    ctx.clearRect(0, 0, w, h);
+    for (const p of particles) {
+      p.x += p.dx; p.y += p.dy;
+      if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(232, 200, 64, ${p.alpha})`;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = '#E8C840';
+      ctx.fill();
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+initParticles();
+
+/* ---------------- Native Tone Synthesis ---------------- */
+function playTone(freq, duration = 0.08) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(0.06, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  } catch (e) {}
+}
+
+/* ---------------- Toast Notification ---------------- */
+function showToast(text) {
+  const t = $('toast');
+  if (!t) return;
+  t.textContent = text;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ---------------- Copy & Text-to-Speech ---------------- */
+$('copyBtn').onclick = () => {
+  if (!lastAnswerText) return;
+  navigator.clipboard.writeText(lastAnswerText).then(() => showToast('Answer copied to clipboard ✓'));
+};
+
+$('ttsBtn').onclick = () => {
+  if (!lastAnswerText || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const ut = new SpeechSynthesisUtterance(lastAnswerText);
+  ut.rate = 1.0;
+  window.speechSynthesis.speak(ut);
+};
+
+/* ---------------- The Sunline Telemetry Renderer ---------------- */
 function renderSunline(stages, coreMs, sttMs) {
   const track = $('track');
   [...track.querySelectorAll('.seg')].forEach(n => n.remove());
@@ -257,118 +1108,201 @@ function renderSunline(stages, coreMs, sttMs) {
     const el = document.createElement('div');
     el.className = 'seg';
     el.style.left = (100 * acc / total) + '%';
-    el.style.width = Math.max(0.6, 100 * d / total) + '%';
-    el.style.background = STAGE_COLORS[s.name] || '#4b5c93';
-    el.title = `${s.name} ${d.toFixed(1)}ms`;
+    el.style.width = Math.max(0.8, 100 * d / total) + '%';
+    el.style.background = STAGE_COLORS[s.name] || '#E8C840';
+    el.title = `${s.name.toUpperCase()}: ${d.toFixed(1)}ms`;
     track.appendChild(el);
     acc += d;
   }
   const over = coreMs > BUDGET;
   track.classList.toggle('over', over);
-  // the sun rises in proportion to budget consumed
   $('sun').style.left = Math.min(100, 100 * (coreMs || 0) / total) + '%';
+
+  const headroom = (BUDGET - (coreMs || 0)).toFixed(0);
   $('budgetNum').textContent =
-    `${(coreMs || 0).toFixed(0)} / ${BUDGET} ms budget` + (over ? ' · over' : '');
-  $('budgetNum').className = 'budget-num num ' + (over ? 'fail' : 'live');
+    `${(coreMs || 0).toFixed(0)} / ${BUDGET} ms budget` + 
+    (over ? ' · OVER BUDGET' : ` · PASS (+${headroom}ms headroom)`);
+  $('budgetNum').className = 'budget-pill num ' + (over ? 'fail' : 'pass');
 
   const parts = stages.filter(s => s.duration_ms > 0).map(s =>
-    `<span><span class="swatch" style="background:${STAGE_COLORS[s.name] || '#4b5c93'}"></span>` +
-    `${s.name} <b>${s.duration_ms.toFixed(1)}</b></span>`);
-  if (sttMs) parts.unshift(`<span><span class="swatch" style="background:${STAGE_COLORS.stt}"></span>stt <b>${sttMs.toFixed(0)}</b> <em>(outside budget)</em></span>`);
+    `<span class="legend-block"><span class="swatch" style="background:${STAGE_COLORS[s.name] || '#E8C840'}"></span>` +
+    `${s.name.toUpperCase()} <b class="num">${s.duration_ms.toFixed(1)}ms</b></span>`);
+  if (sttMs) {
+    parts.unshift(`<span class="legend-block"><span class="swatch" style="background:${STAGE_COLORS.stt}"></span>STT <b class="num">${sttMs.toFixed(0)}ms</b> <em>(outside budget)</em></span>`);
+  }
   $('legend').innerHTML = parts.join('');
 }
 
-/* ---------------- refusal: designed, not a toast ---------------- */
+/* ---------------- Refusal Visualizer ---------------- */
 const REFUSAL_COPY = {
-  off_topic: ["nothing in the corpus covers this",
-    "this index is MS MARCO-XI — general web passages, translated into 14 Indic languages.",
-    "try rephrasing, or ask about something factual and general."],
-  unsafe: ["that request is not one this system answers",
-    "the question was classified as unsafe, so retrieval never ran.", ""],
-  prompt_injection: ["that looked like an instruction, not a question",
-    "the transcript contained text trying to override the system's rules, so it was refused.",
-    "ask the question plainly and it will be answered."],
-  not_in_retrieved_set: ["the passages found do not contain the answer",
-    "retrieval returned related passages, but none of them actually answer this.",
-    "try being more specific, or ask a different question."],
-  ungrounded: ["the answer could not be verified against a source",
-    "a draft was produced but its claims did not hold up against the retrieved text, so it was withheld.", ""],
-  unsupported_language: ["that language is not in this corpus",
-    "supported: english plus 14 indic languages (hindi, tamil, bengali, telugu, urdu and more).", ""],
-  low_confidence_transcript: ["that did not come through clearly",
-    "the transcript confidence was below threshold.", "try again, a little closer to the mic."],
-  empty_audio: ["no speech detected", "the audio was silent or too short.", "hold the button and speak."],
-  pii_detected: ["personal details were removed", "the query contained PII, which was redacted before logging.", ""]
+  off_topic: [
+    "Nothing in the corpus covers this",
+    "This index is MS MARCO-XI — general factual knowledge passages translated into 14 Indic languages.",
+    "Try rephrasing or ask about something factual and general."
+  ],
+  unsafe: [
+    "Harmful Content Filter Triggered",
+    "The input question violated zero-trust safety rails, so retrieval was prevented.",
+    ""
+  ],
+  prompt_injection: [
+    "Prompt Injection Override Blocked",
+    "The query contained pattern instructions trying to override system rules.",
+    "Ask your question plainly and it will be answered."
+  ],
+  not_in_retrieved_set: [
+    "Information Not Present in Corpus",
+    "Retrieval returned related candidate passages, but none answer this exact question.",
+    "Try asking a more specific question or exploring a related topic."
+  ],
+  ungrounded: [
+    "Ungrounded Claims Withheld",
+    "The synthesized draft could not be 100% verified against retrieved passage evidence.",
+    ""
+  ],
+  unsupported_language: [
+    "Unsupported Language Script",
+    "Supported: English plus 14 Indic languages (Hindi, Tamil, Bengali, Telugu, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Odia, Assamese, Urdu, Nepali, Sanskrit).",
+    ""
+  ],
+  low_confidence_transcript: [
+    "Audio Transcript Below Confidence Floor",
+    "Speech confidence was below threshold. Please speak closer to the microphone.",
+    ""
+  ],
+  empty_audio: [
+    "No Speech Detected",
+    "Audio input was silent or too brief. Hold the button while speaking.",
+    ""
+  ],
+  pii_detected: [
+    "Personal Details Sanitized",
+    "Personal identifiable information was redacted before logging.",
+    ""
+  ]
 };
 
 function renderRefusal(reason, detail) {
   const [title, body, next] = REFUSAL_COPY[reason] ||
-    ["this question was not answered", detail || "", ""];
-  $('answerPanel').classList.add('refusal');
-  $('answerPanel').innerHTML =
-    `<div class="refusal-why">refused · ${reason || 'unknown'}</div>` +
-    `<h3>${title}</h3><p>${body}</p>` +
-    (next ? `<p class="next">${next}</p>` : '') +
-    (detail ? `<p class="next mono" style="margin-top:10px">${detail}</p>` : '');
+    ["Request Refused by Guardrails", detail || "", ""];
+  
+  $('answerPanel').className = 'panel answer-panel refusal-state gold-corner';
+  $('answerPanel').innerHTML = `
+    <div class="card-topbar">
+      <div class="refusal-pill">⚠️ REFUSED · ${reason || 'GUARDRAIL_TRIGGER'}</div>
+      <span class="bracket-tag">ZERO-TRUST BLOCK</span>
+    </div>
+    <h3 class="refusal-heading">${title}</h3>
+    <p class="refusal-body">${body}</p>
+    ${next ? `<p class="refusal-hint">${next}</p>` : ''}
+    ${detail ? `<p class="mono" style="margin-top:10px; font-size:12px; color:var(--goa-muted);">${detail}</p>` : ''}
+  `;
 }
 
 function renderAnswer(ans) {
-  $('answerPanel').classList.remove('refusal');
-  $('answerPanel').innerHTML =
-    `<span class="eyebrow">answer</span><div class="answer" id="answer" role="status" aria-live="polite" style="margin-top:10px"></div>`;
+  $('answerPanel').className = 'panel answer-panel gold-corner';
+  lastAnswerText = ans.answer || '';
+  $('answerPanel').innerHTML = `
+    <div class="card-topbar">
+      <span class="eyebrow">NEURAL SYNTHESIS</span>
+      <div class="card-action-bar">
+        <button type="button" class="tool-btn" id="copyBtn">📋 COPY</button>
+        <button type="button" class="tool-btn" id="ttsBtn">🔊 LISTEN</button>
+        <span class="bracket-tag">GROUNDED PASS</span>
+      </div>
+    </div>
+    <div class="answer-content" id="answer" role="status" aria-live="polite"></div>
+  `;
+  
+  // Re-bind action buttons
+  $('copyBtn').onclick = () => {
+    navigator.clipboard.writeText(lastAnswerText).then(() => showToast('Answer copied to clipboard ✓'));
+  };
+  $('ttsBtn').onclick = () => {
+    window.speechSynthesis.cancel();
+    const ut = new SpeechSynthesisUtterance(lastAnswerText);
+    ut.rate = 1.0;
+    window.speechSynthesis.speak(ut);
+  };
+
   let html = (ans.answer || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
   (ans.citations || []).forEach((c, i) => {
-    html += ` <button class="cite" data-pid="${c.passage_id}">[${i + 1}]</button>`;
+    html += ` <button class="citation-tag" data-pid="${c.passage_id}">[${i + 1}]</button>`;
   });
   $('answer').innerHTML = html;
-  $('answer').querySelectorAll('.cite').forEach(b => b.onclick = () => {
-    document.querySelectorAll('.card').forEach(el => {
-      const on = el.dataset.pid === b.dataset.pid;
-      el.classList.toggle('hl', on); el.classList.toggle('open', on);
-      if (on) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    });
+
+  // Citation Click -> Highlight and Auto-scroll
+  $('answer').querySelectorAll('.citation-tag').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('.passage-item').forEach(el => {
+        const on = el.dataset.pid === b.dataset.pid;
+        el.classList.toggle('hl', on);
+        el.classList.toggle('open', on);
+        if (on) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
+    };
   });
 }
 
 function renderRetrieved(chunks, citations) {
   const cited = new Set((citations || []).map(c => c.passage_id));
   $('retCount').textContent = `(${chunks.length})`;
-  $('retrieved').innerHTML = chunks.map(c => {
-    const body = (c.text || '').slice(0, 460).replace(/[&<>]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]));
+  
+  if (!chunks || chunks.length === 0) {
+    $('retrieved').innerHTML = '<div class="mic-caption" style="text-align:center; padding: 28px 0;">No passages retrieved for this query.</div>';
+    return;
+  }
+
+  $('retrieved').innerHTML = chunks.map((c, i) => {
+    const body = (c.text || '').slice(0, 480).replace(/[&<>]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]));
     const q = (citations || []).find(x => x.passage_id === c.passage_id);
     const shown = q && q.quote && body.includes(q.quote)
-      ? body.replace(q.quote, `<mark>${q.quote}</mark>`) : body;
-    return `<div class="card ${cited.has(c.passage_id) ? 'hl' : ''}" data-pid="${c.passage_id}">
-      <div class="card-top">
-        <span class="pid">${c.passage_id.slice(0, 22)}</span>
-        <span>${c.lang}</span>
-        <span>${c.chunk_strategy || ''}</span>
-        <span style="margin-left:auto">score <b class="num">${(c.score || 0).toFixed(4)}</b></span>
-      </div><div class="card-body">${shown}</div></div>`;
-  }).join('') || '<div class="hint">nothing retrieved.</div>';
-  $('retrieved').querySelectorAll('.card').forEach(el =>
-    el.onclick = () => el.classList.toggle('open'));
+      ? body.replace(q.quote, `<mark>${q.quote}</mark>`)
+      : body;
+
+    return `
+      <div class="passage-item ${cited.has(c.passage_id) ? 'hl' : ''}" data-pid="${c.passage_id}">
+        <div class="passage-header">
+          <span class="passage-pid">#${i + 1} · ${c.passage_id.slice(0, 18)}</span>
+          <span class="bracket-tag">${c.lang || 'eng'}</span>
+          <span>${c.chunk_strategy || 'passage_atomic'}</span>
+          <span style="margin-left:auto; color:var(--goa-gold);">score <b class="num">${(c.score || 0).toFixed(4)}</b></span>
+        </div>
+        <div class="passage-snippet">${shown}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Accordion Expand/Collapse
+  $('retrieved').querySelectorAll('.passage-item').forEach(el => {
+    el.onclick = () => el.classList.toggle('open');
+  });
 }
 
 function renderRails(trace) {
-  $('rails').innerHTML = (trace.guardrails || []).map(g =>
-    `<div class="rail-row">
-       <span class="rail-name ${g.passed ? 'pass' : 'fail'}">${g.passed ? '✓' : '✕'} ${g.name}</span>
-       <span class="rail-detail">${g.detail || ''}</span>
-       <span class="rail-at num">${(g.at_ms || 0).toFixed(1)}ms</span>
-     </div>`).join('') || '<div class="hint">no guardrail events.</div>';
+  const railsContainer = $('rails');
+  railsContainer.innerHTML = (trace.guardrails || []).map(g => `
+    <div class="guard-tile">
+      <span class="guard-label ${g.passed ? 'pass' : 'fail'}">${g.passed ? '✓' : '✕'} ${g.name.toUpperCase()}</span>
+      <span class="guard-detail">${g.detail || ''}</span>
+      <span class="guard-time num">${(g.at_ms || 0).toFixed(1)}ms</span>
+    </div>
+  `).join('') || '<div class="mic-caption">No guardrail events recorded.</div>';
 
   const rows = [];
-  if (trace.stt_ms) rows.push(['STT_MS (outside budget)', trace.stt_ms.toFixed(0)]);
-  if (trace.core_rag_loop_ms) rows.push(['CORE_RAG_LOOP_MS', trace.core_rag_loop_ms.toFixed(1)]);
-  if (trace.ttft_ms) rows.push(['TTFT_MS', trace.ttft_ms.toFixed(0)]);
-  if (trace.e2e_ms) rows.push(['E2E_MS', trace.e2e_ms.toFixed(0)]);
-  (trace.degradations || []).forEach(d => rows.push(['degraded', d]));
-  if (trace.stt_provider && trace.stt_provider !== 'sarvam')
-    rows.push(['stt provider', trace.stt_provider + ' (fallback)']);
-  if (trace.request_id) rows.push(['request_id', trace.request_id]);
-  $('traceTable').innerHTML = rows.map(([k, v]) =>
-    `<tr><td>${k}</td><td class="num">${v}</td></tr>`).join('');
+  if (trace.stt_ms) rows.push(['STT_MS (Outside Core Budget)', `${trace.stt_ms.toFixed(1)} ms`]);
+  if (trace.core_rag_loop_ms) rows.push(['CORE_RAG_LOOP_MS (T2–T6)', `${trace.core_rag_loop_ms.toFixed(1)} ms`]);
+  if (trace.ttft_ms) rows.push(['TTFT_MS (Time to First Token)', `${trace.ttft_ms.toFixed(1)} ms`]);
+  if (trace.e2e_ms) rows.push(['E2E_MS (End-to-End)', `${trace.e2e_ms.toFixed(1)} ms`]);
+  (trace.degradations || []).forEach(d => rows.push(['DEGRADATION_TRIGGERED', d]));
+  if (trace.stt_provider && trace.stt_provider !== 'sarvam') {
+    rows.push(['STT_PROVIDER', `${trace.stt_provider} (fallback)`]);
+  }
+  if (trace.request_id) rows.push(['REQUEST_ID', trace.request_id]);
+
+  $('traceTable').innerHTML = rows.map(([k, v]) => `
+    <tr><td>${k}</td><td class="num">${v}</td></tr>
+  `).join('');
 }
 
 function paint(out) {
@@ -384,45 +1318,81 @@ function paint(out) {
 }
 
 function setStatus(text, cls) {
-  $('statusText').textContent = text;
-  $('dot').className = 'dot ' + (cls || '');
+  $('statusText').textContent = text.toUpperCase();
+  $('dot').className = 'status-beacon ' + (cls || '');
 }
 
-/* ---------------- typed fallback ---------------- */
-$('typedForm').onsubmit = async e => {
-  e.preventDefault();
-  const text = $('q').value.trim();
+/* ---------------- Query Dispatcher ---------------- */
+async function submitQuery(text, lang) {
   if (!text) return;
-  $('ask').disabled = true; setStatus('thinking', 'busy');
-  $('partial').textContent = text; $('partial').classList.add('final');
+  playTone(880, 0.06);
+  $('ask').disabled = true;
+  setStatus('synthesizing', 'busy');
+  $('partial').textContent = text;
+  $('partial').classList.add('final');
+
   try {
+    const body = { text };
+    if (lang) body.lang = lang;
     const r = await fetch(API + '/query', {
-      method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ text })
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body)
     });
     paint(await r.json());
     setStatus('ready', 'on');
   } catch (err) {
-    setStatus('error', ''); $('answer').textContent = 'the service did not respond.';
+    setStatus('error', 'error');
+    $('answer').textContent = 'Backend service is temporarily unreachable.';
   }
   $('ask').disabled = false;
+}
+
+$('typedForm').onsubmit = e => {
+  e.preventDefault();
+  const text = $('q').value.trim();
+  const lang = $('langSelect').value;
+  submitQuery(text, lang);
 };
 
-/* ---------------- voice ---------------- */
+// Prompt Chips
+document.querySelectorAll('.prompt-chip').forEach(btn => {
+  btn.onclick = () => {
+    const q = btn.dataset.q;
+    const lang = btn.dataset.lang;
+    $('q').value = q;
+    $('langSelect').value = lang || '';
+    submitQuery(q, lang);
+  };
+});
+
+/* ---------------- Audio Waveform Visualizer ---------------- */
 let ws, audioCtx, node, stream, analyser, drawing = false;
 
 function drawWave() {
   const c = $('wave'), ctx = c.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
-  c.width = c.clientWidth * dpr; c.height = c.clientHeight * dpr;
+  c.width = c.clientWidth * dpr;
+  c.height = c.clientHeight * dpr;
   const buf = new Uint8Array(analyser.fftSize);
+
   const loop = () => {
-    if (!drawing) { ctx.clearRect(0, 0, c.width, c.height); return; }
+    if (!drawing) {
+      ctx.clearRect(0, 0, c.width, c.height);
+      return;
+    }
     analyser.getByteTimeDomainData(buf);
     ctx.clearRect(0, 0, c.width, c.height);
-    ctx.lineWidth = 1.5 * dpr; ctx.strokeStyle = '#FF9E3D'; ctx.beginPath();
+    
+    // Draw Neon Gold Waveform Line
+    ctx.lineWidth = 2.5 * dpr;
+    ctx.strokeStyle = '#E8C840';
+    ctx.shadowBlur = 10 * dpr;
+    ctx.shadowColor = '#E8C840';
+    ctx.beginPath();
     for (let i = 0; i < buf.length; i++) {
-      const x = i / buf.length * c.width, y = (buf[i] / 128) * c.height / 2;
+      const x = (i / buf.length) * c.width;
+      const y = (buf[i] / 128) * (c.height / 2);
       i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
     }
     ctx.stroke();
@@ -432,70 +1402,101 @@ function drawWave() {
 }
 
 async function startMic() {
+  playTone(520, 0.08);
   stream = await navigator.mediaDevices.getUserMedia({
     audio: { channelCount: 1, sampleRate: 16000, echoCancellation: true }
   });
   audioCtx = new AudioContext({ sampleRate: 16000 });
   const src = audioCtx.createMediaStreamSource(stream);
-  analyser = audioCtx.createAnalyser(); analyser.fftSize = 512; src.connect(analyser);
-  drawing = true; drawWave();
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 512;
+  src.connect(analyser);
+  drawing = true;
+  drawWave();
 
   ws = new WebSocket(WS_BASE + '/ws');
   ws.binaryType = 'arraybuffer';
   let streamed = '';
+
   ws.onmessage = ev => {
     const m = JSON.parse(ev.data);
-    if (m.type === 'partial') { $('partial').textContent = m.text; $('partial').classList.remove('final'); }
-    else if (m.type === 'final') { $('partial').textContent = m.text; $('partial').classList.add('final'); }
-    else if (m.type === 'speculative') setStatus('retrieving early', 'busy');
-    else if (m.type === 'stt_fallback') {
-      // The degraded transcriber is batch, so there are no partials and no
-      // speculation. Say so rather than letting the transcript just stop.
-      setStatus('stt degraded', 'busy');
-      $('partial').textContent = 'primary transcriber unavailable — retrying on the fallback';
+    if (m.type === 'partial') {
+      $('partial').textContent = m.text;
       $('partial').classList.remove('final');
+    } else if (m.type === 'final') {
+      $('partial').textContent = m.text;
+      $('partial').classList.add('final');
+    } else if (m.type === 'speculative') {
+      setStatus('speculative retrieving', 'busy');
+    } else if (m.type === 'stt_fallback') {
+      setStatus('stt fallback', 'busy');
+      $('partial').textContent = 'Primary transcriber busy — retrying on fallback...';
+      $('partial').classList.remove('final');
+    } else if (m.type === 'token') {
+      streamed += m.text;
+    } else if (m.type === 'done') {
+      playTone(660, 0.06);
+      paint(m);
+      setStatus('ready', 'on');
+    } else if (m.type === 'error') {
+      setStatus('error', 'error');
     }
-    else if (m.type === 'token') { streamed += m.text; }
-    else if (m.type === 'done') { paint(m); setStatus('ready', 'on'); }
-    else if (m.type === 'error') { setStatus('error', ''); }
   };
+
   node = audioCtx.createScriptProcessor(4096, 1, 1);
   node.onaudioprocess = e => {
     if (!ws || ws.readyState !== 1) return;
-    const f = e.inputBuffer.getChannelData(0), pcm = new Int16Array(f.length);
-    for (let i = 0; i < f.length; i++) pcm[i] = Math.max(-1, Math.min(1, f[i])) * 0x7FFF;
+    const f = e.inputBuffer.getChannelData(0);
+    const pcm = new Int16Array(f.length);
+    for (let i = 0; i < f.length; i++) {
+      pcm[i] = Math.max(-1, Math.min(1, f[i])) * 0x7FFF;
+    }
     ws.send(pcm.buffer);
   };
-  src.connect(node); node.connect(audioCtx.destination);
+  src.connect(node);
+  node.connect(audioCtx.destination);
   setStatus('listening', 'busy');
 }
 
 function stopMic() {
+  playTone(420, 0.08);
   drawing = false;
   try { node && node.disconnect(); } catch (e) {}
   try { stream && stream.getTracks().forEach(t => t.stop()); } catch (e) {}
   try { audioCtx && audioCtx.close(); } catch (e) {}
   if (ws && ws.readyState === 1) ws.send(JSON.stringify({ event: 'end' }));
-  setStatus('thinking', 'busy');
+  setStatus('synthesizing', 'busy');
 }
 
 const mic = $('mic');
 let held = false;
 const press = async e => {
   e.preventDefault();
-  if (held) return; held = true;
+  if (held) return;
+  held = true;
   mic.setAttribute('aria-pressed', 'true');
-  try { await startMic(); } catch (err) { setStatus('mic blocked', ''); held = false; mic.setAttribute('aria-pressed','false'); }
+  try {
+    await startMic();
+  } catch (err) {
+    setStatus('mic blocked', 'error');
+    held = false;
+    mic.setAttribute('aria-pressed', 'false');
+  }
 };
 const release = e => {
-  if (!held) return; held = false;
-  e.preventDefault(); mic.setAttribute('aria-pressed', 'false'); stopMic();
+  if (!held) return;
+  held = false;
+  e.preventDefault();
+  mic.setAttribute('aria-pressed', 'false');
+  stopMic();
 };
+
 mic.addEventListener('mousedown', press);
 mic.addEventListener('touchstart', press, { passive: false });
 window.addEventListener('mouseup', release);
 window.addEventListener('touchend', release);
-// keyboard parity: space/enter toggles, so the mic is not mouse-only
+
+// Keyboard space / enter toggle
 mic.addEventListener('keydown', e => {
   if ((e.key === ' ' || e.key === 'Enter') && !held) press(e);
 });
@@ -503,26 +1504,24 @@ mic.addEventListener('keyup', e => {
   if (e.key === ' ' || e.key === 'Enter') release(e);
 });
 
+/* ---------------- Health Check & Initialization ---------------- */
 fetch(API + '/health').then(r => r.json()).then(h => {
   BUDGET = h.budget_ms || 200;
   $('budgetNum').textContent = `— / ${BUDGET} ms budget`;
-  setStatus(h.ready ? 'ready' : 'warming', h.ready ? 'on' : 'busy');
+  setStatus(h.ready ? 'SYS.READY // 200MS_BUDGET' : 'WARMING PARTITIONS', h.ready ? 'on' : 'busy');
 }).catch(() => {
-  setStatus('backend offline', '');
-  $('answerPanel').classList.add('refusal');
-  $('answerPanel').innerHTML =
-    '<div class="refusal-why">backend unreachable</div>' +
-    '<h3>the retrieval backend is not responding</h3>' +
-    '<p>this page is a static frontend. the index is 15GB across 15 languages ' +
-    'and runs on a separate machine, so the backend is not always up.</p>' +
-    '<p class="next">point it somewhere else by adding ' +
-    '<span class="mono">?api=https://your-backend</span> to this URL, or run it ' +
-    'locally &mdash; <span class="mono">docker compose up</span>, then ' +
-    '<span class="mono">?api=http://localhost:7860</span>.</p>' +
-    '<p class="next">everything measured here is reproducible offline: the ' +
-    'ablation, latency and guardrail reports are in the repo with the scripts ' +
-    'that produced them.</p>';
+  setStatus('BACKEND OFFLINE', 'error');
+  $('answerPanel').className = 'panel answer-panel refusal-state gold-corner';
+  $('answerPanel').innerHTML = `
+    <div class="refusal-pill">BACKEND UNREACHABLE</div>
+    <h3 class="refusal-heading">Retrieval Backend Not Responding</h3>
+    <p class="refusal-body">The 14.2M vector index runs behind a Cloudflare Tunnel.</p>
+    <p class="refusal-hint">Point to local or remote API via <span class="mono">?api=https://your-backend</span> or check Cloudflare Tunnel.</p>
+  `;
   $('ask').disabled = true;
   $('q').disabled = true;
 });
 </script>
+
+</body>
+</html>

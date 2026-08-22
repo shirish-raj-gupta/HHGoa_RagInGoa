@@ -7,4 +7,4 @@
 //
 // Override without redeploying by appending ?api=https://your-backend to the
 // URL; it is remembered in localStorage.
-window.RAG_API = "";   // set by scripts/deploy_static_space.py at deploy time
+window.RAG_API = "https://rag.helperhome.works";   // set by scripts/deploy_static_space.py at deploy time

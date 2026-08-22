@@ -61,7 +61,7 @@ def _safe_refusal(lang: str, reason: RefusalReason,
     )
 
 
-def render_context(rs: RetrievalSet, max_chars: int = 900) -> str:
+def render_context(rs: RetrievalSet, max_chars: int = 1200) -> str:
     """
     Retrieved passages as model input.
 
