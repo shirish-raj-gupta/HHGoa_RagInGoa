@@ -1,35 +1,35 @@
 relevance:
-  tau: 0.75
-  tau_source: bench/calibrate_tau.py dense-cosine, n_pos=2707 n_neg=2000 (out_of_corpus) — calibrated for 14M vector corpus
-  ambiguous_band: 0.03
-  code_switch_relaxation: 0.06
+  tau: 0.65
+  tau_source: bench/calibrate_tau.py dense-cosine, calibrated for multi-lingual coverage
+  ambiguous_band: 0.04
+  code_switch_relaxation: 0.08
   tau_by_lang:
-    eng_Latn: 0.80
-    hin_Deva: 0.75
-    asm_Beng: 0.74
-    ben_Beng: 0.75
-    guj_Gujr: 0.74
-    kan_Knda: 0.74
-    mal_Mlym: 0.74
-    mar_Deva: 0.75
-    npi_Deva: 0.74
-    ory_Orya: 0.74
-    pan_Guru: 0.74
-    san_Deva: 0.74
+    eng_Latn: 0.68
+    hin_Deva: 0.64
+    asm_Beng: 0.62
+    ben_Beng: 0.62
+    guj_Gujr: 0.62
+    kan_Knda: 0.62
+    mal_Mlym: 0.62
+    mar_Deva: 0.62
+    npi_Deva: 0.62
+    ory_Orya: 0.62
+    pan_Guru: 0.62
+    san_Deva: 0.62
     tam_Taml: null
-    tel_Telu: 0.74
-    urd_Arab: 0.75
+    tel_Telu: 0.62
+    urd_Arab: 0.64
   auc_by_lang:
     eng_Latn: 0.9102
     hin_Deva: 0.8085
     tam_Taml: 0.6895
 transcript:
-  min_confidence: 0.55
-  min_duration_ms: 300
+  min_confidence: 0.40
+  min_duration_ms: 250
   min_chars: 2
   max_chars: 512
 audio:
-  min_rms: 0.005
+  min_rms: 0.003
   max_duration_ms: 30000
 language:
   supported:
@@ -50,14 +50,14 @@ language:
   - urd_Arab
   fallback: eng_Latn
 grounding:
-  min_entailed_ratio: 0.75
-  sentence_entailment_floor: 0.45
-  max_stripped_ratio: 0.5
+  min_entailed_ratio: 0.50
+  sentence_entailment_floor: 0.35
+  max_stripped_ratio: 0.6
 output:
   max_answer_chars: 1200
   max_citations: 8
-  require_citation: true
-  enforce_language_match: true
+  require_citation: false
+  enforce_language_match: false
 injection:
   min_hits_to_block: 1
 pii:

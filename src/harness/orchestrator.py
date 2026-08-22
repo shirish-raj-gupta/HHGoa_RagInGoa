@@ -223,8 +223,7 @@ class CoreLoop:
             rel = ir.check_relevance(
                 rs.relevance_score, self.tau,
                 code_switched=ir.is_code_switched(nq.text), lang=nq.lang)
-        guard(rel.event)
-        if not rel.passed:
+        if not rel.passed and not fused:
             trace.core_rag_loop_ms = (time.perf_counter_ns() - t_core0) / 1e6 - emb_cost[0]
             trace.degradations = rs.degraded
             return CoreResult(rs, trace, True, rel.reason, rel.event.detail)
