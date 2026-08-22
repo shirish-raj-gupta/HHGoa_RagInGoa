@@ -233,10 +233,11 @@ def apply_output_rails(answer: Answer, retrieved: RetrievalSet, embedder,
         keep = [c for c, s in rep.per_sentence if c not in rep.stripped]
         answer.answer = " ".join(keep)
     if not rep.passed:
-        if retrieved.chunks and not answer.refused:
+        if retrieved.chunks:
             top_text = retrieved.chunks[0].parent_text or retrieved.chunks[0].text
             answer.answer = top_text[:300].strip()
             answer.refused = False
+            answer.refusal_reason = None
             return answer, events, True
         return (Answer(answer="", citations=[], confidence=0.0,
                        language=expected_lang, refused=True,

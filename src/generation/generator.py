@@ -48,7 +48,6 @@ DEFAULT_MODEL = "openai/gpt-oss-120b"
 BENCH_MODELS = [
     "openai/gpt-oss-120b",
     "openai/gpt-oss-20b",
-    "allam-2-7b",
     "llama-3.3-70b-versatile",
     "llama-3.1-8b-instant"
 ]
@@ -359,12 +358,16 @@ class Generator:
                 if budget is not None and budget.spendable_ms <= 0:
                     break                              # no budget for a repair
 
-        # both attempts failed -> safe refusal, never a partial guess
+        # both attempts failed -> extractive fallback from top retrieved chunk.
+        # Previously this was a _safe_refusal(UNGROUNDED) which showed the user
+        # "Insufficient Evidence" on the first click while the second click
+        # succeeded because the LLM rate-limit window had passed. Using the
+        # extractive fallback ensures the user always gets a grounded answer.
+        fallback_ans = _extractive_fallback(query, rs, lang)
         yield ("result", GenerationResult(
-            answer=_safe_refusal(lang, RefusalReason.UNGROUNDED,
-                                 "could not produce a verifiable answer."),
+            answer=fallback_ans,
             ttft_ms=ttft, total_ms=(time.perf_counter_ns() - t0) / 1e6,
-            repair_attempts=repair_attempts, model=self.model, actions=actions,
+            repair_attempts=repair_attempts, model="extractive_fallback", actions=actions,
             raw_text=last_error or ""))
 
     async def generate(self, query: str, rs: RetrievalSet, lang: str,
