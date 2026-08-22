@@ -12,6 +12,7 @@ which is 34% of this corpus by query_type (NUMERIC + ENTITY).
 """
 from __future__ import annotations
 
+import concurrent.futures
 import json
 from pathlib import Path
 
@@ -129,12 +130,26 @@ class SparseIndex:
 
     def search(self, query: str, lang: str, k: int = 10,
                fallback: str = "eng_Latn") -> list[SparseHit]:
+        has_latin = any('a' <= c.lower() <= 'z' for c in query)
         langs = [lang] if lang in self.partitions else []
-        if fallback in self.partitions and fallback != lang:
+        # Only search english fallback if the query actually has latin letters or is code-switched
+        if has_latin and fallback in self.partitions and fallback != lang:
             langs.append(fallback)
+        elif not langs and fallback in self.partitions:
+            langs.append(fallback)
+
+        if not langs:
+            langs = list(self.partitions.keys())[:1]
+
+        if len(langs) == 1:
+            return self.partitions[langs[0]].search(query, k)
+
         hits: list[SparseHit] = []
-        for lg in langs or list(self.partitions):
-            hits.extend(self.partitions[lg].search(query, k))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(langs)) as ex:
+            futures = [ex.submit(self.partitions[lg].search, query, k)
+                       for lg in langs if lg in self.partitions]
+            for f in concurrent.futures.as_completed(futures):
+                hits.extend(f.result())
         hits.sort(key=lambda h: -h.score)
         for r, h in enumerate(hits):
             h.rank = r

@@ -11,6 +11,7 @@ full-validation corpus viable at all.
 """
 from __future__ import annotations
 
+import concurrent.futures
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -224,9 +225,18 @@ class DenseIndex:
     def search(self, qvec: np.ndarray, lang: str, k: int = 10, *,
                fallback: str = "eng_Latn",
                expansion_search: int | None = None) -> list[Hit]:
+        routes = self.route(lang, fallback)
+        if not routes:
+            return []
+        if len(routes) == 1:
+            return self.partitions[routes[0]].search(qvec, k, expansion_search)
+
         hits: list[Hit] = []
-        for lg in self.route(lang, fallback):
-            hits.extend(self.partitions[lg].search(qvec, k, expansion_search))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(routes)) as ex:
+            futures = [ex.submit(self.partitions[lg].search, qvec, k, expansion_search)
+                       for lg in routes if lg in self.partitions]
+            for f in concurrent.futures.as_completed(futures):
+                hits.extend(f.result())
         hits.sort(key=lambda h: -h.score)
         for r, h in enumerate(hits):
             h.rank = r

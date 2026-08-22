@@ -151,14 +151,37 @@ def _load(langs: list[str]) -> None:
     S.generator = Generator(model=os.environ.get("RAG_MODEL", "openai/gpt-oss-20b"), use_tools=False)
     S.n_chunks = sum(len(p.chunk_ids) for p in dense.partitions.values())
 
-    # Warm up ONNX embedder session and pipeline so the first live query is sub-100ms
+    # ---- Force ALL mmap pages into OS page cache ----
+    # Reading the .usearch file sequentially triggers OS readahead and fills
+    # the kernel buffer cache. After this, mmap page faults resolve instantly
+    # from RAM instead of disk. This is the same trick PostgreSQL/MySQL use
+    # (pg_prewarm / innodb_buffer_pool_load_at_startup).
+    t_prefault = time.perf_counter_ns()
+    for lang in langs:
+        usf = INDEX_DIR / f"{lang}.usearch"
+        if usf.exists():
+            with open(usf, "rb") as f:
+                while f.read(1 << 20):  # 1MB chunks
+                    pass
+        bm = INDEX_DIR / f"{lang}.bm25"
+        if bm.exists():
+            # BM25 index is a directory of numpy arrays - read them all
+            import glob
+            for npy in glob.glob(str(bm / "**" / "*"), recursive=True):
+                try:
+                    with open(npy, "rb") as f:
+                        while f.read(1 << 20):
+                            pass
+                except (IsADirectoryError, PermissionError):
+                    pass
+    # Warm ONNX embedder JIT
     try:
-        q_vecs = S.embedder.encode_queries(["what is corporation?", "परिभाषा परिधान", "இது தீப்பற்றக்கூடியது"])
-        for lg in S.corpus_langs:
-            if lg in dense.partitions:
-                dense.partitions[lg].search(q_vecs[0], k=10)
-    except Exception as e:
-        log.warning("embedder warmup note: %s", e)
+        S.embedder.encode_queries(["warmup", "what is definition", "explain the process"])
+    except Exception:
+        pass
+    prefault_ms = (time.perf_counter_ns() - t_prefault) / 1e6
+    log.info("page cache prefault complete in %.0fms: %d index files read into RAM",
+             prefault_ms, len(langs) * 2)
 
 
 def _lookup_texts(passage_ids: list[str]) -> dict[str, str]:
