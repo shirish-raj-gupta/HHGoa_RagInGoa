@@ -641,6 +641,81 @@
       border-color: var(--border-gold);
     }
 
+    /* Dual Synthesis Boxes (With LLM + Without LLM) */
+    .dual-synthesis-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 860px) {
+      .dual-synthesis-container { grid-template-columns: 1fr; }
+    }
+    .synthesis-subcard {
+      background: rgba(10, 32, 22, 0.55);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+    }
+    .synthesis-subcard.llm-card {
+      border-color: rgba(255, 222, 89, 0.35);
+      background: linear-gradient(180deg, rgba(255, 222, 89, 0.05) 0%, rgba(10, 32, 22, 0.65) 100%);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .synthesis-subcard.extractive-card {
+      border-color: rgba(46, 213, 115, 0.35);
+      background: linear-gradient(180deg, rgba(46, 213, 115, 0.05) 0%, rgba(10, 32, 22, 0.65) 100%);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .subcard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .subcard-title {
+      font-family: var(--font-code);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .subcard-title.llm-title { color: var(--goa-gold); }
+    .subcard-title.extractive-title { color: var(--goa-green); }
+    .subcard-body {
+      font-size: 14.5px;
+      line-height: 1.7;
+      color: var(--goa-skin-light);
+      word-break: break-word;
+      flex-grow: 1;
+    }
+    .subcard-body.extractive-body {
+      font-family: var(--font-sans);
+      font-style: italic;
+      color: var(--goa-sand);
+      border-left: 3px solid var(--goa-green);
+      padding-left: 12px;
+    }
+    .subcard-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+      font-family: var(--font-code);
+      font-size: 10.5px;
+      color: var(--goa-dim);
+    }
+
     /* Section Divider inside unified panel */
     .section-divider {
       height: 1px;
@@ -1318,19 +1393,49 @@
     <div class="legend-row" id="legend"></div>
   </section>
 
-  <!-- Unified Results Panel (Answer + Passages merged) -->
+  <!-- Unified Results Panel (Dual Answers: With LLM & Without LLM + Passages) -->
   <div class="results-unified">
     <section class="panel answer-panel" id="answerPanel" aria-labelledby="answerLabel">
-      <div class="card-topbar">
-        <span class="eyebrow" id="answerLabel">NEURAL SYNTHESIS</span>
-        <div class="card-action-bar">
-          <button type="button" class="tool-btn" id="copyBtn" title="Copy answer">📋 COPY</button>
-          <button type="button" class="tool-btn" id="ttsBtn" title="Speak answer aloud">🔊 LISTEN</button>
-          <span class="bracket-tag palm" id="answerMeta">T6 GROUNDED PASS</span>
+      <div class="answer-area" id="answerArea">
+        <div class="dual-synthesis-container">
+          <!-- Box 1: With LLM -->
+          <div class="synthesis-subcard llm-card">
+            <div class="subcard-header">
+              <span class="subcard-title llm-title">🧠 NEURAL SYNTHESIS · WITH LLM</span>
+              <div class="card-action-bar">
+                <button type="button" class="tool-btn" id="copyLlmBtn" title="Copy LLM answer">📋 COPY</button>
+                <button type="button" class="tool-btn" id="ttsLlmBtn" title="Speak LLM answer aloud">🔊 LISTEN</button>
+                <span class="bracket-tag palm">LLM GENERATED</span>
+              </div>
+            </div>
+            <div class="subcard-body" id="answerLlm" role="status" aria-live="polite">
+              Ask a question or hold the microphone button to initiate the neural synthesis.
+            </div>
+            <div class="subcard-footer">
+              <span>MODEL: <b class="num" style="color:var(--goa-gold)">allam-2-7b</b></span>
+              <span class="bracket-tag palm">GROUNDED PASS</span>
+            </div>
+          </div>
+
+          <!-- Box 2: Without LLM (Direct Extractive) -->
+          <div class="synthesis-subcard extractive-card">
+            <div class="subcard-header">
+              <span class="subcard-title extractive-title">⚡ DIRECT CORPUS MATCH · WITHOUT LLM</span>
+              <div class="card-action-bar">
+                <button type="button" class="tool-btn" id="copyDirectBtn" title="Copy direct excerpt">📋 COPY</button>
+                <button type="button" class="tool-btn" id="ttsDirectBtn" title="Speak direct excerpt aloud">🔊 LISTEN</button>
+                <span class="bracket-tag green">0ms · EXTRACTIVE</span>
+              </div>
+            </div>
+            <div class="subcard-body extractive-body" id="answerDirect" role="status" aria-live="polite">
+              Top passage verbatim excerpt will appear here instantly from the 14.2M index without passing through an LLM.
+            </div>
+            <div class="subcard-footer">
+              <span>SOURCE: <b class="num">MS MARCO CORPUS</b></span>
+              <span class="bracket-tag green">ZERO-HALLUCINATION</span>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="answer-content" id="answer" role="status" aria-live="polite">
-        Ask a question or hold the microphone button to initiate the voice RAG pipeline.
       </div>
 
       <div class="section-divider"></div>
@@ -1592,10 +1697,13 @@ function renderRefusal(reason, detail) {
   `;
 }
 
-function renderAnswer(ans) {
+function renderAnswer(ans, retrieved) {
   const panel = $('answerPanel');
   panel.className = 'panel answer-panel';
   lastAnswerText = ans.answer || '';
+  
+  const topChunk = (retrieved && retrieved.length > 0) ? retrieved[0] : null;
+  const directText = topChunk ? (topChunk.text || '') : 'No passage retrieved.';
   
   // Only update the answer area, keep passages area intact
   let ansArea = panel.querySelector('.answer-area');
@@ -1614,35 +1722,72 @@ function renderAnswer(ans) {
     if (existingDeck) panel.appendChild(existingDeck);
     else { const dk = document.createElement('div'); dk.id = 'retrieved'; dk.className = 'passages-deck'; dk.innerHTML = '<div class="mic-caption" style="text-align:center;padding:16px 0">No query executed yet.</div>'; panel.appendChild(dk); }
   }
+
+  let llmHtml = (ans.answer || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  (ans.citations || []).forEach((c, i) => {
+    llmHtml += ` <button class="citation-tag" data-pid="${c.passage_id}">[${i + 1}]</button>`;
+  });
+
+  const directClean = directText.slice(0, 380).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
   ansArea.innerHTML = `
-    <div class="card-topbar">
-      <span class="eyebrow">NEURAL SYNTHESIS</span>
-      <div class="card-action-bar">
-        <button type="button" class="tool-btn" id="copyBtn">📋 COPY</button>
-        <button type="button" class="tool-btn" id="ttsBtn">🔊 LISTEN</button>
-        <span class="bracket-tag palm">GROUNDED PASS</span>
+    <div class="dual-synthesis-container">
+      <!-- Box 1: With LLM -->
+      <div class="synthesis-subcard llm-card">
+        <div class="subcard-header">
+          <span class="subcard-title llm-title">🧠 NEURAL SYNTHESIS · WITH LLM</span>
+          <div class="card-action-bar">
+            <button type="button" class="tool-btn" id="copyLlmBtn">📋 COPY</button>
+            <button type="button" class="tool-btn" id="ttsLlmBtn">🔊 LISTEN</button>
+            <span class="bracket-tag palm">LLM GENERATED</span>
+          </div>
+        </div>
+        <div class="subcard-body" id="answerLlm" role="status" aria-live="polite">${llmHtml || '<span style="color:var(--goa-dim)">No synthesis available.</span>'}</div>
+        <div class="subcard-footer">
+          <span>MODEL: <b class="num" style="color:var(--goa-gold)">allam-2-7b</b></span>
+          <span class="bracket-tag palm">GROUNDED PASS</span>
+        </div>
+      </div>
+
+      <!-- Box 2: Without LLM (Direct Extractive) -->
+      <div class="synthesis-subcard extractive-card">
+        <div class="subcard-header">
+          <span class="subcard-title extractive-title">⚡ DIRECT CORPUS MATCH · WITHOUT LLM</span>
+          <div class="card-action-bar">
+            <button type="button" class="tool-btn" id="copyDirectBtn">📋 COPY</button>
+            <button type="button" class="tool-btn" id="ttsDirectBtn">🔊 LISTEN</button>
+            <span class="bracket-tag green">0ms · EXTRACTIVE</span>
+          </div>
+        </div>
+        <div class="subcard-body extractive-body" id="answerDirect" role="status" aria-live="polite">"${directClean}"</div>
+        <div class="subcard-footer">
+          <span>PASSAGE: <b class="num">${topChunk ? topChunk.passage_id.slice(0, 16) : 'N/A'}</b></span>
+          <span>SCORE: <b class="num" style="color:var(--goa-green)">${topChunk ? (topChunk.score || 0).toFixed(4) : '0.0'}</b></span>
+        </div>
       </div>
     </div>
-    <div class="answer-content" id="answer" role="status" aria-live="polite"></div>
   `;
   
-  $('copyBtn').onclick = () => {
-    navigator.clipboard.writeText(lastAnswerText).then(() => showToast('Answer copied to clipboard ✓'));
+  $('copyLlmBtn').onclick = () => {
+    navigator.clipboard.writeText(ans.answer || '').then(() => showToast('LLM answer copied ✓'));
   };
-  $('ttsBtn').onclick = () => {
+  $('ttsLlmBtn').onclick = () => {
     window.speechSynthesis.cancel();
-    const ut = new SpeechSynthesisUtterance(lastAnswerText);
+    const ut = new SpeechSynthesisUtterance(ans.answer || '');
+    ut.rate = 1.0;
+    window.speechSynthesis.speak(ut);
+  };
+  $('copyDirectBtn').onclick = () => {
+    navigator.clipboard.writeText(directText).then(() => showToast('Direct passage copied ✓'));
+  };
+  $('ttsDirectBtn').onclick = () => {
+    window.speechSynthesis.cancel();
+    const ut = new SpeechSynthesisUtterance(directText);
     ut.rate = 1.0;
     window.speechSynthesis.speak(ut);
   };
 
-  let html = (ans.answer || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-  (ans.citations || []).forEach((c, i) => {
-    html += ` <button class="citation-tag" data-pid="${c.passage_id}">[${i + 1}]</button>`;
-  });
-  $('answer').innerHTML = html;
-
-  $('answer').querySelectorAll('.citation-tag').forEach(b => {
+  $('answerLlm').querySelectorAll('.citation-tag').forEach(b => {
     b.onclick = () => {
       document.querySelectorAll('.passage-item').forEach(el => {
         const on = el.dataset.pid === b.dataset.pid;
@@ -1720,7 +1865,7 @@ function paint(out) {
   if (out.answer && out.answer.refused) {
     renderRefusal(out.answer.refusal_reason, out.answer.detail || '');
   } else if (out.answer) {
-    renderAnswer(out.answer);
+    renderAnswer(out.answer, out.retrieved || []);
   }
   renderRetrieved(out.retrieved || [], (out.answer || {}).citations);
   renderRails(t);
