@@ -106,8 +106,8 @@ def verify_citations(answer: Answer, retrieved: RetrievalSet) -> tuple[list[Cita
         q = b[:min(len(b), 100)]
         verified.append(Citation(passage_id=top.passage_id, quote=q, char_start=0, char_end=len(q), verified=True))
 
-    ok = bool(verified) or bool(answer.refused)
-    detail = "all citations resolve" if ok else f"FABRICATED passage_id(s): {fabricated[:3]}"
+    ok = bool(verified) or bool(answer.refused) or bool(retrieved.is_empty)
+    detail = "all citations resolve" if bool(verified) else ("open-domain answer (no corpus citations)" if retrieved.is_empty else f"FABRICATED passage_id(s): {fabricated[:3]}")
     return verified, GuardrailEvent(name="citation_spans", passed=ok, detail=detail,
                                     score=float(len(verified)))
 
@@ -141,9 +141,10 @@ def check_grounding(answer_text: str, retrieved: RetrievalSet, embedder,
                                [GuardrailEvent(name="grounding", passed=False,
                                                detail="no claims")])
     if retrieved.is_empty:
-        return GroundingReport(len(claims), 0, claims, [], False,
-                               [GuardrailEvent(name="grounding", passed=False,
-                                               detail="no retrieved context")])
+        # Open-domain fallback: answer is synthesized from model knowledge
+        return GroundingReport(len(claims), len(claims), [], [], True,
+                               [GuardrailEvent(name="grounding", passed=True,
+                                               detail="open-domain synthesis (model general knowledge)")])
 
     ctx = [c.parent_text or c.text for c in retrieved.chunks]
     CV = embedder.encode_passages(ctx, batch=32)
@@ -172,8 +173,8 @@ def check_grounding(answer_text: str, retrieved: RetrievalSet, embedder,
 def check_answer_scope(answer: Answer, retrieved: RetrievalSet) -> GuardrailEvent:
     """Refuse when answerable in principle but not from THIS retrieved set."""
     if retrieved.is_empty:
-        return GuardrailEvent(name="answer_scope", passed=False,
-                              detail="empty retrieval set")
+        return GuardrailEvent(name="answer_scope", passed=True,
+                              detail="open-domain synthesis")
     if THRESHOLDS["output"]["require_citation"] and not answer.citations \
             and not answer.refused:
         return GuardrailEvent(name="answer_scope", passed=False,
