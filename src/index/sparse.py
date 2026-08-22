@@ -117,6 +117,9 @@ class SparsePartition:
         return p
 
 
+_SPARSE_POOL = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+
+
 class SparseIndex:
     """Language-partitioned BM25, mirroring DenseIndex's routing."""
 
@@ -144,12 +147,11 @@ class SparseIndex:
         if len(langs) == 1:
             return self.partitions[langs[0]].search(query, k)
 
+        futures = [_SPARSE_POOL.submit(self.partitions[lg].search, query, k)
+                   for lg in langs if lg in self.partitions]
         hits: list[SparseHit] = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=len(langs)) as ex:
-            futures = [ex.submit(self.partitions[lg].search, query, k)
-                       for lg in langs if lg in self.partitions]
-            for f in concurrent.futures.as_completed(futures):
-                hits.extend(f.result())
+        for f in concurrent.futures.as_completed(futures):
+            hits.extend(f.result())
         hits.sort(key=lambda h: -h.score)
         for r, h in enumerate(hits):
             h.rank = r

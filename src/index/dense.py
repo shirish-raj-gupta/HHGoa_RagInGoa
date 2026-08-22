@@ -200,6 +200,9 @@ class DensePartition:
         return p
 
 
+_DENSE_POOL = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+
+
 class DenseIndex:
     """Language-partitioned dense index with cross-lingual fallback routing."""
 
@@ -215,28 +218,33 @@ class DenseIndex:
     def add(self, lang: str, vectors, chunk_ids, passage_ids) -> None:
         self.partition(lang).add(vectors, chunk_ids, passage_ids)
 
-    def route(self, lang: str, fallback: str = "eng_Latn") -> list[str]:
+    def route(self, lang: str, fallback: str = "eng_Latn", query: str = "") -> list[str]:
         """Which partitions to search for a query in `lang`."""
-        out = [lang] if lang in self.partitions else []
-        if fallback in self.partitions and fallback != lang:
-            out.append(fallback)
-        return out or list(self.partitions)
+        if lang in self.partitions:
+            out = [lang]
+            has_latin = any('a' <= c.lower() <= 'z' for c in query) if query else False
+            if has_latin and fallback in self.partitions and fallback != lang:
+                out.append(fallback)
+            return out
+        if fallback in self.partitions:
+            return [fallback]
+        return list(self.partitions)[:1]
 
     def search(self, qvec: np.ndarray, lang: str, k: int = 10, *,
                fallback: str = "eng_Latn",
-               expansion_search: int | None = None) -> list[Hit]:
-        routes = self.route(lang, fallback)
+               expansion_search: int | None = None,
+               query: str = "") -> list[Hit]:
+        routes = self.route(lang, fallback, query=query)
         if not routes:
             return []
         if len(routes) == 1:
             return self.partitions[routes[0]].search(qvec, k, expansion_search)
 
+        futures = [_DENSE_POOL.submit(self.partitions[lg].search, qvec, k, expansion_search)
+                   for lg in routes if lg in self.partitions]
         hits: list[Hit] = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=len(routes)) as ex:
-            futures = [ex.submit(self.partitions[lg].search, qvec, k, expansion_search)
-                       for lg in routes if lg in self.partitions]
-            for f in concurrent.futures.as_completed(futures):
-                hits.extend(f.result())
+        for f in concurrent.futures.as_completed(futures):
+            hits.extend(f.result())
         hits.sort(key=lambda h: -h.score)
         for r, h in enumerate(hits):
             h.rank = r

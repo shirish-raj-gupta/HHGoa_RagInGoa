@@ -74,7 +74,7 @@ class CoreLoop:
             qv = qvs[0]
         return await asyncio.to_thread(
             self.dense.search, qv, nq.lang, params["k"],
-            expansion_search=params["ef_search"])
+            expansion_search=params["ef_search"], query=nq.text)
 
     async def _sparse(self, nq: NormalizedQuery, *, budget: Budget,
                       params: dict, **_) -> list:
