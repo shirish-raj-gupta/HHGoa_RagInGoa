@@ -143,7 +143,7 @@ class CoreLoop:
         budget = Budget(total_ms=budget_ms)
 
         try:
-            params = budget.retrieval_params(base_k=10, base_ef=32)
+            params = budget.retrieval_params(base_k=10, base_ef=16)
         except BudgetExceeded as e:
             return refuse(RefusalReason.NOT_IN_RETRIEVED_SET, str(e),
                           ErrorKind.BUDGET_EXCEEDED)
@@ -153,8 +153,8 @@ class CoreLoop:
             params["mode"] = "hybrid"
 
         rem = budget.remaining_ms
-        dense_to = max(15.0, rem - 3.0)
-        sparse_to = max(15.0, rem - 3.0)
+        dense_to = min(60.0, max(15.0, rem - 10.0))
+        sparse_to = min(60.0, max(15.0, rem - 10.0))
         stages = []
         if params["mode"] == "hybrid":
             stages.append(Stage("dense", self._dense, timeout_ms=dense_to,

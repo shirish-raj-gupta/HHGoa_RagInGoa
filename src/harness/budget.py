@@ -56,14 +56,14 @@ class Budget:
 
     # ---- the actual degradation ladder, cheapest quality loss first --------
 
-    def retrieval_params(self, *, base_k: int = 10, base_ef: int = 32,
+    def retrieval_params(self, *, base_k: int = 10, base_ef: int = 16,
                          stage: str = "retrieve") -> dict:
         """
         Pick retrieval parameters that fit the remaining budget.
 
         The ladder is ordered by how much quality each step costs:
           >40ms  full quality
-          >25ms  ef=32, base_k
+          >25ms  ef=16, base_k
           >12ms  cut k as well (less for MMR to work with)
           >3ms   sparse-only (BM25 needs no embedding forward pass)
           <=2ms  nothing survives - caller must refuse rather than guess

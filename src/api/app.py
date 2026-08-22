@@ -133,9 +133,9 @@ def _load(langs: list[str]) -> None:
         probe = rng.normal(size=(24, part.dim)).astype(np.float32)
         probe /= np.linalg.norm(probe, axis=1, keepdims=True)
         for v in probe:
-            part.search(v, k=10)
+            part.search(v, k=10, expansion_search=16)
         if lang in sparse.partitions:
-            for w in ("the", "what is", "how many", "who"):
+            for w in ("the", "what is", "how many", "who", "meaning", "definition"):
                 sparse.partitions[lang].search(w, k=10)
         warm_ms = (time.perf_counter_ns() - t_warm) / 1e6
 
