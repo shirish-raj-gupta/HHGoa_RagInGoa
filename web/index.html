@@ -314,31 +314,40 @@
       letter-spacing: 0.08em;
     }
 
-    /* Waveform Canvas */
+    /* Waveform Canvas — hidden until mic active */
     #wave {
       width: 100%;
       max-width: 580px;
       height: 48px;
-      display: block;
+      display: none;
       margin: 14px auto 0;
       border-radius: var(--radius-sm);
       background: var(--goa-bg-input);
       border: 1px solid var(--border-subtle);
     }
+    #wave.active { display: block; }
 
-    /* Live Transcript */
+    /* Live Transcript — hidden until has content */
     .partial-transcript {
       font-family: var(--font-code);
       font-size: 14px;
-      min-height: 1.5em;
+      min-height: 0;
       color: var(--goa-gold);
-      margin: 14px auto;
+      margin: 0 auto;
       word-break: break-word;
-      padding: 10px 18px;
+      padding: 0;
       border-radius: var(--radius-sm);
+      background: transparent;
+      border: none;
+      max-width: 580px;
+      transition: all 0.3s ease;
+    }
+    .partial-transcript.visible {
+      min-height: 1.5em;
+      padding: 10px 18px;
+      margin: 14px auto;
       background: var(--goa-bg-input);
       border: 1px solid rgba(255, 222, 89, 0.18);
-      max-width: 580px;
     }
     .partial-transcript.final {
       color: var(--goa-sand);
@@ -621,21 +630,32 @@
       border-radius: 2px;
     }
 
-    /* ==================== RESULTS LAYOUT ==================== */
-    .results-layout {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 20px;
+    /* ==================== UNIFIED RESULTS PANEL ==================== */
+    .results-unified {
       margin-bottom: 24px;
-    }
-    @media (max-width: 920px) {
-      .results-layout { grid-template-columns: 1fr; }
     }
 
     /* Answer Panel */
     .answer-panel {
-      min-height: 240px;
+      min-height: 120px;
       border-color: var(--border-gold);
+    }
+
+    /* Section Divider inside unified panel */
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent 5%, rgba(255, 222, 89, 0.20) 50%, transparent 95%);
+      margin: 20px 0;
+    }
+
+    /* Retrieved Section Header inside unified panel */
+    .retrieved-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .card-topbar {
@@ -913,13 +933,61 @@
     .hh-footer a:hover { color: var(--goa-gold); }
 
     /* ==================== RESPONSIVE ==================== */
-    @media (max-width: 640px) {
-      .hh-nav { flex-direction: column; align-items: flex-start; }
-      .hero-headline { font-size: clamp(28px, 8vw, 42px); }
+    @media (max-width: 768px) {
+      .app-wrap { padding: 12px; }
+      .hh-nav { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .hh-meta-badges { gap: 4px; }
+      .meta-pill { font-size: 9px; padding: 2px 7px; }
+      .hero-headline { font-size: clamp(26px, 8vw, 40px); }
+      .hero-subhead { font-size: 13px; }
+      .hero-overlay { padding: 16px 12px; }
+      .signboard-deck { gap: 4px; }
+      .sign-arrow { font-size: 8.5px; padding: 4px 8px; gap: 3px; }
       .query-form { flex-direction: column; }
       .submit-button { width: 100%; justify-content: center; padding: 12px; }
-      .signboard-deck { gap: 5px; }
-      .sign-arrow { font-size: 9px; padding: 4px 10px; }
+      .mic-trigger { width: 72px; height: 72px; font-size: 26px; }
+      .mic-orbit-ring { top: -10px; left: -10px; right: -10px; bottom: -10px; }
+      .chip-tabs-container { margin-top: 14px; }
+      .chip-tab-btn { font-size: 9.5px; padding: 3px 10px; }
+      .prompt-chip { font-size: 10px; padding: 4px 10px; }
+      .chip-lang-tag { font-size: 8px; padding: 1px 4px; }
+      .panel { padding: clamp(12px, 3vw, 20px); border-radius: var(--radius-md); }
+      .goa-scene-container { border-radius: var(--radius-md); }
+      .sunline-top { flex-direction: column; align-items: flex-start; }
+      .budget-pill { font-size: 11px; }
+      .legend-row { gap: 6px; }
+      .legend-block { font-size: 10px; padding: 2px 6px; }
+      .guard-grid { grid-template-columns: 1fr; gap: 8px; }
+      .guard-tile { font-size: 10.5px; padding: 6px 10px; }
+      .guard-label { min-width: 100px; font-size: 10px; }
+      .card-topbar { flex-direction: column; align-items: flex-start; gap: 6px; }
+      .answer-content { font-size: 14px; }
+      .passage-snippet { font-size: 12px; }
+      .hh-footer { flex-direction: column; align-items: flex-start; font-size: 10px; }
+      .hud-status-pill { font-size: 10px; padding: 5px 12px; }
+      .lang-dropdown { font-size: 11px; width: 100%; }
+      .language-toolbar { flex-direction: column; align-items: stretch; }
+      #waveCanvas:not(.active), #partialTranscript:not(.active) { display: none; }
+    }
+
+    @media (max-width: 400px) {
+      .hero-headline { font-size: clamp(22px, 9vw, 32px); }
+      .signboard-deck { flex-direction: column; align-items: stretch; }
+      .sign-arrow { justify-content: center; }
+      .hh-logo-title { font-size: 20px; }
+    }
+    
+    .unified-result-panel {
+        background: var(--goa-bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        margin-top: 20px;
+    }
+    .panel-divider {
+        height: 1px;
+        background: var(--border-subtle);
+        margin: 20px 0;
     }
   </style>
 </head>
@@ -1250,9 +1318,8 @@
     <div class="legend-row" id="legend"></div>
   </section>
 
-  <!-- Results Grid -->
-  <div class="results-layout">
-    <!-- Answer Panel -->
+  <!-- Unified Results Panel (Answer + Passages merged) -->
+  <div class="results-unified">
     <section class="panel answer-panel" id="answerPanel" aria-labelledby="answerLabel">
       <div class="card-topbar">
         <span class="eyebrow" id="answerLabel">NEURAL SYNTHESIS</span>
@@ -1265,16 +1332,15 @@
       <div class="answer-content" id="answer" role="status" aria-live="polite">
         Ask a question or hold the microphone button to initiate the voice RAG pipeline.
       </div>
-    </section>
 
-    <!-- Retrieved Passages -->
-    <section class="panel" aria-labelledby="retLabel">
-      <div class="card-topbar">
+      <div class="section-divider"></div>
+
+      <div class="retrieved-section-header">
         <span class="eyebrow" id="retLabel">RETRIEVED PASSAGES <span id="retCount" class="num"></span></span>
         <span class="bracket-tag">FAISS + BM25 FUSED</span>
       </div>
       <div class="passages-deck" id="retrieved">
-        <div class="mic-caption" style="text-align:center; padding: 24px 0;">No query executed yet.</div>
+        <div class="mic-caption" style="text-align:center; padding: 16px 0;">No query executed yet.</div>
       </div>
     </section>
   </div>
@@ -1493,8 +1559,28 @@ function renderRefusal(reason, detail) {
   const [title, body, next] = REFUSAL_COPY[reason] ||
     ["Request Refused by Guardrails", detail || "", ""];
   
-  $('answerPanel').className = 'panel answer-panel refusal-state';
-  $('answerPanel').innerHTML = `
+  // Only update the answer area, keep passages area intact
+  const panel = $('answerPanel');
+  panel.className = 'panel answer-panel refusal-state';
+  // Find or create answer-area and passages-area
+  let ansArea = panel.querySelector('.answer-area');
+  if (!ansArea) {
+    // First time: restructure the panel
+    const existingDivider = panel.querySelector('.section-divider');
+    const existingRetHeader = panel.querySelector('.retrieved-section-header');
+    const existingDeck = panel.querySelector('.passages-deck');
+    panel.innerHTML = '';
+    ansArea = document.createElement('div');
+    ansArea.className = 'answer-area';
+    panel.appendChild(ansArea);
+    if (existingDivider) panel.appendChild(existingDivider);
+    else { const d = document.createElement('div'); d.className = 'section-divider'; panel.appendChild(d); }
+    if (existingRetHeader) panel.appendChild(existingRetHeader);
+    else { const h = document.createElement('div'); h.className = 'retrieved-section-header'; h.innerHTML = '<span class="eyebrow" id="retLabel">RETRIEVED PASSAGES <span id="retCount" class="num"></span></span><span class="bracket-tag">FAISS + BM25 FUSED</span>'; panel.appendChild(h); }
+    if (existingDeck) panel.appendChild(existingDeck);
+    else { const dk = document.createElement('div'); dk.id = 'retrieved'; dk.className = 'passages-deck'; dk.innerHTML = '<div class="mic-caption" style="text-align:center;padding:16px 0">No query executed yet.</div>'; panel.appendChild(dk); }
+  }
+  ansArea.innerHTML = `
     <div class="card-topbar">
       <div class="refusal-pill">⚠️ REFUSED · ${reason || 'GUARDRAIL_TRIGGER'}</div>
       <span class="bracket-tag pink">ZERO-TRUST BLOCK</span>
@@ -1507,9 +1593,28 @@ function renderRefusal(reason, detail) {
 }
 
 function renderAnswer(ans) {
-  $('answerPanel').className = 'panel answer-panel';
+  const panel = $('answerPanel');
+  panel.className = 'panel answer-panel';
   lastAnswerText = ans.answer || '';
-  $('answerPanel').innerHTML = `
+  
+  // Only update the answer area, keep passages area intact
+  let ansArea = panel.querySelector('.answer-area');
+  if (!ansArea) {
+    const existingDivider = panel.querySelector('.section-divider');
+    const existingRetHeader = panel.querySelector('.retrieved-section-header');
+    const existingDeck = panel.querySelector('.passages-deck');
+    panel.innerHTML = '';
+    ansArea = document.createElement('div');
+    ansArea.className = 'answer-area';
+    panel.appendChild(ansArea);
+    if (existingDivider) panel.appendChild(existingDivider);
+    else { const d = document.createElement('div'); d.className = 'section-divider'; panel.appendChild(d); }
+    if (existingRetHeader) panel.appendChild(existingRetHeader);
+    else { const h = document.createElement('div'); h.className = 'retrieved-section-header'; h.innerHTML = '<span class="eyebrow" id="retLabel">RETRIEVED PASSAGES <span id="retCount" class="num"></span></span><span class="bracket-tag">FAISS + BM25 FUSED</span>'; panel.appendChild(h); }
+    if (existingDeck) panel.appendChild(existingDeck);
+    else { const dk = document.createElement('div'); dk.id = 'retrieved'; dk.className = 'passages-deck'; dk.innerHTML = '<div class="mic-caption" style="text-align:center;padding:16px 0">No query executed yet.</div>'; panel.appendChild(dk); }
+  }
+  ansArea.innerHTML = `
     <div class="card-topbar">
       <span class="eyebrow">NEURAL SYNTHESIS</span>
       <div class="card-action-bar">
@@ -1633,7 +1738,7 @@ async function submitQuery(text, lang) {
   $('ask').disabled = true;
   setStatus('synthesizing', 'busy');
   $('partial').textContent = text;
-  $('partial').classList.add('final');
+  $('partial').classList.add('final', 'visible');
 
   try {
     const body = { text };
@@ -1715,6 +1820,7 @@ async function startMic() {
   analyser.fftSize = 512;
   src.connect(analyser);
   drawing = true;
+  $('wave').classList.add('active');
   drawWave();
 
   ws = new WebSocket(WS_BASE + '/ws');
@@ -1725,10 +1831,11 @@ async function startMic() {
     const m = JSON.parse(ev.data);
     if (m.type === 'partial') {
       $('partial').textContent = m.text;
+      $('partial').classList.add('visible');
       $('partial').classList.remove('final');
     } else if (m.type === 'final') {
       $('partial').textContent = m.text;
-      $('partial').classList.add('final');
+      $('partial').classList.add('final', 'visible');
     } else if (m.type === 'speculative') {
       setStatus('speculative retrieving', 'busy');
     } else if (m.type === 'stt_fallback') {
@@ -1764,6 +1871,7 @@ async function startMic() {
 
 function stopMic() {
   drawing = false;
+  $('wave').classList.remove('active');
   if (node) { try { node.disconnect(); } catch (e) {} node = null; }
   if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
   if (audioCtx) { try { audioCtx.close(); } catch (e) {} audioCtx = null; }
