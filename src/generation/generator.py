@@ -61,7 +61,7 @@ def _safe_refusal(lang: str, reason: RefusalReason,
     )
 
 
-def render_context(rs: RetrievalSet, max_chars: int = 1200) -> str:
+def render_context(rs: RetrievalSet, max_chars: int = 500, max_chunks: int = 4) -> str:
     """
     Retrieved passages as model input.
 
@@ -70,7 +70,7 @@ def render_context(rs: RetrievalSet, max_chars: int = 1200) -> str:
     corpus is web text - so this is a real risk, not a theoretical one.
     """
     lines = []
-    for c in rs.chunks:
+    for c in rs.chunks[:max_chunks]:
         body = (c.parent_text or c.text)[:max_chars]
         lines.append(f"<passage id=\"{c.passage_id}\" lang=\"{c.lang}\" "
                      f"score=\"{c.score:.3f}\">\n{body}\n</passage>")
@@ -91,14 +91,14 @@ class GenerationResult:
 
 class Generator:
     def __init__(self, model: str = DEFAULT_MODEL, api_key: str | None = None,
-                 max_tokens: int = 1024, tool_executor: Callable | None = None,
+                 max_tokens: int = 350, tool_executor: Callable | None = None,
                  use_tools: bool = True, tool_phase_ms: float = 1500.0):
         self.model = model
         self.max_tokens = max_tokens
         self.use_tools = use_tools
         self.tool_phase_ms = tool_phase_ms
         self.tool_executor = tool_executor
-        self.client = AsyncGroq(api_key=api_key or cfg_get("GROQ_API_KEY"))
+        self.client = AsyncGroq(api_key=api_key or cfg_get("GROQ_API_KEY"), max_retries=0)
 
     # ------------------------------------------------------------- prompting
     def _messages(self, query: str, rs: RetrievalSet, lang: str,
