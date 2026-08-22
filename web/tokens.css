@@ -1,86 +1,95 @@
 /* ==========================================================================
-   HH GOA 2026 — AWARD-WINNING PRO UI/UX (#RAGInGoa)
-   Theme: Hacker House Goa · 2:47 PM Studio · Deep Goa Forest & Solar Gold
+   HH GOA 2026 — AWARD-WINNING GOA VIBES & SKIN TONE DESIGN SYSTEM
+   Theme: Hacker House Goa (hhgoa.com) · Tropical Emerald, Golden Sun & Sand/Skin
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,600;0,700;0,800;0,900;1,800&family=Imbue:opsz,wght@10..100,200..900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Victor+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,600;0,700;0,800;0,900;1,800&family=Imbue:opsz,wght@10..100,200..900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Victor+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 :root {
-  /* Ultra-Deep Forest Backgrounds */
-  --goa-bg-page:        #05180D;
-  --goa-bg-dark:        #072414;
-  --goa-bg-surface:     rgba(10, 29, 19, 0.85);
-  --goa-bg-card:        rgba(13, 61, 34, 0.68);
-  --goa-bg-card-hover:  rgba(20, 90, 50, 0.82);
-  --goa-bg-elevated:    #145A32;
-  --goa-bg-glass:       rgba(7, 36, 20, 0.75);
+  /* Ultra-Lush Tropical Goan Emerald & Forest Backgrounds */
+  --goa-bg-page:        #062817;
+  --goa-bg-dark:        #093820;
+  --goa-bg-surface:     rgba(10, 48, 28, 0.88);
+  --goa-bg-card:        rgba(251, 243, 230, 0.06);
+  --goa-bg-card-hover:  rgba(251, 243, 230, 0.12);
+  --goa-bg-elevated:    #0D4D2B;
+  --goa-bg-glass:       rgba(8, 38, 22, 0.82);
 
-  /* Primary Brand Greens */
-  --goa-green:          #1A6B3C;
-  --goa-green-rgb:      26, 107, 60;
-  --goa-green-deep:     #0D3D22;
-  --goa-green-deep-rgb: 13, 61, 34;
+  /* Primary Brand Goan Greens */
+  --goa-green:          #166534;
+  --goa-green-rgb:      22, 101, 52;
+  --goa-green-deep:     #0B3B20;
+  --goa-green-deep-rgb: 11, 59, 32;
+  --goa-palm:           #22C55E;
+  --goa-palm-rgb:       34, 197, 94;
+  --goa-mint:           #4ADE80;
 
-  /* Radiant Solar Gold & Amber Accents */
-  --goa-gold:           #E8C840;
-  --goa-gold-rgb:       232, 200, 64;
-  --goa-gold-dim:       #C4A832;
-  --goa-gold-warm:      #FFF2C2;
-  --goa-amber:          #FF7A00;
-  --goa-amber-rgb:      255, 122, 0;
+  /* Radiant Goa Solar Gold & Amber Accents */
+  --goa-gold:           #FFDE59;
+  --goa-gold-rgb:       255, 222, 89;
+  --goa-gold-bright:    #FFE600;
+  --goa-gold-dim:       #E5C138;
+  --goa-gold-warm:      #FFF4CC;
+  --goa-amber:          #FF9F1C;
+  --goa-amber-rgb:      255, 159, 28;
 
-  /* Goa Hot Pink & Laser Coral */
-  --goa-pink:           #FF2D78;
-  --goa-pink-rgb:       255, 45, 120;
-  --goa-coral:          #FF5F52;
+  /* Tropical Hibiscus Hot Pink & Neon Scooter Magenta */
+  --goa-pink:           #FF007F;
+  --goa-pink-rgb:       255, 0, 127;
+  --goa-pink-bright:    #FF2A8D;
+  --goa-coral:          #FF6B6B;
 
-  /* Quantum Emerald & Electric Cyan */
-  --goa-emerald:        #34D399;
-  --goa-emerald-rgb:    52, 211, 153;
+  /* Warm Sun-Kissed Goa Beach Sand & Skin Tones */
+  --goa-sand:           #FBF4EA;
+  --goa-sand-rgb:       251, 244, 234;
+  --goa-skin-light:     #FDF8F0;
+  --goa-skin-warm:      #F5E7D0;
+  --goa-skin-tan:       #EAD2B4;
+  --goa-skin-terracotta:#D48B68;
+  --goa-cream:          #F8F0E3;
+  --goa-cream-dark:     #E8DCB8;
+  --goa-muted:          #A3C6B1;
+  --goa-dim:            #648B74;
+  --goa-white:          #FFFFFF;
+
+  /* Ocean Wave Turquoise & Electric Cyan */
   --goa-cyan:           #00F0FF;
   --goa-cyan-rgb:       0, 240, 255;
-  --goa-violet:         #A855F7;
-
-  /* Typography Palette */
-  --goa-sand:           #F5F0E1;
-  --goa-sand-rgb:       245, 240, 225;
-  --goa-cream:          #EDE3D2;
-  --goa-cream-dark:     #D8CEB8;
-  --goa-muted:          #9CB3A4;
-  --goa-dim:            #567563;
-  --goa-white:          #FFFFFF;
+  --goa-turquoise:      #2DD4BF;
+  --goa-violet:         #C084FC;
 
   /* Typography Stacks */
   --font-serif:         'Imbue', Georgia, serif;
-  --font-display:       'Anybody', 'Space Grotesk', sans-serif;
-  --font-hero:          'Space Grotesk', sans-serif;
+  --font-display:       'Anybody', 'Space Grotesk', 'Outfit', sans-serif;
+  --font-hero:          'Space Grotesk', 'Outfit', sans-serif;
   --font-body:          'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-code:          'Victor Mono', 'JetBrains Mono', monospace;
   --font-mono:          'JetBrains Mono', monospace;
 
   /* Borders & Dividers */
-  --border-subtle:      rgba(245, 240, 225, 0.09);
-  --border-gold:        rgba(232, 200, 64, 0.35);
-  --border-gold-glow:   rgba(232, 200, 64, 0.7);
-  --border-green:       rgba(26, 107, 60, 0.5);
-  --border-emerald:     rgba(52, 211, 153, 0.4);
-  --border-pink:        rgba(255, 45, 120, 0.4);
+  --border-subtle:      rgba(251, 244, 234, 0.12);
+  --border-white:       rgba(255, 255, 255, 0.35);
+  --border-gold:        rgba(255, 222, 89, 0.45);
+  --border-gold-glow:   rgba(255, 222, 89, 0.85);
+  --border-green:       rgba(34, 197, 94, 0.5);
+  --border-emerald:     rgba(74, 222, 128, 0.45);
+  --border-pink:        rgba(255, 0, 127, 0.55);
 
   /* Shadows & Illuminations */
-  --shadow-gold-sm:     0 0 16px rgba(232, 200, 64, 0.22);
-  --shadow-gold-md:     0 0 35px rgba(232, 200, 64, 0.38);
-  --shadow-gold-lg:     0 0 65px rgba(232, 200, 64, 0.28);
-  --shadow-emerald-sm:  0 0 16px rgba(52, 211, 153, 0.28);
-  --shadow-pink:        0 4px 20px rgba(255, 45, 120, 0.4);
-  --shadow-card:        0 14px 40px -6px rgba(0, 0, 0, 0.65);
-  --shadow-glow:        0 0 30px rgba(232, 200, 64, 0.15);
+  --shadow-gold-sm:     0 0 16px rgba(255, 222, 89, 0.28);
+  --shadow-gold-md:     0 0 35px rgba(255, 222, 89, 0.48);
+  --shadow-gold-lg:     0 0 65px rgba(255, 222, 89, 0.38);
+  --shadow-pink:        0 0 24px rgba(255, 0, 127, 0.45);
+  --shadow-palm:        0 0 20px rgba(34, 197, 94, 0.35);
+  --shadow-card:        0 16px 48px -8px rgba(0, 0, 0, 0.72);
+  --shadow-glow:        0 0 32px rgba(255, 222, 89, 0.2);
 
   --radius-xs:          4px;
   --radius-sm:          8px;
-  --radius-md:          14px;
-  --radius-lg:          22px;
+  --radius-md:          16px;
+  --radius-lg:          24px;
   --radius-pill:        9999px;
-  --pad-container:      clamp(16px, 3.2vw, 36px);
+  --pad-container:      clamp(16px, 3.5vw, 40px);
 }
 
 /* Base Styles */
@@ -105,15 +114,15 @@ html, body {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(5, 24, 13, 0.8);
+  background: rgba(4, 26, 14, 0.85);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(232, 200, 64, 0.35);
-  border-radius: 3px;
+  background: rgba(255, 222, 89, 0.45);
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--goa-gold);
@@ -132,39 +141,39 @@ html, body {
   width: 100%; height: 100%;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.6;
+  opacity: 0.65;
 }
 
-/* Background Atmosphere: Goa Canopy + Golden Sunbeam Vignette */
+/* Background Atmosphere: Goan Palm Canopy + Solar Flare & Sand Radiance */
 body::before {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background-image: 
-    radial-gradient(circle at 50% -12%, rgba(var(--goa-gold-rgb), 0.18) 0%, transparent 60%),
-    radial-gradient(circle at 8% 45%, rgba(var(--goa-green-rgb), 0.45) 0%, transparent 65%),
-    radial-gradient(circle at 92% 75%, rgba(var(--goa-pink-rgb), 0.14) 0%, transparent 55%),
-    linear-gradient(to right, rgba(245, 240, 225, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(245, 240, 225, 0.02) 1px, transparent 1px);
+    radial-gradient(circle at 50% -8%, rgba(255, 222, 89, 0.22) 0%, transparent 58%),
+    radial-gradient(circle at 10% 40%, rgba(34, 197, 94, 0.35) 0%, transparent 60%),
+    radial-gradient(circle at 90% 70%, rgba(255, 0, 127, 0.16) 0%, transparent 52%),
+    linear-gradient(to right, rgba(251, 244, 234, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(251, 244, 234, 0.025) 1px, transparent 1px);
   background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
   pointer-events: none;
   z-index: 0;
 }
 
-/* Subtle CRT Grain / Scanline Texture */
+/* Subtle CRT Grain / Retro Scanline Texture */
 body::after {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background: repeating-linear-gradient(
     0deg,
-    rgba(0, 0, 0, 0.14) 0px,
-    rgba(0, 0, 0, 0.14) 1px,
+    rgba(0, 0, 0, 0.12) 0px,
+    rgba(0, 0, 0, 0.12) 1px,
     transparent 1px,
     transparent 2px
   );
   pointer-events: none;
-  opacity: 0.35;
+  opacity: 0.3;
   z-index: 1;
 }
 
@@ -188,7 +197,7 @@ body::after {
 .eyebrow {
   font-family: var(--font-display);
   font-weight: 800;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   font-size: 11px;
   color: var(--goa-gold);
@@ -210,9 +219,9 @@ body::after {
   content: '';
   position: absolute;
   top: -1px; right: -1px;
-  width: 10px; height: 10px;
-  border-top: 2px solid var(--goa-gold);
-  border-right: 2px solid var(--goa-gold);
+  width: 12px; height: 12px;
+  border-top: 2.5px solid var(--goa-gold);
+  border-right: 2.5px solid var(--goa-gold);
   pointer-events: none;
 }
 
@@ -221,8 +230,8 @@ body::after {
   font-family: var(--font-code);
   font-size: 11px;
   color: var(--goa-gold);
-  background: rgba(232, 200, 64, 0.1);
-  border: 1px solid rgba(232, 200, 64, 0.35);
+  background: rgba(255, 222, 89, 0.12);
+  border: 1px solid rgba(255, 222, 89, 0.4);
   border-radius: var(--radius-xs);
   padding: 3px 9px;
   letter-spacing: 0.05em;
@@ -231,14 +240,26 @@ body::after {
   gap: 5px;
 }
 
+.bracket-tag.pink {
+  color: var(--goa-pink);
+  background: rgba(255, 0, 127, 0.14);
+  border-color: var(--border-pink);
+}
+
+.bracket-tag.palm {
+  color: var(--goa-palm);
+  background: rgba(34, 197, 94, 0.14);
+  border-color: var(--border-green);
+}
+
 .hashtag-badge {
   font-family: var(--font-display);
   font-weight: 900;
   font-size: 12px;
-  color: #05180D;
-  background: linear-gradient(135deg, var(--goa-gold), #FFF2C2);
+  color: #062817;
+  background: linear-gradient(135deg, var(--goa-gold), #FFF4CC);
   border-radius: var(--radius-pill);
-  padding: 5px 15px;
+  padding: 5px 16px;
   letter-spacing: 0.06em;
   box-shadow: var(--shadow-gold-sm);
   text-decoration: none;
@@ -248,17 +269,17 @@ body::after {
   transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .hashtag-badge:hover {
-  transform: translateY(-2px) scale(1.03);
+  transform: translateY(-2px) scale(1.04);
   box-shadow: var(--shadow-gold-md);
   filter: brightness(1.12);
 }
 
-/* Glassmorphism Panel */
+/* Glassmorphism Panel with Goa Sand Skin Backdrop */
 .panel {
-  background: var(--goa-bg-card);
+  background: var(--goa-bg-surface);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--border-subtle);
+  border: 1.5px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: var(--pad-container);
   box-shadow: var(--shadow-card);
@@ -271,25 +292,25 @@ body::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(232, 200, 64, 0.35), transparent);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 222, 89, 0.45), rgba(255, 0, 127, 0.3), transparent);
   pointer-events: none;
 }
 
 .panel:hover {
-  border-color: rgba(232, 200, 64, 0.4);
+  border-color: rgba(255, 222, 89, 0.45);
 }
 
 /* State Status Colors */
-.pass { color: var(--goa-gold); text-shadow: 0 0 10px rgba(232, 200, 64, 0.5); }
-.fail { color: var(--goa-pink); text-shadow: 0 0 10px rgba(255, 45, 120, 0.5); }
-.live { color: var(--goa-gold); text-shadow: 0 0 10px rgba(232, 200, 64, 0.5); }
+.pass { color: var(--goa-gold); text-shadow: 0 0 10px rgba(255, 222, 89, 0.5); }
+.fail { color: var(--goa-pink); text-shadow: 0 0 10px rgba(255, 0, 127, 0.5); }
+.live { color: var(--goa-palm); text-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
 
 /* Accessible Focus States */
 :focus-visible {
   outline: 2px solid var(--goa-gold);
   outline-offset: 3px;
-  box-shadow: 0 0 14px rgba(232, 200, 64, 0.6);
+  box-shadow: 0 0 14px rgba(255, 222, 89, 0.65);
   border-radius: 4px;
 }
 
@@ -309,17 +330,23 @@ body::after {
   50% { opacity: 0.75; transform: scale(0.97); filter: drop-shadow(0 0 3px var(--goa-gold)); }
 }
 
+@keyframes pulsePink {
+  0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 14px var(--goa-pink)); }
+  50% { opacity: 0.75; transform: scale(0.97); filter: drop-shadow(0 0 4px var(--goa-pink)); }
+}
+
 @keyframes ringRotate {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-@keyframes waveBar {
-  0%, 100% { height: 6px; }
-  50% { height: 26px; }
+@keyframes waveFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
 }
 
-@keyframes shimmerLight {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(200%); }
+@keyframes solarPulse {
+  0% { box-shadow: 0 0 20px 6px rgba(255, 222, 89, 0.85), 0 0 45px 12px rgba(255, 222, 89, 0.4); }
+  50% { box-shadow: 0 0 28px 9px rgba(255, 222, 89, 0.95), 0 0 60px 18px rgba(255, 159, 28, 0.55); }
+  100% { box-shadow: 0 0 20px 6px rgba(255, 222, 89, 0.85), 0 0 45px 12px rgba(255, 222, 89, 0.4); }
 }
