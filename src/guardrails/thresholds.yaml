@@ -1,12 +1,24 @@
 relevance:
-  tau: 0.80
+  tau: 0.75
   tau_source: bench/calibrate_tau.py dense-cosine, n_pos=2707 n_neg=2000 (out_of_corpus) — calibrated for 14M vector corpus
   ambiguous_band: 0.03
   code_switch_relaxation: 0.06
   tau_by_lang:
-    eng_Latn: 0.82
-    hin_Deva: 0.78
+    eng_Latn: 0.80
+    hin_Deva: 0.75
+    asm_Beng: 0.74
+    ben_Beng: 0.75
+    guj_Gujr: 0.74
+    kan_Knda: 0.74
+    mal_Mlym: 0.74
+    mar_Deva: 0.75
+    npi_Deva: 0.74
+    ory_Orya: 0.74
+    pan_Guru: 0.74
+    san_Deva: 0.74
     tam_Taml: null
+    tel_Telu: 0.74
+    urd_Arab: 0.75
   auc_by_lang:
     eng_Latn: 0.9102
     hin_Deva: 0.8085
