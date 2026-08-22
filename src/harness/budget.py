@@ -33,7 +33,7 @@ class Budget:
     started_ns: int = field(default_factory=time.perf_counter_ns)
     degradations: list[Degradation] = field(default_factory=list)
     # reserve for stages that must always get a slice (guardrails, assembly)
-    reserve_ms: float = 8.0
+    reserve_ms: float = 4.0
 
     @property
     def elapsed_ms(self) -> float:
@@ -56,32 +56,32 @@ class Budget:
 
     # ---- the actual degradation ladder, cheapest quality loss first --------
 
-    def retrieval_params(self, *, base_k: int = 15, base_ef: int = 16,
+    def retrieval_params(self, *, base_k: int = 10, base_ef: int = 32,
                          stage: str = "retrieve") -> dict:
         """
         Pick retrieval parameters that fit the remaining budget.
 
         The ladder is ordered by how much quality each step costs:
-          >60ms  full quality
-          >35ms  ef=16, base_k
-          >20ms  cut k as well (less for MMR to work with)
-          >4ms   sparse-only (BM25 needs no embedding forward pass)
+          >40ms  full quality
+          >25ms  ef=32, base_k
+          >12ms  cut k as well (less for MMR to work with)
+          >3ms   sparse-only (BM25 needs no embedding forward pass)
           <=2ms  nothing survives - caller must refuse rather than guess
 
         Note: if the embedding was already done before this call (the new
         flow), the caller upgrades sparse-only back to hybrid for free.
         """
         r = self.spendable_ms
-        if r > 60:
+        if r > 40:
             return {"k": base_k, "ef_search": base_ef, "mode": "hybrid"}
-        if r > 35:
+        if r > 25:
             return {"k": base_k, "ef_search": base_ef, "mode": "hybrid"}
-        if r > 20:
-            self.note(stage, "ef_search->16,k->10")
-            return {"k": 10, "ef_search": 16, "mode": "hybrid"}
-        if r > 4:
+        if r > 12:
+            self.note(stage, "ef_search->16,k->8")
+            return {"k": 8, "ef_search": 16, "mode": "hybrid"}
+        if r > 3:
             self.note(stage, "sparse_only")
-            return {"k": 10, "ef_search": 16, "mode": "sparse"}
+            return {"k": 8, "ef_search": 16, "mode": "sparse"}
         self.note(stage, "budget_exhausted")
         raise BudgetExceeded(f"{r:.1f}ms left at {stage}")
 

@@ -143,7 +143,7 @@ class CoreLoop:
         budget = Budget(total_ms=budget_ms)
 
         try:
-            params = budget.retrieval_params()
+            params = budget.retrieval_params(base_k=10, base_ef=32)
         except BudgetExceeded as e:
             return refuse(RefusalReason.NOT_IN_RETRIEVED_SET, str(e),
                           ErrorKind.BUDGET_EXCEEDED)
@@ -153,8 +153,8 @@ class CoreLoop:
             params["mode"] = "hybrid"
 
         rem = budget.remaining_ms
-        dense_to = max(20.0, rem - 4.0)
-        sparse_to = max(20.0, rem - 4.0)
+        dense_to = max(15.0, rem - 3.0)
+        sparse_to = max(15.0, rem - 3.0)
         stages = []
         if params["mode"] == "hybrid":
             stages.append(Stage("dense", self._dense, timeout_ms=dense_to,
@@ -175,8 +175,8 @@ class CoreLoop:
 
         # ---- T5 fuse + diversify
         t0 = budget.elapsed_ms
-        fused = rrf(dense_hits, sparse_hits, top_k=max(k_final * 2, 10))
-        if fused and budget.allow_mmr(est_ms=30.0):
+        fused = rrf(dense_hits, sparse_hits, top_k=k_final + 3)
+        if fused and budget.allow_mmr(est_ms=12.0):
             # Read candidate vectors OUT OF THE INDEX. Re-embedding the passage
             # text here (one forward pass per candidate) cost 260-420ms of a
             # 200ms budget and made fuse dominate the entire loop - measured,
@@ -184,7 +184,7 @@ class CoreLoop:
             vecs: dict = {}
             for lg in self.dense.route(nq.lang):
                 part = self.dense.partitions[lg]
-                if not (missing := [f.passage_id for f in fused[:k_final * 2]
+                if not (missing := [f.passage_id for f in fused[:k_final + 3]
                                     if f.passage_id not in vecs]):
                     break
                 vecs.update(part.get_vectors(missing))
