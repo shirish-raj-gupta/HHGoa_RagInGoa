@@ -1,19 +1,20 @@
 /* ==========================================================================
-   HH GOA 2026 — AWARD-WINNING GOA VIBES & SKIN TONE DESIGN SYSTEM
-   Theme: Hacker House Goa (hhgoa.com) · Tropical Emerald, Golden Sun & Sand/Skin
+   HH GOA 2026 — PREMIUM TROPICAL NIGHT-BEACH DESIGN SYSTEM
+   Theme: Hacker House Goa (hhgoa.com) · Deep Emerald Night, Warm Campfire Gold
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,600;0,700;0,800;0,900;1,800&family=Imbue:opsz,wght@10..100,200..900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Victor+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 :root {
-  /* Ultra-Lush Tropical Goan Emerald & Forest Backgrounds */
-  --goa-bg-page:        #062817;
-  --goa-bg-dark:        #093820;
-  --goa-bg-surface:     rgba(10, 48, 28, 0.88);
-  --goa-bg-card:        rgba(251, 243, 230, 0.06);
-  --goa-bg-card-hover:  rgba(251, 243, 230, 0.12);
-  --goa-bg-elevated:    #0D4D2B;
-  --goa-bg-glass:       rgba(8, 38, 22, 0.82);
+  /* Deep Tropical Night Backgrounds */
+  --goa-bg-page:        #040F09;
+  --goa-bg-dark:        #071A10;
+  --goa-bg-surface:     rgba(8, 32, 18, 0.75);
+  --goa-bg-card:        rgba(12, 40, 24, 0.65);
+  --goa-bg-card-hover:  rgba(18, 56, 32, 0.80);
+  --goa-bg-elevated:    #0C2818;
+  --goa-bg-glass:       rgba(6, 24, 14, 0.88);
+  --goa-bg-input:       rgba(4, 18, 10, 0.92);
 
   /* Primary Brand Goan Greens */
   --goa-green:          #166534;
@@ -23,42 +24,43 @@
   --goa-palm:           #22C55E;
   --goa-palm-rgb:       34, 197, 94;
   --goa-mint:           #4ADE80;
+  --goa-emerald:        #0E5A33;
 
-  /* Radiant Goa Solar Gold & Amber Accents */
+  /* Warm Campfire Gold & Amber */
   --goa-gold:           #FFDE59;
   --goa-gold-rgb:       255, 222, 89;
   --goa-gold-bright:    #FFE600;
-  --goa-gold-dim:       #E5C138;
+  --goa-gold-dim:       #D4A832;
   --goa-gold-warm:      #FFF4CC;
   --goa-amber:          #FF9F1C;
   --goa-amber-rgb:      255, 159, 28;
 
-  /* Tropical Hibiscus Hot Pink & Neon Scooter Magenta */
+  /* Tropical Hibiscus Hot Pink */
   --goa-pink:           #FF007F;
   --goa-pink-rgb:       255, 0, 127;
   --goa-pink-bright:    #FF2A8D;
   --goa-coral:          #FF6B6B;
 
-  /* Warm Sun-Kissed Goa Beach Sand & Skin Tones */
-  --goa-sand:           #FBF4EA;
-  --goa-sand-rgb:       251, 244, 234;
+  /* Beach Sand & Warm Skin Tones */
+  --goa-sand:           #F5EDD8;
+  --goa-sand-rgb:       245, 237, 216;
   --goa-skin-light:     #FDF8F0;
   --goa-skin-warm:      #F5E7D0;
   --goa-skin-tan:       #EAD2B4;
   --goa-skin-terracotta:#D48B68;
   --goa-cream:          #F8F0E3;
   --goa-cream-dark:     #E8DCB8;
-  --goa-muted:          #A3C6B1;
-  --goa-dim:            #648B74;
+  --goa-muted:          #8CA898;
+  --goa-dim:            #506B5C;
   --goa-white:          #FFFFFF;
 
-  /* Ocean Wave Turquoise & Electric Cyan */
+  /* Ocean Turquoise */
   --goa-cyan:           #00F0FF;
   --goa-cyan-rgb:       0, 240, 255;
   --goa-turquoise:      #2DD4BF;
   --goa-violet:         #C084FC;
 
-  /* Typography Stacks */
+  /* Typography */
   --font-serif:         'Imbue', Georgia, serif;
   --font-display:       'Anybody', 'Space Grotesk', 'Outfit', sans-serif;
   --font-hero:          'Space Grotesk', 'Outfit', sans-serif;
@@ -66,33 +68,40 @@
   --font-code:          'Victor Mono', 'JetBrains Mono', monospace;
   --font-mono:          'JetBrains Mono', monospace;
 
-  /* Borders & Dividers */
-  --border-subtle:      rgba(251, 244, 234, 0.12);
-  --border-white:       rgba(255, 255, 255, 0.35);
-  --border-gold:        rgba(255, 222, 89, 0.45);
-  --border-gold-glow:   rgba(255, 222, 89, 0.85);
-  --border-green:       rgba(34, 197, 94, 0.5);
-  --border-emerald:     rgba(74, 222, 128, 0.45);
-  --border-pink:        rgba(255, 0, 127, 0.55);
+  /* Borders */
+  --border-subtle:      rgba(245, 237, 216, 0.08);
+  --border-white:       rgba(255, 255, 255, 0.18);
+  --border-gold:        rgba(255, 222, 89, 0.30);
+  --border-gold-glow:   rgba(255, 222, 89, 0.70);
+  --border-green:       rgba(34, 197, 94, 0.35);
+  --border-emerald:     rgba(74, 222, 128, 0.35);
+  --border-pink:        rgba(255, 0, 127, 0.40);
 
-  /* Shadows & Illuminations */
-  --shadow-gold-sm:     0 0 16px rgba(255, 222, 89, 0.28);
-  --shadow-gold-md:     0 0 35px rgba(255, 222, 89, 0.48);
-  --shadow-gold-lg:     0 0 65px rgba(255, 222, 89, 0.38);
-  --shadow-pink:        0 0 24px rgba(255, 0, 127, 0.45);
-  --shadow-palm:        0 0 20px rgba(34, 197, 94, 0.35);
-  --shadow-card:        0 16px 48px -8px rgba(0, 0, 0, 0.72);
-  --shadow-glow:        0 0 32px rgba(255, 222, 89, 0.2);
+  /* Shadows */
+  --shadow-gold-sm:     0 0 12px rgba(255, 222, 89, 0.18);
+  --shadow-gold-md:     0 0 28px rgba(255, 222, 89, 0.30);
+  --shadow-gold-lg:     0 0 50px rgba(255, 222, 89, 0.25);
+  --shadow-pink:        0 0 20px rgba(255, 0, 127, 0.35);
+  --shadow-palm:        0 0 16px rgba(34, 197, 94, 0.25);
+  --shadow-card:        0 8px 32px -4px rgba(0, 0, 0, 0.65);
+  --shadow-glow:        0 0 24px rgba(255, 222, 89, 0.15);
+  --shadow-deep:        0 24px 64px -12px rgba(0, 0, 0, 0.80);
 
-  --radius-xs:          4px;
-  --radius-sm:          8px;
+  /* Radii & Spacing */
+  --radius-xs:          6px;
+  --radius-sm:          10px;
   --radius-md:          16px;
   --radius-lg:          24px;
+  --radius-xl:          32px;
   --radius-pill:        9999px;
-  --pad-container:      clamp(16px, 3.5vw, 40px);
+  --pad-container:      clamp(18px, 3.5vw, 44px);
+
+  /* Transitions */
+  --ease-spring:        cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth:        cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Base Styles */
+/* Base Reset */
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -113,240 +122,199 @@ html, body {
 }
 
 /* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
-::-webkit-scrollbar-track {
-  background: rgba(4, 26, 14, 0.85);
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 222, 89, 0.45);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--goa-gold);
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: rgba(4, 15, 9, 0.9); }
+::-webkit-scrollbar-thumb { background: rgba(255, 222, 89, 0.30); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--goa-gold); }
 
-/* Official HH Goa selection highlight */
 ::selection {
-  background-color: var(--goa-pink);
+  background-color: rgba(255, 222, 89, 0.35);
   color: #FFFFFF;
 }
 
-/* Interactive Particle Canvas (Behind content) */
+/* Particle Canvas */
 #particleCanvas {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   width: 100%; height: 100%;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.65;
+  opacity: 0.5;
 }
 
-/* Background Atmosphere: Goan Palm Canopy + Solar Flare & Sand Radiance */
+/* Atmospheric Night Background */
 body::before {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-image: 
-    radial-gradient(circle at 50% -8%, rgba(255, 222, 89, 0.22) 0%, transparent 58%),
-    radial-gradient(circle at 10% 40%, rgba(34, 197, 94, 0.35) 0%, transparent 60%),
-    radial-gradient(circle at 90% 70%, rgba(255, 0, 127, 0.16) 0%, transparent 52%),
-    linear-gradient(to right, rgba(251, 244, 234, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(251, 244, 234, 0.025) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+  background-image:
+    radial-gradient(ellipse at 50% -15%, rgba(255, 222, 89, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse at 15% 50%, rgba(22, 101, 52, 0.25) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 75%, rgba(255, 0, 127, 0.06) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 100%, rgba(212, 168, 50, 0.08) 0%, transparent 40%);
   pointer-events: none;
   z-index: 0;
 }
 
-/* Subtle CRT Grain / Retro Scanline Texture */
+/* Subtle Grain Texture */
 body::after {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.12) 0px,
-    rgba(0, 0, 0, 0.12) 1px,
-    transparent 1px,
-    transparent 2px
-  );
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
   pointer-events: none;
-  opacity: 0.3;
+  opacity: 1;
   z-index: 1;
 }
 
-.mono, .num, code, pre, .pid {
-  font-family: var(--font-code);
-}
-.num {
-  font-variant-numeric: tabular-nums;
-}
+/* Utility Classes */
+.mono, .num, code, pre, .pid { font-family: var(--font-code); }
+.num { font-variant-numeric: tabular-nums; }
 
-/* Editorial Serif Headline */
 .serif-headline {
   font-family: var(--font-serif);
   font-weight: 800;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
   line-height: 0.94;
   text-transform: uppercase;
 }
 
-/* High-Impact Eyebrow */
 .eyebrow {
   font-family: var(--font-display);
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  font-size: 11px;
-  color: var(--goa-gold);
+  font-size: 10.5px;
+  color: var(--goa-gold-dim);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .eyebrow::before {
-  content: '✦';
+  content: '◆';
+  font-size: 6px;
   color: var(--goa-gold);
-  font-size: 10px;
 }
 
-/* Gold Corner Pixel Bracket Accents */
-.gold-corner {
-  position: relative;
-}
-.gold-corner::after {
-  content: '';
-  position: absolute;
-  top: -1px; right: -1px;
-  width: 12px; height: 12px;
-  border-top: 2.5px solid var(--goa-gold);
-  border-right: 2.5px solid var(--goa-gold);
-  pointer-events: none;
-}
-
-/* Cyber Bracket Badges */
+/* Bracket Tags */
 .bracket-tag {
   font-family: var(--font-code);
-  font-size: 11px;
-  color: var(--goa-gold);
-  background: rgba(255, 222, 89, 0.12);
-  border: 1px solid rgba(255, 222, 89, 0.4);
+  font-size: 10px;
+  color: var(--goa-gold-dim);
+  background: rgba(255, 222, 89, 0.06);
+  border: 1px solid rgba(255, 222, 89, 0.20);
   border-radius: var(--radius-xs);
-  padding: 3px 9px;
-  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  letter-spacing: 0.06em;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
-
 .bracket-tag.pink {
   color: var(--goa-pink);
-  background: rgba(255, 0, 127, 0.14);
-  border-color: var(--border-pink);
+  background: rgba(255, 0, 127, 0.08);
+  border-color: rgba(255, 0, 127, 0.25);
 }
-
 .bracket-tag.palm {
   color: var(--goa-palm);
-  background: rgba(34, 197, 94, 0.14);
-  border-color: var(--border-green);
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.25);
 }
 
 .hashtag-badge {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 12px;
-  color: #062817;
-  background: linear-gradient(135deg, var(--goa-gold), #FFF4CC);
+  font-size: 11px;
+  color: #040F09;
+  background: linear-gradient(135deg, var(--goa-gold) 0%, var(--goa-amber) 100%);
   border-radius: var(--radius-pill);
   padding: 5px 16px;
-  letter-spacing: 0.06em;
-  box-shadow: var(--shadow-gold-sm);
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 12px rgba(255, 222, 89, 0.30);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  gap: 5px;
+  transition: all 0.25s var(--ease-spring);
 }
 .hashtag-badge:hover {
-  transform: translateY(-2px) scale(1.04);
+  transform: translateY(-2px) scale(1.03);
   box-shadow: var(--shadow-gold-md);
-  filter: brightness(1.12);
 }
 
-/* Glassmorphism Panel with Goa Sand Skin Backdrop */
+/* Panel (Glass Card) */
 .panel {
-  background: var(--goa-bg-surface);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1.5px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  background: var(--goa-bg-card);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   padding: var(--pad-container);
   box-shadow: var(--shadow-card);
   position: relative;
   overflow: hidden;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
-
 .panel::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255, 222, 89, 0.45), rgba(255, 0, 127, 0.3), transparent);
+  height: 1px;
+  background: linear-gradient(90deg, transparent 5%, rgba(255, 222, 89, 0.25) 50%, transparent 95%);
   pointer-events: none;
 }
-
 .panel:hover {
-  border-color: rgba(255, 222, 89, 0.45);
+  border-color: rgba(255, 222, 89, 0.18);
 }
 
-/* State Status Colors */
-.pass { color: var(--goa-gold); text-shadow: 0 0 10px rgba(255, 222, 89, 0.5); }
-.fail { color: var(--goa-pink); text-shadow: 0 0 10px rgba(255, 0, 127, 0.5); }
-.live { color: var(--goa-palm); text-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
+/* State Colors */
+.pass { color: var(--goa-gold); }
+.fail { color: var(--goa-pink); }
+.live { color: var(--goa-palm); }
 
-/* Accessible Focus States */
+/* Focus */
 :focus-visible {
   outline: 2px solid var(--goa-gold);
   outline-offset: 3px;
-  box-shadow: 0 0 14px rgba(255, 222, 89, 0.65);
+  box-shadow: 0 0 10px rgba(255, 222, 89, 0.45);
   border-radius: 4px;
 }
-
 .sr-only {
-  position: absolute;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* Keyframe Animations */
+/* Animations */
 @keyframes pulseGold {
-  0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 10px var(--goa-gold)); }
-  50% { opacity: 0.75; transform: scale(0.97); filter: drop-shadow(0 0 3px var(--goa-gold)); }
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 8px var(--goa-gold)); }
+  50% { opacity: 0.7; filter: drop-shadow(0 0 2px var(--goa-gold)); }
 }
-
 @keyframes pulsePink {
-  0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 14px var(--goa-pink)); }
-  50% { opacity: 0.75; transform: scale(0.97); filter: drop-shadow(0 0 4px var(--goa-pink)); }
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px var(--goa-pink)); }
+  50% { opacity: 0.7; filter: drop-shadow(0 0 3px var(--goa-pink)); }
 }
-
 @keyframes ringRotate {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
 @keyframes waveFloat {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-4px); }
+  50% { transform: translateY(-3px); }
 }
-
 @keyframes solarPulse {
-  0% { box-shadow: 0 0 20px 6px rgba(255, 222, 89, 0.85), 0 0 45px 12px rgba(255, 222, 89, 0.4); }
-  50% { box-shadow: 0 0 28px 9px rgba(255, 222, 89, 0.95), 0 0 60px 18px rgba(255, 159, 28, 0.55); }
-  100% { box-shadow: 0 0 20px 6px rgba(255, 222, 89, 0.85), 0 0 45px 12px rgba(255, 222, 89, 0.4); }
+  0% { box-shadow: 0 0 16px 4px rgba(255, 222, 89, 0.60), 0 0 36px 8px rgba(255, 222, 89, 0.25); }
+  50% { box-shadow: 0 0 22px 6px rgba(255, 222, 89, 0.75), 0 0 48px 12px rgba(255, 159, 28, 0.35); }
+  100% { box-shadow: 0 0 16px 4px rgba(255, 222, 89, 0.60), 0 0 36px 8px rgba(255, 222, 89, 0.25); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
 }
