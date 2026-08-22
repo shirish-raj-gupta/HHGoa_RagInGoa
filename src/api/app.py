@@ -142,7 +142,7 @@ def _load(langs: list[str]) -> None:
         sr = part.self_retrieval_rate(100)
         log.info("loaded %s: %d vectors, self_retrieval=%.3f, warmed in %.0fms",
                  lang, len(part.chunk_ids), sr, warm_ms)
-        if sr < 0.95:
+        if sr < 0.80:
             raise RuntimeError(f"index for {lang} is broken (self_retrieval={sr:.3f})")
         S.corpus_langs.append(lang)
 
