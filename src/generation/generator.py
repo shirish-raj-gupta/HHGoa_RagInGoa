@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 from dataclasses import dataclass, field
 from typing import Any, AsyncIterator, Callable
@@ -48,11 +49,12 @@ DEFAULT_MODEL = "openai/gpt-oss-120b"
 BENCH_MODELS = [
     "openai/gpt-oss-120b",
     "openai/gpt-oss-20b",
-    "llama-3.3-70b-versatile",
-    "llama-3.1-8b-instant"
 ]
 # reasoning_effort low: cuts completion tokens and avoids extra reasoning cost
 REASONING_EFFORT = "low"
+
+# Multi-script sentence splitter supporting Latin, Devanagari (।), Bengali (।), Urdu (۔), etc.
+EXTRACT_SENT_SPLIT = re.compile(r"(?<=[.!?।॥۔؟])\s+|\n+")
 
 
 def _safe_refusal(lang: str, reason: RefusalReason,
@@ -73,35 +75,38 @@ def _extractive_fallback(query: str, rs: RetrievalSet, lang: str) -> Answer:
     if not text:
         return _safe_refusal(lang, RefusalReason.NOT_IN_RETRIEVED_SET)
     
-    sentences = [s.strip() for s in text.replace("\n", " ").split(".") if len(s.strip()) > 15]
-    if not sentences:
-        sentences = [text[:min(len(text), 200)]]
+    # Split sentences using multi-script punctuation
+    raw_sentences = [s.strip() for s in EXTRACT_SENT_SPLIT.split(text) if len(s.strip()) > 10]
+    if not raw_sentences:
+        raw_sentences = [text[:min(len(text), 250)].strip()]
     
-    q_words = set(query.lower().split())
-    best_sent = sentences[0]
+    q_words = {w.lower() for w in re.findall(r"\w+", query)}
+    best_sent = raw_sentences[0]
     best_overlap = 0
-    for s in sentences:
-        overlap = len(set(s.lower().split()) & q_words)
+    for s in raw_sentences:
+        s_words = {w.lower() for w in re.findall(r"\w+", s)}
+        overlap = len(s_words & q_words)
         if overlap > best_overlap:
             best_overlap = overlap
             best_sent = s
             
     quote = best_sent
-    if quote in text:
-        c_start = text.find(quote)
+    c_start = text.find(quote)
+    if c_start >= 0:
         c_end = c_start + len(quote)
     else:
-        quote = text[:min(len(text), 150)]
+        quote = text[:min(len(text), 200)].strip()
         c_start = 0
         c_end = len(quote)
         
-    ans_text = quote + "." if not quote.endswith(".") else quote
+    ans_text = quote
     return Answer(
         answer=ans_text,
-        citations=[Citation(passage_id=top_chunk.passage_id, quote=quote, char_start=c_start, char_end=c_end)],
-        confidence=0.88,
+        citations=[Citation(passage_id=top_chunk.passage_id, quote=quote, char_start=c_start, char_end=c_end, verified=True)],
+        confidence=0.90,
         language=lang,
-        refused=False
+        refused=False,
+        refusal_reason=None
     )
 
 
