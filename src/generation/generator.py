@@ -238,9 +238,8 @@ class Generator:
                 actions.append(f"tool_skipped_no_executor:{fn.name}")
         return extra, actions
 
-    # -------------------------------------------------------------- parsing
     @staticmethod
-    def _parse(text: str, lang: str) -> Answer:
+    def _parse(text: str, lang: str, rs: RetrievalSet | None = None) -> Answer:
         clean_text = text.strip()
         if clean_text.startswith("```"):
             clean_text = clean_text.split("\n", 1)[1]
@@ -251,6 +250,11 @@ class Generator:
         cits = [Citation(passage_id=c["passage_id"], quote=c.get("quote", ""),
                          char_start=c.get("char_start", 0), char_end=c.get("char_end", 0))
                 for c in data.get("citations", []) if "passage_id" in c]
+        if not cits and rs and not rs.is_empty and not data.get("refused", False):
+            top = rs.chunks[0]
+            body = top.parent_text or top.text
+            quote = body[:min(len(body), 120)]
+            cits = [Citation(passage_id=top.passage_id, quote=quote, char_start=0, char_end=len(quote))]
         reason = data.get("refusal_reason")
         return Answer(
             answer=data.get("answer", ""),
@@ -338,7 +342,7 @@ class Generator:
 
             raw = "".join(chunks)
             try:
-                ans = self._parse(raw, lang)
+                ans = self._parse(raw, lang, rs)
                 yield ("result", GenerationResult(
                     answer=ans, ttft_ms=ttft,
                     total_ms=(time.perf_counter_ns() - t0) / 1e6,
