@@ -222,8 +222,7 @@ class DenseIndex:
         """Which partitions to search for a query in `lang`."""
         if lang in self.partitions:
             out = [lang]
-            has_latin = any('a' <= c.lower() <= 'z' for c in query) if query else False
-            if has_latin and fallback in self.partitions and fallback != lang:
+            if fallback in self.partitions and fallback != lang:
                 out.append(fallback)
             return out
         if fallback in self.partitions:
