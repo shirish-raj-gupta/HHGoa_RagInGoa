@@ -44,11 +44,15 @@ from .tools import ANSWER_SCHEMA, SYSTEM_PROMPT, TOOLS_OPENAI
 # this task: qwen/qwen3.6-27b failed strict validation with a 400 on every
 # attempt. gpt-oss-120b answers Hindi and Tamil in-language with correct
 # citations and correctly refuses out-of-context questions.
-DEFAULT_MODEL = "allam-2-7b"
-BENCH_MODELS = ["allam-2-7b", "openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.6-27b"]
-# reasoning_effort low: cuts completion tokens 237 -> 148 at identical latency
-# (~1.1s, network-dominated). The job is extraction from <=5 short passages,
-# not open-ended reasoning.
+DEFAULT_MODEL = "openai/gpt-oss-120b"
+BENCH_MODELS = [
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "allam-2-7b",
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant"
+]
+# reasoning_effort low: cuts completion tokens and avoids extra reasoning cost
 REASONING_EFFORT = "low"
 
 
@@ -132,7 +136,7 @@ class GenerationResult:
 
 class Generator:
     def __init__(self, model: str = DEFAULT_MODEL, api_key: str | None = None,
-                 max_tokens: int = 1024, tool_executor: Callable | None = None,
+                 max_tokens: int = 256, tool_executor: Callable | None = None,
                  use_tools: bool = True, tool_phase_ms: float = 1500.0):
         self.model = model
         self.max_tokens = max_tokens
