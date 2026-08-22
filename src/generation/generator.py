@@ -130,10 +130,11 @@ class Generator:
             "model": self.model,
             "max_tokens": self.max_tokens,
             "temperature": 0,
-            "reasoning_effort": REASONING_EFFORT,
             # system prompt is a message here, not a top-level field
             "messages": [{"role": "system", "content": SYSTEM_PROMPT}] + msgs,
         }
+        if "gpt-oss" in self.model:
+            kw["reasoning_effort"] = REASONING_EFFORT
         if with_tools:
             kw["tools"] = TOOLS_OPENAI
             kw["tool_choice"] = "auto"
@@ -232,13 +233,37 @@ class Generator:
             else:
                 tool_msgs, actions = await self.tool_phase(query, rs, lang)
 
+        models_to_try = [self.model] + [m for m in BENCH_MODELS if m != self.model]
+        used_model = self.model
+
         for attempt in range(2):                       # original + ONE repair
             chunks.clear()
             msgs = self._messages(query, rs, lang, last_error if attempt else None)
             msgs = msgs + tool_msgs
+            stream = None
+            last_model_err = None
+            for cand_model in models_to_try:
+                try:
+                    self.model = cand_model
+                    stream = await self.client.chat.completions.create(
+                        stream=True, **self._request_kwargs(msgs))
+                    used_model = cand_model
+                    break
+                except Exception as e:
+                    last_model_err = e
+                    continue
+
+            if stream is None:
+                yield ("result", GenerationResult(
+                    answer=_safe_refusal(lang, RefusalReason.NOT_IN_RETRIEVED_SET,
+                                         "the answer service is unavailable. "
+                                         "try again in a moment."),
+                    ttft_ms=ttft, total_ms=(time.perf_counter_ns() - t0) / 1e6,
+                    repair_attempts=repair_attempts, model=used_model, actions=actions,
+                    raw_text=f"{type(last_model_err).__name__}: {last_model_err}"))
+                return
+
             try:
-                stream = await self.client.chat.completions.create(
-                    stream=True, **self._request_kwargs(msgs))
                 async for ev in stream:
                     if not ev.choices:
                         continue
@@ -254,7 +279,7 @@ class Generator:
                                          "the answer service is unavailable. "
                                          "try again in a moment."),
                     ttft_ms=ttft, total_ms=(time.perf_counter_ns() - t0) / 1e6,
-                    repair_attempts=repair_attempts, model=self.model, actions=actions,
+                    repair_attempts=repair_attempts, model=used_model, actions=actions,
                     raw_text=f"{type(e).__name__}: {e}"))
                 return
 

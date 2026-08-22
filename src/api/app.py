@@ -148,7 +148,7 @@ def _load(langs: list[str]) -> None:
 
     S.core = CoreLoop(S.embedder, dense, sparse, tau=None,
                       text_lookup=_lookup_texts)
-    S.generator = Generator(model=os.environ.get("RAG_MODEL", "openai/gpt-oss-20b"), use_tools=False)
+    S.generator = Generator(model=os.environ.get("RAG_MODEL", DEFAULT_MODEL), use_tools=False)
     S.n_chunks = sum(len(p.chunk_ids) for p in dense.partitions.values())
 
     # ---- Force ALL mmap pages into OS page cache ----
