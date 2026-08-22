@@ -153,8 +153,8 @@ class CoreLoop:
             params["mode"] = "hybrid"
 
         rem = budget.remaining_ms
-        dense_to = min(60.0, max(15.0, rem - 10.0))
-        sparse_to = min(60.0, max(15.0, rem - 10.0))
+        dense_to = min(120.0, max(25.0, rem - 15.0))
+        sparse_to = min(120.0, max(25.0, rem - 15.0))
         stages = []
         if params["mode"] == "hybrid":
             stages.append(Stage("dense", self._dense, timeout_ms=dense_to,
