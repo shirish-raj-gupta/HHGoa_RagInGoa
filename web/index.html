@@ -1595,7 +1595,9 @@ function renderSunline(stages, core_ms, stt_ms) {
   stages.forEach(s => {
     const dur = s.duration_ms || 0;
     const w = (dur / BUDGET) * 100;
-    const l = (acc / BUDGET) * 100;
+    // Use exact start timestamp from trace so parallel branches (dense & sparse) render accurately
+    const start = (s.started_ms !== undefined && s.started_ms !== null) ? s.started_ms : acc;
+    const l = (start / BUDGET) * 100;
     acc += dur;
 
     const div = document.createElement('div');
