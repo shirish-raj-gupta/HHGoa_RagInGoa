@@ -268,11 +268,9 @@ class Generator:
         cits = [Citation(passage_id=c["passage_id"], quote=c.get("quote", ""),
                          char_start=c.get("char_start", 0), char_end=c.get("char_end", 0))
                 for c in data.get("citations", []) if "passage_id" in c]
-        if not cits and rs and not rs.is_empty and not data.get("refused", False):
-            top = rs.chunks[0]
-            body = top.parent_text or top.text
-            quote = body[:min(len(body), 120)]
-            cits = [Citation(passage_id=top.passage_id, quote=quote, char_start=0, char_end=len(quote))]
+        if data.get("refused") and rs and not rs.is_empty:
+            # If the LLM returned a refusal but we have retrieved context, fall back to extractive grounding
+            return _extractive_fallback("", rs, lang)
         reason = data.get("refusal_reason")
         return Answer(
             answer=data.get("answer", ""),
