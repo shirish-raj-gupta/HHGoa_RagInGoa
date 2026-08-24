@@ -45,7 +45,7 @@ from .tools import ANSWER_SCHEMA, SYSTEM_PROMPT, TOOLS_OPENAI
 # this task: qwen/qwen3.6-27b failed strict validation with a 400 on every
 # attempt. gpt-oss-120b answers Hindi and Tamil in-language with correct
 # citations and correctly refuses out-of-context questions.
-DEFAULT_MODEL = "openai/gpt-oss-120b"
+DEFAULT_MODEL = os.environ.get("RAG_MODEL", "openai/gpt-oss-20b")
 BENCH_MODELS = [
     "openai/gpt-oss-120b",
     "openai/gpt-oss-20b",

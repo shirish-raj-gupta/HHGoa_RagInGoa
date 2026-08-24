@@ -126,7 +126,10 @@ class OnnxEmbedder:
         if use_gpu and self.provider != "CUDAExecutionProvider":
             log_msg = f"GPU requested but running on {self.provider}"
             print(f"[embedder] WARNING: {log_msg}", file=sys.stderr)
-        self.tok = AutoTokenizer.from_pretrained(str(tokenizer_dir))
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.tok = AutoTokenizer.from_pretrained(str(tokenizer_dir))
         self._inputs = {i.name for i in self.session.get_inputs()}
         self.threads = threads
         if warm:

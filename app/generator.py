@@ -77,22 +77,21 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
     # Formulate context for the LLM
     context_text = "\n\n".join([f"[{i+1}] {getattr(r, 'text', '')}" for i, r in enumerate(results[:5])])
     prompt = (
-        f"Question: {query}\n\n"
         f"Context passages:\n{context_text}\n\n"
+        f"Question: {query}\n\n"
         f"Instruction:\n"
-        f"1. Determine if the context passages directly and explicitly contain the answer to the question.\n"
-        f"2. If the context passages do NOT contain the answer, return JSON:\n"
+        f"1. If the context passages provide information to answer the question (including standard mathematical/factual concepts and definitions described in the text), return a concise 1-2 sentence answer extracted from the passages in JSON:\n"
+        f"   {{\"grounded\": true, \"refused\": false, \"answer\": \"<concise answer from context>\"}}\n"
+        f"2. Only if the context passages do not contain relevant facts to answer the question, return JSON:\n"
         f"   {{\"grounded\": false, \"refused\": true, \"answer\": \"The provided documents don't contain information about this.\"}}\n"
-        f"3. If the context passages DO contain the answer, return a concise 1-2 sentence factual answer in JSON:\n"
-        f"   {{\"grounded\": true, \"refused\": false, \"answer\": \"<concise answer>\"}}\n"
-        f"Respond with a single JSON object."
+        f"Respond with a single valid JSON object."
     )
 
     import os
     import re
 
     client = _get_groq_client()
-    model_name = os.environ.get("RAG_MODEL", "openai/gpt-oss-120b")
+    model_name = os.environ.get("RAG_MODEL", "openai/gpt-oss-20b")
 
     for attempt in range(2):
         try:
@@ -139,7 +138,13 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
             ans_words = [w for w in lower_ans.split() if len(w) > 4]
             overlap_ratio = (sum(1 for w in ans_words if w in ctx_lower) / len(ans_words)) if ans_words else 1.0
 
-            is_refused = is_refused_flag or (not is_grounded_flag) or has_refusal_phrase or (overlap_ratio < 0.35)
+            is_refused = (
+                is_refused_flag
+                or (not is_grounded_flag)
+                or has_refusal_phrase
+                or (len(ans_text) < 10)
+                or (overlap_ratio < 0.35)
+            )
             elapsed = (time.perf_counter() - t0) * 1000.0
 
             if is_refused:
