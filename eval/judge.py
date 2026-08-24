@@ -164,15 +164,18 @@ def _call_openai(system_prompt: str, user_content: str) -> JudgeVerdict:
         _openai_client = openai.OpenAI()
 
     t0 = time.perf_counter()
-    response = _openai_client.chat.completions.create(
-        model=JUDGE_MODEL_OPENAI,
-        max_completion_tokens=200,
-        response_format={"type": "json_object"},
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_content},
-        ],
-    )
+    try:
+        response = _openai_client.chat.completions.create(
+            model=JUDGE_MODEL_OPENAI,
+            max_completion_tokens=200,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content},
+            ],
+        )
+    except openai.OpenAIError as e:
+        raise JudgeNotConfigured(f"OpenAI API call failed ({e})") from e
     judge_ms = (time.perf_counter() - t0) * 1000
     raw = (response.choices[0].message.content or "").strip()
     verdict, reason = _parse_verdict(raw)

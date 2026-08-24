@@ -70,10 +70,12 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
     prompt = (
         f"Question: {query}\n\n"
         f"Context passages:\n{context_text}\n\n"
-        f"Task: Answer the question ONLY if the context passages directly and factually provide the true answer to the question. "
-        f"If the context passages do not provide the exact answer (or only mention the keywords without explaining the answer), you MUST return refused: true and "
-        f"answer: 'The provided documents don't contain information about this.'\n"
-        f"Return valid JSON: {{\"answer\": string, \"grounded\": bool, \"refused\": bool}}"
+        f"Instruction:\n"
+        f"1. Determine if the context passages directly and explicitly contain the answer to the question.\n"
+        f"2. If the context passages do NOT contain the answer, return:\n"
+        f"   {{\"grounded\": false, \"refused\": true, \"answer\": \"The provided documents don't contain information about this.\"}}\n"
+        f"3. If the context passages DO contain the answer, synthesize the answer using ONLY facts directly from those passages:\n"
+        f"   {{\"grounded\": true, \"refused\": false, \"answer\": \"<factual answer>\"}}\n"
     )
 
     from groq import Groq
@@ -81,21 +83,36 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
 
     api_key = os.environ.get("GROQ_API_KEY")
     client = Groq(api_key=api_key)
+    model_name = os.environ.get("RAG_MODEL", "openai/gpt-oss-120b")
 
     try:
         resp = client.chat.completions.create(
-            model=gen.model,
+            model=model_name,
             temperature=0,
+            max_tokens=400,
             messages=[
-                {"role": "system", "content": "You are a factual, zero-hallucination assistant. When evidence is missing in the passages, you must refuse and say the documents don't contain information."},
+                {"role": "system", "content": "You are a strict zero-hallucination assistant. Return your response as a JSON object."},
                 {"role": "user", "content": prompt}
             ],
             response_format={"type": "json_object"}
         )
         raw = resp.choices[0].message.content or "{}"
         data = json.loads(raw)
-        ans_text = data.get("answer", "")
-        is_refused = bool(data.get("refused", False)) or "don't contain" in ans_text.lower() or "not contain" in ans_text.lower()
+        ans_text = str(data.get("answer", "")).strip()
+        is_grounded_flag = bool(data.get("grounded", True))
+        is_refused_flag = bool(data.get("refused", False))
+        
+        # Check text signals
+        lower_ans = ans_text.lower()
+        refusal_phrases = ("don't contain", "do not contain", "not contain", "does not contain", "no information", "insufficient evidence", "cannot be answered")
+        has_refusal_phrase = any(p in lower_ans for p in refusal_phrases)
+
+        # Check if the answer has factual grounding in the context passages
+        ctx_lower = context_text.lower()
+        ans_words = [w for w in lower_ans.split() if len(w) > 4]
+        overlap_ratio = (sum(1 for w in ans_words if w in ctx_lower) / len(ans_words)) if ans_words else 1.0
+
+        is_refused = is_refused_flag or (not is_grounded_flag) or has_refusal_phrase or (overlap_ratio < 0.35)
         elapsed = (time.perf_counter() - t0) * 1000.0
 
         if is_refused:
@@ -103,17 +120,17 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
                 text="The provided documents don't contain information about this.",
                 grounded=False,
                 generation_ms=elapsed,
-                model=gen.model,
+                model=model_name,
             )
 
         return GeneratedAnswer(
             text=ans_text,
             grounded=True,
             generation_ms=elapsed,
-            model=gen.model,
+            model=model_name,
         )
-    except Exception:
-        pass
+    except Exception as exc:
+        print("[generator exception]:", type(exc), exc)
 
     # Safe fallback
     fb = _extractive_fallback(query, rs, "eng_Latn")
