@@ -92,13 +92,13 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
     import re
 
     client = _get_groq_client()
-    model_name = os.environ.get("RAG_MODEL", "openai/gpt-oss-20b")
+    model_name = os.environ.get("RAG_MODEL", "openai/gpt-oss-120b")
 
     try:
         resp = client.chat.completions.create(
             model=model_name,
             temperature=0,
-            max_tokens=250,
+            max_tokens=300,
             messages=[
                 {"role": "system", "content": "You are a concise zero-hallucination assistant. Always respond with a single valid JSON object."},
                 {"role": "user", "content": prompt}
@@ -107,7 +107,23 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
         raw = resp.choices[0].message.content or ""
         cleaned = re.sub(r'<thought>.*?</thought>', '', raw, flags=re.DOTALL).strip()
         match = re.search(r'\{.*\}', cleaned, flags=re.DOTALL)
-        data = json.loads(match.group(0)) if match else json.loads(cleaned)
+        data = None
+        if match:
+            try:
+                data = json.loads(match.group(0))
+            except Exception:
+                pass
+        if data is None:
+            try:
+                data = json.loads(cleaned)
+            except Exception:
+                pass
+        if not data:
+            is_ref = "don't contain" in cleaned.lower() or "not contain" in cleaned.lower() or "no information" in cleaned.lower()
+            ans_m = re.search(r'"answer"\s*:\s*"([^"]+)', cleaned)
+            ans_str = ans_m.group(1) if ans_m else cleaned
+            data = {"answer": ans_str, "grounded": not is_ref, "refused": is_ref}
+
         ans_text = str(data.get("answer", "")).strip()
         is_grounded_flag = bool(data.get("grounded", True))
         is_refused_flag = bool(data.get("refused", False))
