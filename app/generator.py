@@ -3,8 +3,8 @@ Generator interface implementation for rag-local-eval-loop.
 
 Optimized for:
 - Token efficiency (compact context to stay well below Groq TPM limits)
-- 0% False Refusal Rate (accurately answer all answerable queries from context)
-- 0% False Confidence Rate (properly refuse unanswerable queries)
+- 0% False Refusal Rate (accurately answer answerable queries from context)
+- Low False Confidence Rate (refuse unanswerable queries without a definitive direct answer)
 - Sub-1500ms generation latency (using openai/gpt-oss-20b)
 - Full compatibility with LLM-as-a-judge (Groq / OpenAI / Anthropic)
 """
@@ -61,9 +61,9 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
             model="no_results",
         )
 
-    # Compact context: top 4 passages, max 350 chars each (saves 65% tokens against TPM limits)
+    # Compact context: top 3 passages, max 350 chars each (stays well within TPM limit)
     context_blocks = []
-    for i, r in enumerate(results[:4]):
+    for i, r in enumerate(results[:3]):
         txt = getattr(r, 'text', '')
         if len(txt) > 350:
             txt = txt[:350].rsplit(' ', 1)[0]
@@ -74,11 +74,11 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
         f"Context:\n{context_text}\n\n"
         f"Question: {query}\n\n"
         f"Instructions:\n"
-        f"1. If the context contains facts or formulas to answer the question, return JSON:\n"
-        f'   {{"grounded": true, "refused": false, "answer": "<concise 1-sentence answer>"}}\n'
-        f"2. If the context lacks facts to answer the question, return JSON:\n"
+        f"1. If the context contains direct, factual information or definitions answering the question, extract a concise 1-sentence answer in JSON:\n"
+        f'   {{"grounded": true, "refused": false, "answer": "<concise answer strictly from context>"}}\n'
+        f"2. If the context does NOT contain a direct answer to the question (e.g. only mentions related terms or incomplete info), refuse in JSON:\n"
         f'   {{"grounded": false, "refused": true, "answer": "The provided documents don\'t contain information about this."}}\n'
-        f"Respond with a single valid JSON object."
+        f"Respond with a single valid JSON object only."
     )
 
     client = _get_groq_client()
@@ -94,7 +94,7 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
                     {
                         "role": "system",
                         "content": (
-                            "You are a concise zero-hallucination assistant. You answer questions strictly based on the provided context passages. "
+                            "You are a strict, concise zero-hallucination assistant. You answer questions strictly based on the provided context passages. "
                             "Always respond with a single valid JSON object."
                         ),
                     },
@@ -131,12 +131,10 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
             ans_text = str(data.get("answer", "")).strip()
             is_grounded = bool(data.get("grounded", False)) and not bool(data.get("refused", False))
 
-            # Clean up partial JSON leaks
             if ans_text.startswith('{') or '":' in ans_text:
                 is_grounded = False
                 ans_text = "The provided documents don't contain information about this."
 
-            # Check for refusal phrases inside answer text
             refusal_phrases = (
                 "don't contain", "do not contain", "not contain",
                 "does not contain", "no information", "cannot be answered",
@@ -164,9 +162,9 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
 
         except Exception as exc:
             if "429" in str(exc) or "rate" in str(exc).lower():
-                time.sleep(2.0 * (attempt + 1))
+                time.sleep(1.5 * (attempt + 1))
             else:
-                time.sleep(0.5)
+                time.sleep(0.3)
 
     # Fallback if API fails
     chunks = [
