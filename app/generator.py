@@ -70,10 +70,10 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
     prompt = (
         f"Question: {query}\n\n"
         f"Context passages:\n{context_text}\n\n"
-        f"Task: Answer the question using ONLY the facts directly mentioned in the context passages above. "
-        f"If the context passages do NOT contain facts answering the question, you MUST return refused: true and "
+        f"Task: Answer the question ONLY if the context passages directly and factually provide the true answer to the question. "
+        f"If the context passages do not provide the exact answer (or only mention the keywords without explaining the answer), you MUST return refused: true and "
         f"answer: 'The provided documents don't contain information about this.'\n"
-        f"Return JSON: {{\"answer\": string, \"grounded\": bool, \"refused\": bool}}"
+        f"Return valid JSON: {{\"answer\": string, \"grounded\": bool, \"refused\": bool}}"
     )
 
     from groq import Groq
