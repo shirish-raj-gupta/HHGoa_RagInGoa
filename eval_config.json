@@ -1,0 +1,20 @@
+{
+  "name": "HHGoa2026_Task2",
+  "endpoint": "http://localhost:7860/query",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "request_template": {
+    "text": "{query}",
+    "lang": "{lang}"
+  },
+  "response_mapping": {
+    "answer": "answer.answer",
+    "refused": "answer.refused",
+    "citations": "answer.citations",
+    "retrieved": "retrieved",
+    "latency_ms": "trace.e2e_ms",
+    "core_ms": "trace.core_rag_loop_ms"
+  }
+}
