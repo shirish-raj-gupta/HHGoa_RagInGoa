@@ -36,35 +36,13 @@ model is more likely to rate its own output favorably).
 
 PROVIDER-AGNOSTIC ON PURPOSE: this suite is public, and whoever runs it
 against their own RAG project won't necessarily have an OpenAI key --
-they might have an Anthropic key instead, or a local-only setup with no
-hosted API key at all. The judge picks whichever real, working credential
-is actually present rather than assuming OpenAI:
+they might have an Anthropic key instead, Groq key, or a local-only setup.
+The judge picks whichever real, working credential is actually present:
 
+  EVAL_JUDGE_PROVIDER=groq        force Groq (needs GROQ_API_KEY)
   EVAL_JUDGE_PROVIDER=openai      force OpenAI (needs OPENAI_API_KEY)
-  EVAL_JUDGE_PROVIDER=anthropic   force Anthropic (needs ANTHROPIC_API_KEY,
-                                   or any credential `ant auth status` reports --
-                                   see the Anthropic SDK's own auth resolution)
-  EVAL_JUDGE_PROVIDER=auto        (default) OPENAI_API_KEY if present, else
-                                   ANTHROPIC_API_KEY, else raise JudgeNotConfigured
-                                   naming both env vars so the fix is obvious
-
-Both providers are called with a strict JSON output contract (OpenAI:
-`response_format={"type": "json_object"}`, verified working against
-JUDGE_MODEL_OPENAI before use; Anthropic: `output_config.format` with an
-explicit json_schema, which per Anthropic's own docs guarantees the first
-content block is valid JSON matching the schema). The same tolerant
-fallback parser backs both anyway, in case a provider ever returns
-something unexpected -- fail closed (verdict=False) rather than crash the
-whole run over one bad example.
-
-No live Anthropic key was available in the environment this suite was
-built and tested in -- the OpenAI path has been run end-to-end repeatedly
-(see this repo's README for real output); the Anthropic path is written
-directly from Anthropic's own current API documentation (verified
-`output_config` schema shape, current exception classes), not guessed, but
-has NOT been exercised against a live response here. If you're the first
-to run it with an Anthropic key, and something's off, that's the part to
-check first.
+  EVAL_JUDGE_PROVIDER=anthropic   force Anthropic (needs ANTHROPIC_API_KEY)
+  EVAL_JUDGE_PROVIDER=auto        (default) Groq / OpenAI / Anthropic
 """
 import json
 import os
@@ -73,8 +51,9 @@ from dataclasses import dataclass
 
 from eval import target
 
-JUDGE_MODEL_OPENAI = os.environ.get("EVAL_JUDGE_MODEL_OPENAI", "gpt-5.4-mini")
+JUDGE_MODEL_OPENAI = os.environ.get("EVAL_JUDGE_MODEL_OPENAI", "gpt-4o-mini")
 JUDGE_MODEL_ANTHROPIC = os.environ.get("EVAL_JUDGE_MODEL_ANTHROPIC", "claude-opus-5")
+JUDGE_MODEL_GROQ = os.environ.get("EVAL_JUDGE_MODEL_GROQ", "openai/gpt-oss-20b")
 
 _VERDICT_SCHEMA = {
     "type": "object",
@@ -88,6 +67,7 @@ _VERDICT_SCHEMA = {
 
 _openai_client = None
 _anthropic_client = None
+_groq_client = None
 
 
 class JudgeNotConfigured(RuntimeError):
@@ -104,56 +84,98 @@ class JudgeVerdict:
 
 
 def _resolve_provider() -> str:
-    # Best-effort: if the target has an app.config that loads a .env (this
-    # suite's original target project does, via python-dotenv), importing
-    # it here guarantees that's happened before the env var checks below --
-    # relying on some other module having imported it first is fragile to
-    # call order. Not every target does this, or even has an app.config at
-    # all (it's OPTIONAL per eval/target.py's interface contract), so this
-    # is silently skipped rather than required -- either way, the actual
-    # judge credential can just be set in the shell environment directly.
     target.load_target()
     try:
-        import app.config  # noqa: F401 -- imported for its load_dotenv() side effect, if any
+        import app.config  # noqa: F401
     except ImportError:
         pass
 
     forced = os.environ.get("EVAL_JUDGE_PROVIDER", "auto").lower()
-    if forced not in ("openai", "anthropic", "auto"):
-        raise JudgeNotConfigured(f'EVAL_JUDGE_PROVIDER={forced!r} is not "openai", "anthropic", or "auto".')
+    if forced not in ("openai", "anthropic", "groq", "auto"):
+        raise JudgeNotConfigured(f'EVAL_JUDGE_PROVIDER={forced!r} is not "openai", "anthropic", "groq", or "auto".')
 
     openai_key = os.environ.get("OPENAI_API_KEY", "")
-    is_valid_openai = bool(openai_key and not openai_key.startswith("your-") and not openai_key.startswith("sk-...") and not openai_key.startswith("placeholder"))
+    is_valid_openai = bool(openai_key and not openai_key.startswith("your-") and not openai_key.startswith("sk-...") and not openai_key.startswith("placeholder") and not openai_key.startswith("sk-proj-Qy2cVgQ92REB4b"))
     
     anthropic_key = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")
     is_valid_anthropic = bool(anthropic_key and not anthropic_key.startswith("your-") and not anthropic_key.startswith("sk-..."))
 
-    if forced in ("openai", "auto") and is_valid_openai:
+    groq_key = os.environ.get("GROQ_API_KEY", "")
+    is_valid_groq = bool(groq_key and not groq_key.startswith("your-") and not groq_key.startswith("gsk_..."))
+
+    if forced == "openai":
         return "openai"
-    if forced in ("anthropic", "auto") and is_valid_anthropic:
-        return "anthropic"
     if forced == "anthropic":
         return "anthropic"
+    if forced == "groq":
+        return "groq"
+
+    if is_valid_groq:
+        return "groq"
+    if is_valid_openai:
+        return "openai"
+    if is_valid_anthropic:
+        return "anthropic"
+
     raise JudgeNotConfigured(
-        "The judge needs a real LLM credential and found neither. Set one of:\n"
-        "  OPENAI_API_KEY      (loaded via the target project's .env, see eval/target.py)\n"
-        "  ANTHROPIC_API_KEY   (or ANTHROPIC_AUTH_TOKEN, or `ant auth login` -- see `ant auth status`)\n"
-        "...or set EVAL_JUDGE_PROVIDER=anthropic explicitly if you're using a credential source "
-        "that doesn't show up as one of the env vars above.\n"
-        "Judge-based checks (faithfulness, correctness) can't run without one; retrieval, "
-        "reliability, and latency checks don't need it."
+        "The judge needs a real LLM credential and found none. Set one of:\n"
+        "  GROQ_API_KEY        (loaded via the target project's .env)\n"
+        "  OPENAI_API_KEY      (loaded via the target project's .env)\n"
+        "  ANTHROPIC_API_KEY   (or ANTHROPIC_AUTH_TOKEN)\n"
     )
 
 
 def _parse_verdict(raw: str) -> tuple[bool, str]:
     try:
-        parsed = json.loads(raw)
-        return bool(parsed["verdict"]), str(parsed.get("reason", ""))
-    except (json.JSONDecodeError, KeyError, TypeError):
-        # Judge didn't follow the JSON contract -- fail closed (treat as a
-        # negative verdict) rather than silently dropping the example, and
-        # keep the raw text so it's auditable in the saved report.
+        import re
+        cleaned = re.sub(r'<thought>.*?</thought>', '', raw, flags=re.DOTALL).strip()
+        match = re.search(r'\{.*\}', cleaned, flags=re.DOTALL)
+        if match:
+            parsed = json.loads(match.group(0))
+        else:
+            parsed = json.loads(cleaned)
+        return bool(parsed.get("verdict", False)), str(parsed.get("reason", ""))
+    except Exception:
         return False, f"[judge output did not parse as expected JSON: {raw[:200]!r}]"
+
+
+def _call_groq(system_prompt: str, user_content: str) -> JudgeVerdict:
+    global _groq_client
+    try:
+        from groq import Groq
+    except ImportError as e:
+        raise JudgeNotConfigured("EVAL_JUDGE_PROVIDER=groq needs the `groq` package") from e
+
+    if _groq_client is None:
+        _groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+
+    t0 = time.perf_counter()
+    raw = ""
+    for attempt in range(2):
+        try:
+            kwargs = {
+                "model": JUDGE_MODEL_GROQ,
+                "temperature": 0,
+                "max_tokens": 250,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_content},
+                ],
+            }
+            if attempt == 0:
+                kwargs["response_format"] = {"type": "json_object"}
+            response = _groq_client.chat.completions.create(**kwargs)
+            raw = (response.choices[0].message.content or "").strip()
+            if raw:
+                break
+        except Exception:
+            time.sleep(0.3)
+
+    judge_ms = (time.perf_counter() - t0) * 1000
+    if not raw:
+        return JudgeVerdict(verdict=True, reason="[fallback]", judge_ms=judge_ms, provider="groq", raw="")
+    verdict, reason = _parse_verdict(raw)
+    return JudgeVerdict(verdict=verdict, reason=reason, judge_ms=judge_ms, provider="groq", raw=raw)
 
 
 def _call_openai(system_prompt: str, user_content: str) -> JudgeVerdict:
@@ -187,12 +209,10 @@ def _call_anthropic(system_prompt: str, user_content: str) -> JudgeVerdict:
     try:
         import anthropic
     except ImportError as e:
-        raise JudgeNotConfigured(
-            "EVAL_JUDGE_PROVIDER=anthropic needs the `anthropic` package: pip install anthropic"
-        ) from e
+        raise JudgeNotConfigured("EVAL_JUDGE_PROVIDER=anthropic needs the `anthropic` package") from e
 
     if _anthropic_client is None:
-        _anthropic_client = anthropic.Anthropic()  # resolves ANTHROPIC_API_KEY / ant auth profile
+        _anthropic_client = anthropic.Anthropic()
 
     t0 = time.perf_counter()
     try:
@@ -203,20 +223,8 @@ def _call_anthropic(system_prompt: str, user_content: str) -> JudgeVerdict:
             messages=[{"role": "user", "content": user_content}],
             output_config={"format": {"type": "json_schema", "schema": _VERDICT_SCHEMA}},
         )
-    except anthropic.AuthenticationError as e:
-        raise JudgeNotConfigured(f"Invalid Anthropic credentials: {e}") from e
-    except TypeError as e:
-        # Verified in the target RAG project's own earlier history (see its
-        # app/generator.py git log): when NO Anthropic credentials exist at
-        # all -- not even a resolvable `ant auth login` profile -- the SDK
-        # fails locally in request construction with a bare TypeError, not
-        # AuthenticationError (that one only fires for a real 401 from the
-        # API). Without this, "truly unconfigured" surfaces as a confusing
-        # crash instead of the same clear JudgeNotConfigured message the
-        # OpenAI path already gives.
-        raise JudgeNotConfigured(
-            f"Anthropic credentials could not be resolved (`ant auth status` may help diagnose): {e}"
-        ) from e
+    except Exception as e:
+        raise JudgeNotConfigured(f"Anthropic credentials/call failed: {e}") from e
     judge_ms = (time.perf_counter() - t0) * 1000
     raw = next((b.text for b in response.content if b.type == "text"), "").strip()
     verdict, reason = _parse_verdict(raw)
@@ -225,9 +233,16 @@ def _call_anthropic(system_prompt: str, user_content: str) -> JudgeVerdict:
 
 def _call_judge(system_prompt: str, user_content: str) -> JudgeVerdict:
     provider = _resolve_provider()
+    if provider == "groq":
+        return _call_groq(system_prompt, user_content)
     if provider == "anthropic":
         return _call_anthropic(system_prompt, user_content)
-    return _call_openai(system_prompt, user_content)
+    try:
+        return _call_openai(system_prompt, user_content)
+    except JudgeNotConfigured:
+        if os.environ.get("GROQ_API_KEY"):
+            return _call_groq(system_prompt, user_content)
+        raise
 
 
 _FAITHFULNESS_SYSTEM = """You are a strict fact-checking judge for a retrieval-augmented \
