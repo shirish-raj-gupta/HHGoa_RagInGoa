@@ -24,6 +24,17 @@ class GeneratedAnswer:
 
 
 _GEN: Generator | None = None
+_GROQ_CLIENT = None
+
+
+def _get_groq_client():
+    global _GROQ_CLIENT
+    if _GROQ_CLIENT is None:
+        from groq import Groq
+        import os
+        api_key = os.environ.get("GROQ_API_KEY")
+        _GROQ_CLIENT = Groq(api_key=api_key)
+    return _GROQ_CLIENT
 
 
 def _get_gen() -> Generator:
@@ -40,7 +51,7 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
             text="The provided documents don't contain information about this.",
             grounded=False,
             generation_ms=0.1,
-            model="openai/gpt-oss-120b",
+            model="openai/gpt-oss-20b",
         )
 
     chunks = [
@@ -63,8 +74,6 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
         relevance_score=0.85,
     )
 
-    gen = _get_gen()
-
     # Formulate context for the LLM
     context_text = "\n\n".join([f"[{i+1}] {getattr(r, 'text', '')}" for i, r in enumerate(results[:5])])
     prompt = (
@@ -72,32 +81,33 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
         f"Context passages:\n{context_text}\n\n"
         f"Instruction:\n"
         f"1. Determine if the context passages directly and explicitly contain the answer to the question.\n"
-        f"2. If the context passages do NOT contain the answer, return:\n"
+        f"2. If the context passages do NOT contain the answer, return JSON:\n"
         f"   {{\"grounded\": false, \"refused\": true, \"answer\": \"The provided documents don't contain information about this.\"}}\n"
-        f"3. If the context passages DO contain the answer, synthesize the answer using ONLY facts directly from those passages:\n"
-        f"   {{\"grounded\": true, \"refused\": false, \"answer\": \"<factual answer>\"}}\n"
+        f"3. If the context passages DO contain the answer, return a concise 1-2 sentence factual answer in JSON:\n"
+        f"   {{\"grounded\": true, \"refused\": false, \"answer\": \"<concise answer>\"}}\n"
+        f"Respond with a single JSON object."
     )
 
-    from groq import Groq
     import os
+    import re
 
-    api_key = os.environ.get("GROQ_API_KEY")
-    client = Groq(api_key=api_key)
-    model_name = os.environ.get("RAG_MODEL", "openai/gpt-oss-120b")
+    client = _get_groq_client()
+    model_name = os.environ.get("RAG_MODEL", "openai/gpt-oss-20b")
 
     try:
         resp = client.chat.completions.create(
             model=model_name,
             temperature=0,
-            max_tokens=400,
+            max_tokens=250,
             messages=[
-                {"role": "system", "content": "You are a strict zero-hallucination assistant. Return your response as a JSON object."},
+                {"role": "system", "content": "You are a concise zero-hallucination assistant. Always respond with a single valid JSON object."},
                 {"role": "user", "content": prompt}
             ],
-            response_format={"type": "json_object"}
         )
-        raw = resp.choices[0].message.content or "{}"
-        data = json.loads(raw)
+        raw = resp.choices[0].message.content or ""
+        cleaned = re.sub(r'<thought>.*?</thought>', '', raw, flags=re.DOTALL).strip()
+        match = re.search(r'\{.*\}', cleaned, flags=re.DOTALL)
+        data = json.loads(match.group(0)) if match else json.loads(cleaned)
         ans_text = str(data.get("answer", "")).strip()
         is_grounded_flag = bool(data.get("grounded", True))
         is_refused_flag = bool(data.get("refused", False))

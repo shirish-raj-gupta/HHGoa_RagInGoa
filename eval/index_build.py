@@ -31,11 +31,11 @@ from eval.dataset import EvalExample
 # small throwaway eval index, not tuned production settings. Override via
 # env var if you have a specific reason to (e.g. matching a target's chunk
 # size to see whether that changes retrieval quality on this dataset).
-CHUNK_SIZE = int(os.environ.get("EVAL_CHUNK_SIZE", 400))
-CHUNK_OVERLAP = int(os.environ.get("EVAL_CHUNK_OVERLAP", 60))
-HNSW_M = int(os.environ.get("EVAL_HNSW_M", 32))
-HNSW_EF_CONSTRUCTION = int(os.environ.get("EVAL_HNSW_EF_CONSTRUCTION", 40))
-HNSW_EF_SEARCH = int(os.environ.get("EVAL_HNSW_EF_SEARCH", 32))
+CHUNK_SIZE = int(os.environ.get("EVAL_CHUNK_SIZE", 800))
+CHUNK_OVERLAP = int(os.environ.get("EVAL_CHUNK_OVERLAP", 100))
+HNSW_M = int(os.environ.get("EVAL_HNSW_M", 48))
+HNSW_EF_CONSTRUCTION = int(os.environ.get("EVAL_HNSW_EF_CONSTRUCTION", 128))
+HNSW_EF_SEARCH = int(os.environ.get("EVAL_HNSW_EF_SEARCH", 128))
 
 
 @dataclass
