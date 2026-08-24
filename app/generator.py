@@ -4,6 +4,7 @@ Generator interface implementation for rag-local-eval-loop.
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 from dataclasses import dataclass
 
@@ -64,25 +65,53 @@ def generate_answer(query: str, results: list) -> GeneratedAnswer:
 
     gen = _get_gen()
 
-    # Synchronous wrapper around the async generator stream
-    async def _run():
-        final_res = None
-        async for kind, payload in gen.stream(query, rs, "eng_Latn"):
-            if kind == "result":
-                final_res = payload
-        return final_res
+    # Formulate context for the LLM
+    context_text = "\n\n".join([f"[{i+1}] {getattr(r, 'text', '')}" for i, r in enumerate(results[:5])])
+    prompt = (
+        f"Question: {query}\n\n"
+        f"Context passages:\n{context_text}\n\n"
+        f"Task: Answer the question using ONLY the facts directly mentioned in the context passages above. "
+        f"If the context passages do NOT contain facts answering the question, you MUST return refused: true and "
+        f"answer: 'The provided documents don't contain information about this.'\n"
+        f"Return JSON: {{\"answer\": string, \"grounded\": bool, \"refused\": bool}}"
+    )
+
+    from groq import Groq
+    import os
+
+    api_key = os.environ.get("GROQ_API_KEY")
+    client = Groq(api_key=api_key)
 
     try:
-        res = asyncio.run(_run())
-        if res and res.answer:
-            ans = res.answer
-            elapsed = (time.perf_counter() - t0) * 1000.0
+        resp = client.chat.completions.create(
+            model=gen.model,
+            temperature=0,
+            messages=[
+                {"role": "system", "content": "You are a factual, zero-hallucination assistant. When evidence is missing in the passages, you must refuse and say the documents don't contain information."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={"type": "json_object"}
+        )
+        raw = resp.choices[0].message.content or "{}"
+        data = json.loads(raw)
+        ans_text = data.get("answer", "")
+        is_refused = bool(data.get("refused", False)) or "don't contain" in ans_text.lower() or "not contain" in ans_text.lower()
+        elapsed = (time.perf_counter() - t0) * 1000.0
+
+        if is_refused:
             return GeneratedAnswer(
-                text=ans.answer or _extractive_fallback(query, rs, "eng_Latn").answer,
-                grounded=not ans.refused,
+                text="The provided documents don't contain information about this.",
+                grounded=False,
                 generation_ms=elapsed,
-                model=res.model or "openai/gpt-oss-120b",
+                model=gen.model,
             )
+
+        return GeneratedAnswer(
+            text=ans_text,
+            grounded=True,
+            generation_ms=elapsed,
+            model=gen.model,
+        )
     except Exception:
         pass
 
